@@ -1,62 +1,85 @@
 package dev.hytalemodding.origins.util;
 
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.nameplate.Nameplate; // Import this!
 import com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import dev.hytalemodding.origins.classes.Classes;
 import dev.hytalemodding.origins.level.LevelingService;
 
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Manages player nameplate updates for the Origins leveling system.
+ * Uses a thread-safe queue to defer component modifications to the WorldThread.
+ */
 public class NameplateManager {
 
-    public static void updateNameplate(UUID uuid, LevelingService service) {
-        PlayerRef ref = Universe.get().getPlayer(uuid);
-        if (ref == null) {
-            System.out.println("[Origins-Debug] Failed: PlayerRef is null for " + uuid);
-            return;
+    private static final Queue<UUID> pendingUpdates = new ConcurrentLinkedQueue<>();
+    private static LevelingService serviceInstance;
+
+    /**
+     * Initialize the NameplateManager with the leveling service instance.
+     */
+    public static void init(LevelingService service) {
+        serviceInstance = service;
+    }
+
+    /**
+     * Schedule a nameplate update for the given player.
+     * The update will be processed on the WorldThread during the next tick.
+     */
+    public static void scheduleUpdate(UUID uuid) {
+        pendingUpdates.offer(uuid);
+    }
+
+    /**
+     * Process all pending nameplate updates.
+     * Called from NameplateUpdateSystem on the WorldThread.
+     */
+    public static void processPendingUpdates() {
+        UUID uuid;
+        while ((uuid = pendingUpdates.poll()) != null) {
+            if (serviceInstance != null) {
+                updateNameplateImmediate(uuid, serviceInstance);
+            }
         }
+    }
+
+    /**
+     * Immediately update a player's nameplate with their current level and class.
+     * Must be called from the WorldThread.
+     */
+    private static void updateNameplateImmediate(UUID uuid, LevelingService service) {
+        PlayerRef ref = Universe.get().getPlayer(uuid);
+        if (ref == null) return;
 
         var entityRef = ref.getReference();
-        if (entityRef == null) {
-            System.out.println("[Origins-Debug] Failed: EntityRef is null for " + ref.getUsername());
-            return;
-        }
+        if (entityRef == null) return;
 
-        int globalLvl = service.getAdventurerLevel(uuid);
+        int globalLevel = service.getAdventurerLevel(uuid);
         String classId = service.getActiveClassId(uuid);
         String username = ref.getUsername();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("&7[Lvl &e").append(globalLvl);
+        // Build nameplate format: [Lvl X ClassName] Username
+        StringBuilder nameplate = new StringBuilder();
+        nameplate.append("[Lvl ").append(globalLevel);
 
         if (classId != null) {
             Classes rpgClass = Classes.fromId(classId);
             String className = (rpgClass != null) ? rpgClass.getDisplayName() : "Hero";
-            sb.append(" &6").append(className);
+            nameplate.append(" ").append(className);
         }
 
-        sb.append("&7] &f").append(username);
+        nameplate.append("] ").append(username);
 
-        String finalString = sb.toString();
-        Message newMessage = Message.raw(finalString);
+        // Apply the nameplate via DisplayNameComponent
+        Message displayName = Message.raw(nameplate.toString());
         var store = entityRef.getStore();
-        System.out.println("[Origins-Debug] Updating Nameplate for " + username + " to: " + finalString);
+        store.putComponent(entityRef, DisplayNameComponent.getComponentType(), new DisplayNameComponent(displayName));
 
-        store.putComponent(entityRef, DisplayNameComponent.getComponentType(), new DisplayNameComponent(newMessage));
-
-        var nameplateType = Nameplate.getComponentType();
-        Nameplate np = store.getComponent(entityRef, nameplateType);
-
-
-        if (np != null) {
-
-            np.setText(finalString);
-
-            store.putComponent(entityRef, nameplateType, np);
-        }
-            System.out.println("[Origins-Debug] Direct Nameplate component updated.");
-        }
+        System.out.println("[Origins] Nameplate updated: " + username + " -> " + nameplate);
     }
+}

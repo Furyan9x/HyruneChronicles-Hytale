@@ -7,11 +7,17 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import dev.hytalemodding.Origins;
-import dev.hytalemodding.origins.classes.Classes; // Your Enum
+import dev.hytalemodding.origins.classes.Classes;
 import dev.hytalemodding.origins.level.LevelingService.ClassChangeResult;
-import java.util.UUID;
-import javax.annotation.Nonnull;
+import dev.hytalemodding.origins.util.NameplateManager;
 
+import javax.annotation.Nonnull;
+import java.util.UUID;
+
+/**
+ * Command to change a player's active RPG class.
+ * Updates the player's nameplate immediately upon successful class change.
+ */
 public class SetClassCommand extends CommandBase {
 
     @Nonnull
@@ -37,13 +43,11 @@ public class SetClassCommand extends CommandBase {
         String className = this.classArg.get(ctx);
         UUID targetUuid = targetPlayer.getUuid();
 
-        // 1. Attempt the change
         ClassChangeResult result = service.changeClass(targetUuid, className);
-
-        // 2. Handle the result
         switch (result) {
             case SUCCESS:
                 String display = className.equalsIgnoreCase("none") ? "Adventurer" : className;
+                NameplateManager.scheduleUpdate(targetUuid);
                 ctx.sendMessage(Message.raw("§aSuccess! " + targetPlayer.getUsername() + " is now: " + display));
                 break;
             case INVALID_CLASS:

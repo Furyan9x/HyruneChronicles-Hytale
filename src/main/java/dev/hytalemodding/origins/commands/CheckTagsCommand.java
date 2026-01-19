@@ -9,26 +9,28 @@ import com.hypixel.hytale.server.core.modules.entity.component.DisplayNameCompon
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
 import javax.annotation.Nonnull;
 
+/**
+ * Debug command to check the current DisplayNameComponent (nameplate) of the executing player.
+ */
 public class CheckTagsCommand extends AbstractPlayerCommand {
 
     public CheckTagsCommand() {
-        super("checktags", "Debug: Print my current nameplate text");
+        super("checktags", "Debug: Display your current nameplate text");
     }
 
     @Override
     protected void execute(@Nonnull CommandContext ctx, @Nonnull Store<EntityStore> store, @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef, @Nonnull World world) {
-        // Since we are in AbstractPlayerCommand, store and ref are already provided for the sender!
         DisplayNameComponent comp = store.getComponent(ref, DisplayNameComponent.getComponentType());
 
         if (comp != null) {
             Message currentName = comp.getDisplayName();
-
-            ctx.sendMessage(Message.raw("Debug: Your internal name is set to:"));
+            ctx.sendMessage(Message.raw("Your current nameplate:"));
             ctx.sendMessage(currentName);
         } else {
-            ctx.sendMessage(Message.raw("Error: You have no DisplayNameComponent attached!"));
+            ctx.sendMessage(Message.raw("Error: No DisplayNameComponent found!"));
         }
     }
 }
