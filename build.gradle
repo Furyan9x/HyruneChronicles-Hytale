@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.hytalemodding'
+version = '1.0-SNAPSHOT'
+
+
+repositories {
+    mavenCentral()
+    mavenLocal() // Crucial: Looks for the HytaleServer.jar you manually installed
+}
+
+dependencies {
+    // The Hytale Server API
+    compileOnly files('libs/HytaleServer.jar')
+
+    // Dependencies needed for JSON storage (Gson is standard)
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Annotations (Nullable/Nonnull)
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.register('copyToDevEnv', Copy) {
+    from jar.archiveFile
+    into file('C:/Users/devin/Desktop/HytaleServer/Server/mods')
+}
+
+tasks.named('build') {
+    finalizedBy('copyToDevEnv')
+}
