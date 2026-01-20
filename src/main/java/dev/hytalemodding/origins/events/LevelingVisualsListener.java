@@ -41,8 +41,10 @@ public class LevelingVisualsListener implements LevelUpListener {
         String chat = "[Origins] Congratulations! Your Character is now Level " + newLevel + "!";
 
         EventTitleUtil.showEventTitleToPlayer(player, Message.raw(title), Message.raw(subtitle), true);
-        NameplateManager.scheduleUpdate(uuid);
         player.sendMessage(Message.raw(chat));
+
+        // Immediate update
+        NameplateManager.update(uuid);
     }
 
     private void handleClassLevelUp(PlayerRef player, int newLevel, String source) {

@@ -52,7 +52,7 @@ public class AddXpCommand extends CommandBase {
 
         // Append Class info if they have one
         if (classId != null) {
-            int classLvl = service.getClassLevel(targetUuid);
+            int classLvl = service.getClassLevel(targetUuid, classId);
 
             // Format nice name (e.g. "mage" -> "Mage")
             Classes rpgClass = Classes.fromId(classId);

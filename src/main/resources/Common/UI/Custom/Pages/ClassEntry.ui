@@ -1,0 +1,29 @@
+$C = "../Common.ui";
+
+Button #ClassEntryRoot {
+  LayoutMode: Left;
+  Anchor: (Height: 30);
+  Padding: (Left: 10, Right: 10);
+  Background: #000000(0.0);
+
+  Label #ClassName {
+     // FIXED: VerticalAlignment moved inside Style (...)
+     Style: (
+         FontSize: 16,
+         TextColor: #ffffff,
+         RenderBold: true,
+         VerticalAlignment: Center
+     );
+     FlexWeight: 1;
+  }
+
+  Label #ClassLevel {
+     // FIXED: VerticalAlignment moved inside Style (...)
+     Style: (
+         FontSize: 16,
+         TextColor: #93844c,
+         RenderBold: true,
+         VerticalAlignment: Center
+     );
+  }
+}

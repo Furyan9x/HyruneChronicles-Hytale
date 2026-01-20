@@ -47,7 +47,7 @@ public class SetClassCommand extends CommandBase {
         switch (result) {
             case SUCCESS:
                 String display = className.equalsIgnoreCase("none") ? "Adventurer" : className;
-                NameplateManager.scheduleUpdate(targetUuid);
+                NameplateManager.update(targetUuid);
                 ctx.sendMessage(Message.raw("§aSuccess! " + targetPlayer.getUsername() + " is now: " + display));
                 break;
             case INVALID_CLASS:

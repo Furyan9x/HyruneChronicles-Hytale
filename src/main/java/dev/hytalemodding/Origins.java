@@ -11,8 +11,8 @@ import dev.hytalemodding.origins.events.PlayerJoinListener;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.level.formulas.DefaultFormula;
 import dev.hytalemodding.origins.system.CombatXpSystem;
-import dev.hytalemodding.origins.system.NameplateUpdateSystem;
 import dev.hytalemodding.origins.util.NameplateManager;
+import dev.hytalemodding.origins.util.SyncTaskSystem;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -56,10 +56,11 @@ public class Origins extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new SetCombatLevelCommand());
         this.getCommandRegistry().registerCommand(new SetClassCommand());
         this.getCommandRegistry().registerCommand(new CheckTagsCommand());
+        this.getCommandRegistry().registerCommand(new CharacterCommand());
 
         // Register ECS systems
         this.getEntityStoreRegistry().registerSystem(new CombatXpSystem());
-        this.getEntityStoreRegistry().registerSystem(new NameplateUpdateSystem());
+        this.getEntityStoreRegistry().registerSystem(new SyncTaskSystem());
 
         LOGGER.at(Level.INFO).log("Origins leveling system initialized successfully!");
     }

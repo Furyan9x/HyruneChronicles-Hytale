@@ -1,0 +1,121 @@
+$C = "../Common.ui";
+
+@StatLabelStyle = LabelStyle(
+  FontSize: 16,
+  TextColor: #93844c, // Gold-ish color from your example
+  RenderBold: true,
+  VerticalAlignment: Center
+);
+
+@StatValueStyle = LabelStyle(
+  FontSize: 16,
+  TextColor: #ffffff,
+  RenderBold: false,
+  VerticalAlignment: Center
+);
+
+$C.@PageOverlay {
+  $C.@DecoratedContainer {
+    Anchor: (Width: 800, Height: 550);
+
+    // --- TITLE BAR ---
+    #Title {
+      Group {
+        $C.@Title { @Text = "Character Overview"; }
+
+        // Close Button (Top Right)
+        $C.@TextButton #BtnClose {
+            Anchor: (Right: 12, Top: 4, Width: 80, Height: 24);
+            Text: "Close";
+            Style: TextButtonStyle(
+                Default: (LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true)),
+                Sounds: $C.@ButtonSounds
+            );
+            Background: #000000(0.13);
+        }
+      }
+    }
+
+    // --- CONTENT ---
+    #Content {
+      LayoutMode: Top;
+      Padding: (Full: 15);
+
+      // 1. Header Info
+      Group #Header {
+         LayoutMode: Left;
+         Anchor: (Height: 40);
+
+         Label #PlayerName {
+            Style: (FontSize: 24, TextColor: #ffffff, RenderBold: true);
+            Padding: (Right: 20);
+         }
+         Label #GlobalLevel { Style: @StatValueStyle; Padding: (Right: 20); }
+         Label #ActiveClass { Style: @StatValueStyle; }
+      }
+
+      // 2. Main Columns
+      Group #Columns {
+        LayoutMode: Left;
+        FlexWeight: 1;
+
+        // LEFT COLUMN: Class List
+        Group #LeftPanel {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Padding: (Right: 10);
+
+            Label { Text: "Class Progress"; Style: @StatLabelStyle; Padding: (Bottom: 5); }
+
+            Group #ClassListScroll {
+                LayoutMode: TopScrolling;
+                FlexWeight: 1;
+                ScrollbarStyle: $C.@DefaultScrollbarStyle;
+                Background: #000000(0.2); // Slight darken for the list area
+
+                // This is the container we target in Java
+                Group #ClassListContainer {
+                    LayoutMode: Top;
+                }
+            }
+        }
+
+        // RIGHT COLUMN: Attributes
+        Group #RightPanel {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Padding: (Left: 10);
+
+            Label { Text: "Attributes"; Style: @StatLabelStyle; Padding: (Bottom: 5); }
+
+            Group {
+                LayoutMode: Left;
+                Label { Text: "Strength: "; Style: @StatLabelStyle; }
+                Label #StrValue { Text: "--"; Style: @StatValueStyle; }
+            }
+            Group {
+                LayoutMode: Left;
+                Label { Text: "Dexterity: "; Style: @StatLabelStyle; }
+                Label #DexValue { Text: "--"; Style: @StatValueStyle; }
+            }
+            Group {
+                LayoutMode: Left;
+                Label { Text: "Intellect: "; Style: @StatLabelStyle; }
+                Label #IntValue { Text: "--"; Style: @StatValueStyle; }
+            }
+        }
+      }
+
+      // 3. Footer
+      Group #Footer {
+         LayoutMode: Right;
+         Anchor: (Height: 40, Top: 10);
+
+         $C.@TextButton #BtnTalents {
+             Anchor: (Width: 150, Height: 30);
+             Text: "Talent Tree >";
+         }
+      }
+    }
+  }
+}

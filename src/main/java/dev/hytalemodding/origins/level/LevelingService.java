@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LevelingService {
-
+    private static LevelingService instance;
     // Core Dependencies
     private final LevelFormula formula;
     private final LevelRepository repository;
@@ -35,10 +35,10 @@ public class LevelingService {
         LEVEL_TOO_LOW,
         ALREADY_THIS_CLASS
     }
-
     public LevelingService(LevelFormula formula, LevelRepository repository) {
         this.formula = formula;
         this.repository = repository;
+        instance = this;
     }
 
     /**
@@ -50,17 +50,20 @@ public class LevelingService {
             return stored != null ? stored : new PlayerLvlData(uuid);
         });
     }
-
+    public static LevelingService get() {
+        return instance;
+    }
     // --- Public API ---
 
     public int getAdventurerLevel(UUID id) {
         return this.get(id).getAdventurerLevel();
     }
 
-    public int getClassLevel(UUID id) {
+    public int getClassLevel(UUID id, String classId) {
         PlayerLvlData data = this.get(id);
-        ExperienceTrack track = data.getActiveTrack();
-        return (track != null) ? track.getLevel() : 0;
+        // FIX: Grab the specific track for the requested class ID
+        ExperienceTrack track = data.getClassTrack(classId);
+        return (track != null) ? track.getLevel() : 1;
     }
 
     public String getActiveClassId(UUID id) {
@@ -161,7 +164,12 @@ public class LevelingService {
     }
 
     /**
-     * Attempts to change the player's class.
+     * Attempts to change the active class for a player.
+     * Includes logic for Tier 1 (Adventurer level) and Tier 2 (Parent class level) checks.
+     * 
+     * @param id The UUID of the player.
+     * @param classId The ID of the class to switch to.
+     * @return The result of the class change attempt.
      */
     public ClassChangeResult changeClass(UUID id, String classId) {
         PlayerLvlData data = this.get(id);
@@ -176,16 +184,14 @@ public class LevelingService {
         Classes targetClass = Classes.fromId(classId);
         if (targetClass == null) return ClassChangeResult.INVALID_CLASS;
 
-        // CHECK 1: Is this a Tier 1 class? (Parent is null)
+        // Tier 1 Check: Requires a minimum global Adventurer level
         if (targetClass.getParent() == null) {
-            // Requirement: Check GLOBAL ADVENTURER Level
             if (data.getAdventurerLevel() < targetClass.getRequiredLevel()) {
                 return ClassChangeResult.LEVEL_TOO_LOW;
             }
         }
-        // CHECK 2: Is this a Tier 2 class? (Parent is NOT null)
+        // Tier 2 Check: Requires a minimum level in a specific parent class
         else {
-            // Requirement: Check ACTIVE CLASS Level (and identity)
             String currentClassId = data.getActiveClassId();
 
             if (currentClassId == null || !currentClassId.equalsIgnoreCase(targetClass.getParent().getId())) {

@@ -5,7 +5,6 @@ import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.util.NameplateManager;
 
-import java.util.UUID;
 
 /**
  * Handles player join events to initialize nameplate display.
@@ -23,8 +22,8 @@ public class PlayerJoinListener {
         Player playerComp = holder.getComponent(Player.getComponentType());
 
         if (playerComp != null) {
-            UUID uuid = playerComp.getUuid();
-            NameplateManager.scheduleUpdate(uuid);
+            // Immediate update
+            NameplateManager.update(playerComp.getUuid());
         }
     }
 }

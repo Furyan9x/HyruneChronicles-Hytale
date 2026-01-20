@@ -37,7 +37,7 @@ public class CheckLevelCommand extends CommandBase {
 
         // 1. Get Data using the new API
         int globalLvl = service.getAdventurerLevel(targetUuid);
-        int classLvl = service.getClassLevel(targetUuid);
+        int classLvl = service.getClassLevel(targetUuid, service.getActiveClassId(targetUuid));
         String classId = service.getActiveClassId(targetUuid);
 
         String displayClass = "None"; // Default if null
