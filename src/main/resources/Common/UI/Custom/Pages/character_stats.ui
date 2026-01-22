@@ -95,13 +95,23 @@ $C.@PageOverlay {
             }
             Group {
                 LayoutMode: Left;
-                Label { Text: "Dexterity: "; Style: @StatLabelStyle; }
-                Label #DexValue { Text: "--"; Style: @StatValueStyle; }
+                Label { Text: "Agility: "; Style: @StatLabelStyle; }
+                Label #AgiValue { Text: "--"; Style: @StatValueStyle; }
             }
             Group {
                 LayoutMode: Left;
                 Label { Text: "Intellect: "; Style: @StatLabelStyle; }
                 Label #IntValue { Text: "--"; Style: @StatValueStyle; }
+            }
+            Group {
+                 LayoutMode: Left;
+                 Label { Text: "Wisdom: "; Style: @StatLabelStyle; }
+                 Label #WisValue { Text: "--"; Style: @StatValueStyle; }
+            }
+            Group {
+                 LayoutMode: Left;
+                 Label { Text: "Constitution: "; Style: @StatLabelStyle; }
+                 Label #ConValue { Text: "--"; Style: @StatValueStyle; }
             }
         }
       }

@@ -15,6 +15,8 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.origins.playerdata.PlayerAttributes;
+import dev.hytalemodding.origins.util.AttributeManager;
 import dev.hytalemodding.origins.util.NameplateManager;
 
 import javax.annotation.Nonnull;
@@ -48,10 +50,15 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.Charact
         commandBuilder.set("#GlobalLevel.Text", "Global Level: " + globalLevel);
         commandBuilder.set("#ActiveClass.Text", "Active Class: " + (activeClass != null ? activeClass.toUpperCase() : "None"));
 
-        // TODO: Implement actual stat calculations once stat system is ready
-        commandBuilder.set("#StrValue.Text", "10");
-        commandBuilder.set("#DexValue.Text", "5");
-        commandBuilder.set("#IntValue.Text", "0");
+
+        PlayerAttributes stats = AttributeManager.getInstance().getPlayerData(uuid);
+        commandBuilder.set("#StrValue.Text", String.valueOf(stats.getStrength()));
+        commandBuilder.set("#AgiValue.Text", String.valueOf(stats.getAgility())); // Agility maps to Dex UI
+        commandBuilder.set("#IntValue.Text", String.valueOf(stats.getIntellect()));
+
+        // Assuming you have labels for the other 2 stats (Uncomment/Rename as needed):
+        commandBuilder.set("#ConValue.Text", String.valueOf(stats.getConstitution()));
+        commandBuilder.set("#WisValue.Text", String.valueOf(stats.getWisdom()));
 
         // Bind global menu buttons
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnClose", EventData.of("Button", "Close"), false);
@@ -165,7 +172,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.Charact
         static final String KEY_BUTTON = "Button";
         static final String KEY_CLASS_ID = "ClassID";
 
-        public static final BuilderCodec<CharacterData> CODEC = BuilderCodec.<CharacterData>builder(CharacterData.class, CharacterData::new)
+        public static final BuilderCodec<CharacterData> CODEC = BuilderCodec.builder(CharacterData.class, CharacterData::new)
                 .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
                 .addField(new KeyedCodec<>(KEY_CLASS_ID, Codec.STRING), (d, s) -> d.classId = s, d -> d.classId)
                 .build();

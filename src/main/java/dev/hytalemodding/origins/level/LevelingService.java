@@ -1,9 +1,8 @@
 package dev.hytalemodding.origins.level;
 
-import dev.hytalemodding.origins.classes.Classes; // Assuming this is your Enum
+import dev.hytalemodding.origins.classes.Classes;
 import dev.hytalemodding.origins.database.LevelRepository;
 import dev.hytalemodding.origins.events.LevelUpListener;
-import dev.hytalemodding.origins.events.PlayerJoinListener;
 import dev.hytalemodding.origins.events.XpGainListener;
 import dev.hytalemodding.origins.level.formulas.LevelFormula;
 import dev.hytalemodding.origins.playerdata.ExperienceTrack;
@@ -115,10 +114,17 @@ public class LevelingService {
 
             int newClassLevel = this.formula.getLevelForXp(classTrack.getXp());
             if (newClassLevel > oldClassLevel) {
+                for (int lvl = oldClassLevel + 1; lvl <= newClassLevel; lvl++) {
+
+                    // Fire the listener for EACH level
+                    // This ensures the AttributeListener runs 3 times if you gain 3 levels
+                    int currentStep = lvl;
+                    String sourceName = data.getActiveClassId();
+                    this.levelUpListeners.forEach(l -> l.onLevelUp(id, currentStep, sourceName));
+                }
+
+                // Finally, save the new level state
                 classTrack.setLevel(newClassLevel);
-                String sourceName = data.getActiveClassId(); // You might want to format this later
-                this.levelUpListeners.forEach(l -> l.onLevelUp(id, newClassLevel, sourceName));
-                // Note: We could fire a separate "ClassLevelUp" event here if needed
             }
         }
 
@@ -221,4 +227,5 @@ public class LevelingService {
     public void registerXpGainListener(XpGainListener listener) {
         this.xpGainListeners.add(listener);
     }
+
 }

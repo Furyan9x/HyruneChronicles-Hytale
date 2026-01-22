@@ -6,13 +6,14 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import dev.hytalemodding.origins.commands.*;
 import dev.hytalemodding.origins.database.JsonLevelRepository;
+import dev.hytalemodding.origins.events.AttributeGrowthListener;
 import dev.hytalemodding.origins.events.LevelingVisualsListener;
 import dev.hytalemodding.origins.events.PlayerJoinListener;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.level.formulas.DefaultFormula;
 import dev.hytalemodding.origins.system.CombatXpSystem;
 import dev.hytalemodding.origins.util.NameplateManager;
-import dev.hytalemodding.origins.util.SyncTaskSystem;
+import dev.hytalemodding.origins.system.SyncTaskSystem;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -48,7 +49,10 @@ public class Origins extends JavaPlugin {
         // Register event listeners
         PlayerJoinListener joinListener = new PlayerJoinListener(this.service);
         this.getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, joinListener::onPlayerJoin);
+
         service.registerLevelUpListener(new LevelingVisualsListener(service));
+        service.registerLevelUpListener(new AttributeGrowthListener());
+
 
         // Register commands
         this.getCommandRegistry().registerCommand(new AddXpCommand());
