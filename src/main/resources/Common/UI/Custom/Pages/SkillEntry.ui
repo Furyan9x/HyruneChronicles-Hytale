@@ -1,0 +1,76 @@
+$C = "../Common.ui";
+
+// Reuse your existing button/text styles
+@SkillTextStyle = LabelStyle(FontSize: 16, TextColor: #ffcc00, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+
+$C.@PageOverlay {
+  $C.@DecoratedContainer {
+    Anchor: (Width: 500, Height: 600); // Taller, narrower like RS
+
+    // --- TITLE ---
+    #Title {
+      Group {
+        $C.@Title { @Text = "Skills"; }
+        $C.@TextButton #BtnClose {
+            Anchor: (Right: 10, Top: 5, Width: 60, Height: 25);
+            Text: "X";
+        }
+      }
+    }
+
+    // --- BODY (The Grid) ---
+    #Content {
+      LayoutMode: Left;
+      Padding: (Top: 50, Left: 20, Right: 20, Bottom: 80); // Space for Header/Footer
+
+      // COLUMN 1
+      Group #Col1 {
+          LayoutMode: Top;
+          FlexWeight: 1;
+          Padding: (Right: 5);
+      }
+      // COLUMN 2
+      Group #Col2 {
+          LayoutMode: Top;
+          FlexWeight: 1;
+          Padding: (Right: 5);
+      }
+      // COLUMN 3
+      Group #Col3 {
+          LayoutMode: Top;
+          FlexWeight: 1;
+      }
+    }
+
+    // --- FOOTER (Global Stats) ---
+    Group #Footer {
+      LayoutMode: Left;
+      Anchor: (Bottom: 15, Left: 20, Right: 20, Height: 50);
+      Background: #000000(0.3); // Slight dark background
+
+      // Total Level
+      Group {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Label { Text: "Total Level"; Style: (FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center); }
+        Label #TotalLevelVal { Text: "---"; Style: @SkillTextStyle; }
+      }
+
+      // Combat Level (Global)
+      Group {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Label { Text: "Combat Level"; Style: (FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center); }
+        Label #CombatLevelVal { Text: "---"; Style: (FontSize: 18, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center); }
+      }
+
+      // Quest Points (Currency)
+      Group {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Label { Text: "Quest Pts"; Style: (FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center); }
+        Label #QuestPointsVal { Text: "0"; Style: @SkillTextStyle; }
+      }
+    }
+  }
+}

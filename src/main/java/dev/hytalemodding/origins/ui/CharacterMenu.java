@@ -1,7 +1,8 @@
 package dev.hytalemodding.origins.ui;
+ // Adjust package as needed
 
 import dev.hytalemodding.origins.level.LevelingService;
-import dev.hytalemodding.origins.classes.Classes;
+import dev.hytalemodding.origins.skills.SkillType;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -15,169 +16,182 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.origins.playerdata.PlayerAttributes;
-import dev.hytalemodding.origins.util.AttributeManager;
-import dev.hytalemodding.origins.util.NameplateManager;
 
 import javax.annotation.Nonnull;
+import java.util.UUID;
 
-/**
- * The main UI menu for viewing character stats and selecting classes.
- */
-public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.CharacterData> {
+public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMenuData> {
 
-    private static final String MAIN_UI = "Pages/character_stats.ui";
-    private static final String ENTRY_UI = "Pages/ClassEntry.ui";
+    // UI Files
+    private static final String MAIN_UI = "Pages/SkillEntry.ui";
+    private static final String CELL_UI = "Pages/character_stats.ui";
+
+    // Colors (RuneScape Style)
+    private static final String COLOR_YELLOW = "#ffff00";
+    private static final String COLOR_WHITE  = "#ffffff";
+    private static final String COLOR_ORANGE = "#ff981f"; // For maxed skills
+
+    // State
+    private SkillType selectedSkill = null;
 
     public CharacterMenu(@Nonnull PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CanDismiss, CharacterData.CODEC);
+        super(playerRef, CustomPageLifetime.CanDismiss, SkillMenuData.CODEC);
     }
 
-    /**
-     * Builds the initial UI state when the menu is opened.
-     */
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder commandBuilder, @Nonnull UIEventBuilder eventBuilder, @Nonnull Store<EntityStore> store) {
-        // Load the base UI layout
         commandBuilder.append(MAIN_UI);
 
-        // Populate header data with player information
-        var uuid = this.playerRef.getUuid();
-        int globalLevel = LevelingService.get().getAdventurerLevel(uuid);
-        String activeClass = LevelingService.get().getActiveClassId(uuid);
+        UUID uuid = this.playerRef.getUuid();
+        LevelingService levelingService = LevelingService.get();
 
-        commandBuilder.set("#PlayerName.Text", this.playerRef.getUsername());
-        commandBuilder.set("#GlobalLevel.Text", "Global Level: " + globalLevel);
-        commandBuilder.set("#ActiveClass.Text", "Active Class: " + (activeClass != null ? activeClass.toUpperCase() : "None"));
+        // 1. Build the Grid
+        this.buildSkillGrid(commandBuilder, eventBuilder, uuid, levelingService);
 
-
-        PlayerAttributes stats = AttributeManager.getInstance().getPlayerData(uuid);
-        commandBuilder.set("#StrValue.Text", String.valueOf(stats.getStrength()));
-        commandBuilder.set("#AgiValue.Text", String.valueOf(stats.getAgility())); // Agility maps to Dex UI
-        commandBuilder.set("#IntValue.Text", String.valueOf(stats.getIntellect()));
-
-        // Assuming you have labels for the other 2 stats (Uncomment/Rename as needed):
-        commandBuilder.set("#ConValue.Text", String.valueOf(stats.getConstitution()));
-        commandBuilder.set("#WisValue.Text", String.valueOf(stats.getWisdom()));
-
-        // Bind global menu buttons
+        // 2. Global Buttons (Close)
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnClose", EventData.of("Button", "Close"), false);
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnTalents", EventData.of("Button", "Talents"), false);
 
-        // Build the dynamic list of available classes
-        this.buildClassList(commandBuilder, eventBuilder);
+        // 3. Update Detail/Description Box (if you kept it in the UI)
+        //this.updateDescription(commandBuilder);
     }
 
-    /**
-     * Populates the class list container with entries for each available class.
-     * Updates styling based on active status and level.
-     */
-    private void buildClassList(@Nonnull UICommandBuilder commandBuilder, @Nonnull UIEventBuilder eventBuilder) {
-        commandBuilder.clear("#ClassListContainer");
+    private void buildSkillGrid(UICommandBuilder cmd, UIEventBuilder evt, UUID uuid, LevelingService service) {
+        // Clear columns to prevent duplication on refresh
+        cmd.clear("#Col1").clear("#Col2").clear("#Col3");
 
-        String activeClassId = LevelingService.get().getActiveClassId(this.playerRef.getUuid());
-        var uuid = this.playerRef.getUuid();
+        int totalLevel = 0;
+        int index = 0;
 
-        int i = 0;
-        for (Classes rpgClass : Classes.values()) {
-            commandBuilder.append("#ClassListContainer", ENTRY_UI);
+        // Iterate through all defined skills
+        for (SkillType skill : SkillType.values()) {
+            // Get Level (Assuming your service now accepts SkillType)
+            // You will need to update LevelingService to support getLevel(UUID, SkillType)
+            int level = service.getSkillLevel(uuid, skill);
+            totalLevel += level;
 
-            String rowRoot = "#ClassListContainer[" + i + "]";
-            int level = LevelingService.get().getClassLevel(uuid, rpgClass.getId());
-            boolean isActive = rpgClass.getId().equalsIgnoreCase(activeClassId);
+            // Determine Column (0, 1, 2 cycling)
+            int colIndex = index % 3;
+            String targetCol = "#Col" + (colIndex + 1); // #Col1, #Col2, #Col3
 
-            // Apply styling based on class state
-            if (isActive) {
-                // Active Class: Highlighted Gold
-                commandBuilder.set(rowRoot + " #ClassName.Style.TextColor", "#ffcc00");
-                commandBuilder.set(rowRoot + " #ClassLevel.Style.TextColor", "#ffcc00");
-            } else if (level == 0) {
-                // Locked/Unvisited: Dimmed Gray
-                commandBuilder.set(rowRoot + " #ClassName.Style.TextColor", "#666666");
-                commandBuilder.set(rowRoot + " #ClassLevel.Visible", false);
-            } else {
-                // Discovered: Default Colors
-                commandBuilder.set(rowRoot + " #ClassName.Style.TextColor", "#ffffff");
-                commandBuilder.set(rowRoot + " #ClassLevel.Style.TextColor", "#93844c");
-            }
+            // Append the Cell
+            cmd.append(targetCol, CELL_UI);
 
-            // Set text information
-            commandBuilder.set(rowRoot + " #ClassName.Text", rpgClass.getDisplayName());
-            commandBuilder.set(rowRoot + " #ClassLevel.Text", "Lvl " + level);
+            // "List Syntax" allows us to target the specific instance we just added
+            // Since we are adding to 3 different lists, we need to track the row index for THAT column
+            int rowIndex = index / 3;
+            String cellRoot = targetCol + "[" + rowIndex + "]";
 
-            // Bind click event to select the class
-            eventBuilder.addEventBinding(
+            // Set Data
+            cmd.set(cellRoot + " #SkillName.Text", skill.getDisplayName());
+            cmd.set(cellRoot + " #SkillLevel.Text", level + "/99");
+            cmd.set(cellRoot + " #IconText.Text", skill.getIconCode()); // "AT", "ST" placeholder
+
+            // Styling (Highlight if selected)
+            boolean isSelected = skill == this.selectedSkill;
+            cmd.set(cellRoot + " #SkillName.Style.TextColor", isSelected ? COLOR_ORANGE : COLOR_YELLOW);
+
+            // Bind Click Event
+            evt.addEventBinding(
                     CustomUIEventBindingType.Activating,
-                    rowRoot,
-                    EventData.of("Button", "SelectClass").append("ClassID", rpgClass.getId()),
+                    cellRoot, // Bind to the root of the cell (make sure #SkillRoot in UI is a Button!)
+                    EventData.of("Button", "SelectSkill").append("SkillID", skill.name()),
                     false
             );
 
-            i++;
+            index++;
         }
+
+        // Update Footer Stats
+        cmd.set("#TotalLevelVal.Text", String.valueOf(totalLevel));
+        cmd.set("#CombatLevelVal.Text", String.valueOf(calculateCombatLevel(uuid, service)));
     }
 
-    /**
-     * Handles data events sent from the client UI.
-     */
-    @Override
-    public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, @Nonnull CharacterData data) {
-        super.handleDataEvent(ref, store, data);
+//    private void updateDescription(UICommandBuilder cmd) {
+//        // Assuming your runescape_menu.ui has a description area,
+//        // perhaps appearing when a skill is clicked?
+//        if (selectedSkill != null) {
+//            cmd.set("#DescTitle.Text", selectedSkill.getDisplayName());
+//            cmd.set("#DescText.Text", selectedSkill.getDescription());
+//        } else {
+//            cmd.set("#DescTitle.Text", "Skill Info");
+//            cmd.set("#DescText.Text", "Select a skill to view details.");
+//        }
+//    }
 
+    @Override
+    public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, @Nonnull SkillMenuData data) {
+        super.handleDataEvent(ref, store, data);
         if (data.button == null) return;
 
         switch (data.button) {
             case "Close":
                 this.close();
                 break;
-            case "Talents":
-                this.playerRef.sendMessage(com.hypixel.hytale.server.core.Message.raw("Talent Tree Coming Soon!"));
-                break;
-            case "SelectClass":
-                if (data.classId != null) {
-                    handleClassSelection(data.classId);
+
+            case "SelectSkill":
+                if (data.skillId != null) {
+                    try {
+                        this.selectedSkill = SkillType.valueOf(data.skillId);
+
+                        // Refresh UI to show highlight and description
+                        UICommandBuilder refreshCmd = new UICommandBuilder();
+                        UIEventBuilder refreshEvt = new UIEventBuilder();
+
+                        // Rebuild grid (to update highlights)
+                        this.buildSkillGrid(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
+                        //this.updateDescription(refreshCmd);
+
+                        this.sendUpdate(refreshCmd, refreshEvt, false);
+
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Invalid skill selected: " + data.skillId);
+                    }
                 }
                 break;
         }
     }
 
     /**
-     * Processes class change requests and refreshes the UI if successful.
+     * Calculates Combat Level based on standard weights.
      */
-    private void handleClassSelection(String classId) {
-        var result = LevelingService.get().changeClass(this.playerRef.getUuid(), classId);
+    private int calculateCombatLevel(UUID uuid, LevelingService service) {
+        // Fetch Combat Stats
+        int def = service.getSkillLevel(uuid, SkillType.DEFENCE);
+        int hp = service.getSkillLevel(uuid, SkillType.CONSTITUTION);
+        int div = service.getSkillLevel(uuid, SkillType.DIVINITY); // Prayer/Healer equivalent
 
-        if (result == LevelingService.ClassChangeResult.SUCCESS) {
-            UICommandBuilder refreshCmd = new UICommandBuilder();
-            UIEventBuilder refreshEvent = new UIEventBuilder();
+        int att = service.getSkillLevel(uuid, SkillType.ATTACK);
+        int str = service.getSkillLevel(uuid, SkillType.STRENGTH);
+        int range = service.getSkillLevel(uuid, SkillType.RANGED);
+        int magic = service.getSkillLevel(uuid, SkillType.MAGIC);
 
-            // Refresh header and class list
-            refreshCmd.set("#ActiveClass.Text", "Active Class: " + classId.toUpperCase());
-            this.buildClassList(refreshCmd, refreshEvent);
-            
-            // Update world visuals
-            NameplateManager.update(this.playerRef.getUuid());
+        // Formula: Base + Max(Melee, Ranged, Magic)
+        // Base = 0.25 * (Def + HP + Prayer)
+        double base = 0.25 * (def + hp + div);
 
-            // Synchronize update with client
-            this.sendUpdate(refreshCmd, refreshEvent, false);
-        } else {
-            this.playerRef.sendMessage(com.hypixel.hytale.server.core.Message.raw("Cannot switch class: " + result.name()));
-        }
+        // Melee = 0.325 * (Att + Str)
+        double melee = 0.325 * (att + str);
+
+        // Range/Magic = 0.325 * (Level * 1.5)
+        double ranged = 0.325 * (range * 1.5);
+        double mage   = 0.325 * (magic * 1.5);
+
+        double maxOffense = Math.max(melee, Math.max(ranged, mage));
+
+        return (int) (base + maxOffense);
     }
 
-    /**
-     * Data codec for communicating with the Custom UI client.
-     */
-    public static class CharacterData {
+    // --- CODEC ---
+    public static class SkillMenuData {
         static final String KEY_BUTTON = "Button";
-        static final String KEY_CLASS_ID = "ClassID";
+        static final String KEY_SKILL_ID = "SkillID";
 
-        public static final BuilderCodec<CharacterData> CODEC = BuilderCodec.builder(CharacterData.class, CharacterData::new)
+        public static final BuilderCodec<SkillMenuData> CODEC = BuilderCodec.builder(SkillMenuData.class, SkillMenuData::new)
                 .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
-                .addField(new KeyedCodec<>(KEY_CLASS_ID, Codec.STRING), (d, s) -> d.classId = s, d -> d.classId)
+                .addField(new KeyedCodec<>(KEY_SKILL_ID, Codec.STRING), (d, s) -> d.skillId = s, d -> d.skillId)
                 .build();
 
         private String button;
-        private String classId;
+        private String skillId;
     }
 }

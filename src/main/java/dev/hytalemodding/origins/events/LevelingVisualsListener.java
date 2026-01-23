@@ -4,7 +4,6 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
-import dev.hytalemodding.origins.classes.Classes;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.util.NameplateManager;
 
@@ -22,36 +21,25 @@ public class LevelingVisualsListener implements LevelUpListener {
     }
 
     @Override
-    public void onLevelUp(UUID uuid, int newLevel, String source) {
+    public void onLevelUp(UUID uuid, int newLevel, String sourceName) {
+        // sourceName comes from the Service (e.g., "Strength", "Mining", "Combat")
         PlayerRef player = Universe.get().getPlayer(uuid);
         if (player == null) return;
 
-        boolean isGlobal = source.equalsIgnoreCase("Global");
-
-        if (isGlobal) {
-            handleGlobalLevelUp(player, uuid, newLevel);
-        } else {
-            handleClassLevelUp(player, newLevel, source);
-        }
-    }
-
-    private void handleGlobalLevelUp(PlayerRef player, UUID uuid, int newLevel) {
+        // 1. Build Messages
         String title = "Level Up!";
-        String subtitle = "Character reached Level " + newLevel;
-        String chat = "[Origins] Congratulations! Your Character is now Level " + newLevel + "!";
+        String subtitle = sourceName + " reached Level " + newLevel;
+        String chat = "§6[Origins] §e" + sourceName + "§6 is now Level §e" + newLevel + "§6!";
 
+        // 2. Display Title (Big text on screen)
+        // Note: Check if your API version uses Message.raw() or just String for titles
         EventTitleUtil.showEventTitleToPlayer(player, Message.raw(title), Message.raw(subtitle), true);
+
+        // 3. Send Chat
         player.sendMessage(Message.raw(chat));
 
-        // Immediate update
+        // 4. Immediate Nameplate Update
+        // (Since gaining a skill level likely increased Combat/Total Level)
         NameplateManager.update(uuid);
-    }
-
-    private void handleClassLevelUp(PlayerRef player, int newLevel, String source) {
-        Classes rpgClass = Classes.fromId(source);
-        String displayName = (rpgClass != null) ? rpgClass.getDisplayName() : source;
-
-        String chatText = "[Origins] " + displayName + " reached Level " + newLevel + "!";
-        player.sendMessage(Message.raw(chatText));
     }
 }

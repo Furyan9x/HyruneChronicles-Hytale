@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 public class CharacterCommand extends AbstractAsyncCommand {
 
     public CharacterCommand() {
-        super("character", "Opens the Character RPG Menu");
+        super("character", "Opens the Character Menu displaying skills and levels");
         // Add permission requirements here if needed
     }
 

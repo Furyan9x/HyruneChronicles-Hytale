@@ -1,25 +1,35 @@
 package dev.hytalemodding.origins.playerdata;
 
+
 public class ExperienceTrack {
-    private long xp;
+
     private int level;
+    private long xp;
+
+    // Optional: You could add "xpRemainingForNextLevel" helper methods here later
 
     public ExperienceTrack() {
+        this.level = 1; // Default to Level 1
         this.xp = 0;
-        this.level = 1; // Everything starts at level 1
     }
 
-    // Constructor for loading specific values
-    public ExperienceTrack(long xp, int level) {
-        this.xp = xp;
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
         this.level = level;
+    }
+
+    public long getXp() {
+        return xp;
+    }
+
+    public void setXp(long xp) {
+        this.xp = xp;
     }
 
     public void addXp(long amount) {
         this.xp += amount;
     }
-
-    public long getXp() { return xp; }
-    public int getLevel() { return level; }
-    public void setLevel(int level) { this.level = level; }
 }
