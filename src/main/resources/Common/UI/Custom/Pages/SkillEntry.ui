@@ -2,6 +2,7 @@ $C = "../Common.ui";
 
 // Reuse your existing button/text styles
 @SkillTextStyle = LabelStyle(FontSize: 16, TextColor: #ffcc00, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+@PageTitleStyle = LabelStyle(FontSize: 20, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
 
 $C.@PageOverlay {
   $C.@DecoratedContainer {
@@ -10,36 +11,172 @@ $C.@PageOverlay {
     // --- TITLE ---
     #Title {
       Group {
-        $C.@Title { @Text = "Skills"; }
-        $C.@TextButton #BtnClose {
-            Anchor: (Right: 10, Top: 5, Width: 60, Height: 25);
+        Label #PageTitle {
+            Text: "Skills";
+            Anchor: (Left: 0, Right: 0, Height: 30);
+            Style: @PageTitleStyle;
+        }
+        TextButton #BtnClose {
+            Anchor: (Right: 0, Top: 3, Width: 30, Height: 25);
             Text: "X";
         }
       }
     }
 
-    // --- BODY (The Grid) ---
+    // --- BODY (Tabs + Content) ---
     #Content {
-      LayoutMode: Left;
-      Padding: (Top: 50, Left: 20, Right: 20, Bottom: 80); // Space for Header/Footer
+      LayoutMode: Top;
+      Padding: (Top: 10, Left: 20, Right: 20, Bottom: 80); // Space for Header/Footer
 
-      // COLUMN 1
-      Group #Col1 {
-          LayoutMode: Top;
-          FlexWeight: 1;
-          Padding: (Right: 5);
+      Group #TabBar {
+        LayoutMode: Left;
+        Anchor: (Height: 36);
+        Padding: (Left: 4, Right: 4);
+
+        Button #TabServerInfoBtn {
+          Anchor: (Width: 40, Height: 32);
+          Background: #000000(0.2);
+
+          Group #TabServerInfoIcon {
+            Anchor: (Width: 20, Height: 20);
+            Background: "Icons/TabServerInfo.png";
+          }
+        }
+        Group { Anchor: (Width: 6); }
+        Button #TabQuestsBtn {
+          Anchor: (Width: 40, Height: 32);
+          Background: #000000(0.2);
+
+          Group #TabQuestsIcon {
+            Anchor: (Width: 20, Height: 20);
+            Background: "Icons/TabQuests.png";
+          }
+        }
+        Group { Anchor: (Width: 6); }
+        Button #TabAttributesBtn {
+          Anchor: (Width: 40, Height: 32);
+          Background: #000000(0.2);
+
+          Group #TabAttributesIcon {
+            Anchor: (Width: 20, Height: 20);
+            Background: "Icons/TabAttributes.png";
+          }
+        }
+        Group { Anchor: (Width: 6); }
+        Button #TabSkillsBtn {
+          Anchor: (Width: 40, Height: 32);
+          Background: #000000(0.2);
+
+          Group #TabSkillsIcon {
+            Anchor: (Width: 20, Height: 20);
+            Background: "Icons/TabSkills.png";
+          }
+        }
+        Group { Anchor: (Width: 6); }
+        Button #TabFriendsBtn {
+          Anchor: (Width: 40, Height: 32);
+          Background: #000000(0.2);
+
+          Group #TabFriendsIcon {
+            Anchor: (Width: 20, Height: 20);
+            Background: "Icons/TabFriends.png";
+          }
+        }
       }
-      // COLUMN 2
-      Group #Col2 {
-          LayoutMode: Top;
-          FlexWeight: 1;
-          Padding: (Right: 5);
+
+      Group { Anchor: (Height: 16); }
+
+      Group #TabServerInfo {
+        LayoutMode: Top;
+        Visible: false;
+
+        Label {
+          Text: "SERVER INFO";
+          Anchor: (Height: 20);
+          Style: (FontSize: 12, TextColor: #AAAAAA, RenderBold: true, RenderUppercase: true, LetterSpacing: 2);
+        }
+        Group { Anchor: (Height: 8); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 18);
+
+          Label { Text: "Players Online"; Style: (FontSize: 12, TextColor: #AAAAAA); }
+          Group { FlexWeight: 1; }
+          Label #ServerInfoPlayersOnline { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 18);
+
+          Label { Text: "Server Time"; Style: (FontSize: 12, TextColor: #AAAAAA); }
+          Group { FlexWeight: 1; }
+          Label #ServerInfoServerTime { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 18);
+
+          Label { Text: "Local Time"; Style: (FontSize: 12, TextColor: #AAAAAA); }
+          Group { FlexWeight: 1; }
+          Label #ServerInfoLocalTime { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 18);
+
+          Label { Text: "Server Date"; Style: (FontSize: 12, TextColor: #AAAAAA); }
+          Group { FlexWeight: 1; }
+          Label #ServerInfoServerDate { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 18);
+
+          Label { Text: "Server Zone"; Style: (FontSize: 12, TextColor: #AAAAAA); }
+          Group { FlexWeight: 1; }
+          Label #ServerInfoServerZone { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+        }
       }
-      // COLUMN 3
-      Group #Col3 {
-          LayoutMode: Top;
-          FlexWeight: 1;
+      Group #TabQuests { LayoutMode: Top; Visible: false; }
+      Group #TabAttributes { LayoutMode: Top; Visible: false; }
+
+      Group #TabSkills {
+        LayoutMode: Top;
+        Visible: true;
+
+        Group #SkillsGrid {
+          LayoutMode: Left;
+
+          // COLUMN 1
+          Group #Col1 {
+              LayoutMode: Top;
+              FlexWeight: 1;
+          }
+          Group { Anchor: (Width: 5); }
+          // COLUMN 2
+          Group #Col2 {
+              LayoutMode: Top;
+              FlexWeight: 1;
+          }
+          Group { Anchor: (Width: 5); }
+          // COLUMN 3
+          Group #Col3 {
+              LayoutMode: Top;
+              FlexWeight: 1;
+          }
+        }
       }
+
+      Group #TabFriends { LayoutMode: Top; Visible: false; }
     }
 
     // --- FOOTER (Global Stats) ---

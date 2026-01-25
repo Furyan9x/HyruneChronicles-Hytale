@@ -1,6 +1,5 @@
 package dev.hytalemodding.origins.database;
 
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.hytalemodding.origins.playerdata.PlayerLvlData;
@@ -20,7 +19,7 @@ public class JsonLevelRepository implements LevelRepository {
         // Pretty printing makes the JSON easier for us to read/edit manually
         this.gson = new GsonBuilder().setPrettyPrinting().create();
 
-        // Ensure the directory exists: ./mods/Origins/players/
+        // Ensure the directory exists: <rootPath>/players
         this.dataFolder = new File(rootPath, "players");
         if (!this.dataFolder.exists()) {
             this.dataFolder.mkdirs();

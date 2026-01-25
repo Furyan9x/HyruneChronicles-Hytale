@@ -1,35 +1,69 @@
+$C = "../Common.ui";
+
 // A single cell in the grid
 Button #SkillRoot {
-    Anchor: (Height: 40);
-    LayoutMode: Left; // This means "Stack children Left-to-Right" (Horizontal)
-    Padding: (Full: 4);
-    Background: #000000(0.2);
+    Anchor: (Height: 52);
+    LayoutMode: Top;
 
-    // Icon Placeholder
-    Group #IconBox {
-        Anchor: (Width: 32, Height: 32);
-        Background: #333333;
-        Padding: (Right: 8);
+    Group #SkillCellBody {
+        Anchor: (Height: 46);
+        LayoutMode: Left; // This means "Stack children Left-to-Right" (Horizontal)
+        Padding: (Full: 5);
+        Background: #000000(0.2);
 
-        Label #IconText {
-            Text: "?";
-            Style: (FontSize: 14, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+
+        // Icon Placeholder
+        Group #IconBox {
+            Anchor: (Width: 30, Height: 32);
+            Background: "attack.png";
+            Padding: (Right: 8);
+
+            Label #IconText {
+                Text: "?";
+                Style: (FontSize: 14, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+            }
+        }
+
+        Group { Anchor: (Width: 2); }
+
+        // Skill Info Group
+        Group {
+            LayoutMode: Top;
+            FlexWeight: 1;
+
+            Label #SkillName {
+                Text: "Skill";
+                Style: (FontSize: 12, TextColor: #ffcc00);
+            }
+
+            Label #SkillLevel {
+                Text: "1 / 99";
+                Style: (FontSize: 12, TextColor: #ffffff);
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+                LayoutMode: Left;
+                Anchor: (Height: 4);
+
+                Group { Anchor: (Width: 1); }
+
+                Group #ProgressTrack {
+                    Anchor: (Width: 112, Height: 4);
+                    LayoutMode: Left;
+                    Background: #000000(0.5);
+
+                    // The "Fill" (Foreground)
+                    // We give it an ID so we can resize it in Java
+                    Group #ProgressFill {
+                        Anchor: (Width: 0, Height: 4); // Start at 0 width
+                        Background: #00FF00; // Bright Green (or Gold)
+                    }
+                }
+            }
         }
     }
 
-    // Skill Info Group
-    Group {
-        LayoutMode: Top; // FIXED: "Top" means "Stack children Top-to-Bottom" (Vertical)
-        FlexWeight: 1;
-
-        Label #SkillName {
-            Text: "Skill";
-            Style: (FontSize: 12, TextColor: #ffcc00);
-        }
-
-        Label #SkillLevel {
-            Text: "1 / 99";
-            Style: (FontSize: 12, TextColor: #ffffff);
-        }
-    }
+    Group { Anchor: (Height: 6); }
 }

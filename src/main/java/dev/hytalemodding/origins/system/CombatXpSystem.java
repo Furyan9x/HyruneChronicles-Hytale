@@ -36,12 +36,12 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
                                  @Nonnull CommandBuffer<EntityStore> commandBuffer) {
 
         Damage deathInfo = deathComponent.getDeathInfo();
-        if (deathInfo == null) return;
+        if (deathInfo == null) {
+            return;
+        }
 
         Damage.Source source = deathInfo.getSource();
-        if (source instanceof Damage.EntitySource) {
-            // Note: In some API versions this requires casting to (Damage.EntitySource)
-            Damage.EntitySource entitySource = (Damage.EntitySource) source;
+        if (source instanceof Damage.EntitySource entitySource) {
             Ref<EntityStore> killerRef = entitySource.getRef();
 
             if (killerRef.isValid()) {
@@ -54,7 +54,6 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
     }
 
     private void handlePlayerKill(Player player, Ref<EntityStore> victimRef, Store<EntityStore> store) {
-        // 1. Calculate Base XP (Based on Victim Max HP)
         long baseXp = 10;
 
         EntityStatMap statMap = store.getComponent(victimRef, EntityStatMap.getComponentType());
@@ -70,23 +69,16 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
             }
         }
 
-        // 2. Identify Weapon & Skill
-        // We pass the 'player' object directly now, which is much cleaner
         String weaponId = getHeldItemIdentifier(player);
         SkillType targetSkill = determineSkillFromWeapon(weaponId);
 
-        // 3. Award XP
         LevelingService service = LevelingService.get();
         if (service != null) {
-
-            // A. Combat Skill XP
             service.addSkillXp(player.getUuid(), targetSkill, baseXp);
 
-            // B. Constitution XP (Hitpoints) - 33% of damage/xp
             long hpXp = Math.max(1, baseXp / 3);
             service.addSkillXp(player.getUuid(), SkillType.CONSTITUTION, hpXp);
 
-            // 4. Feedback
             player.sendMessage(Message.raw("+" + baseXp + " " + targetSkill.getDisplayName() + " XP"));
         }
     }
@@ -127,7 +119,9 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
      * Adapted from RequirementChecker.java
      */
     private String getHeldItemIdentifier(Player player) {
-        if (player == null) return "bare_hands";
+        if (player == null) {
+            return "bare_hands";
+        }
 
         try {
             Inventory inventory = player.getInventory();
@@ -137,7 +131,7 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
                 if (activeSlot >= 0 && activeSlot <= 8) {
                     ItemContainer hotbar = inventory.getHotbar();
                     if (hotbar != null) {
-                        ItemStack heldStack = hotbar.getItemStack((short) activeSlot);
+                        ItemStack heldStack = hotbar.getItemStack(activeSlot);
                         if (heldStack != null) {
                             Item item = heldStack.getItem();
                             if (item != null) {

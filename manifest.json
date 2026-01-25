@@ -1,0 +1,16 @@
+{
+    "Group": "hyskills",
+    "Name": "HySkills",
+    "Version": "1.1.1",
+    "Description": "A RuneScape-like leveling system for Hytale.",
+    "Authors": [
+        {
+            "Name": "Chemica1"
+        }
+    ],
+    "ServerVersion": "*",
+    "Dependencies": {},
+    "DisabledByDefault": false,
+    "Main": "com.hyskills.HySkills",
+    "IncludesAssetPack": true
+}

@@ -1,12 +1,9 @@
 package dev.hytalemodding.origins.playerdata;
 
-
 public class ExperienceTrack {
 
     private int level;
     private long xp;
-
-    // Optional: You could add "xpRemainingForNextLevel" helper methods here later
 
     public ExperienceTrack() {
         this.level = 1; // Default to Level 1

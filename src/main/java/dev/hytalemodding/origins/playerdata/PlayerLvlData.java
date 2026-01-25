@@ -1,6 +1,5 @@
 package dev.hytalemodding.origins.playerdata;
 
-
 import dev.hytalemodding.origins.skills.SkillType;
 
 import java.util.EnumMap;
@@ -62,4 +61,5 @@ public class PlayerLvlData {
     public Map<SkillType, ExperienceTrack> getAllTracks() {
         return this.skillTracks;
     }
+
 }

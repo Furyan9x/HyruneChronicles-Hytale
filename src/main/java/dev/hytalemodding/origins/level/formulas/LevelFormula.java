@@ -6,7 +6,9 @@ public class LevelFormula {
     // Level 1 = 0 XP
     // Level 99 ~ 13,000,000 XP
     public long getXpForLevel(int level) {
-        if (level <= 1) return 0;
+        if (level <= 1) {
+            return 0;
+        }
         long total = 0;
         for (int i = 1; i < level; i++) {
             total += (long) Math.floor(i + 300 * Math.pow(2, i / 7.0));
@@ -15,8 +17,8 @@ public class LevelFormula {
     }
 
     public int getLevelForXp(long xp) {
-        // Simple optimization: check standard ranges or binary search if huge
-        for (int i = 1; i < 120; i++) { // Cap at 120 just in case
+        // Cap at 120 to keep the loop bounded.
+        for (int i = 1; i < 120; i++) {
             if (xp < getXpForLevel(i + 1)) {
                 return i;
             }

@@ -1,7 +1,8 @@
 package dev.hytalemodding.origins.database;
 
-import dev.hytalemodding.origins.playerdata.PlayerLvlData;
 import java.util.UUID;
+
+import dev.hytalemodding.origins.playerdata.PlayerLvlData;
 
 public interface LevelRepository {
     /**

@@ -8,7 +8,15 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-    mavenLocal() // Crucial: Looks for the HytaleServer.jar you manually installed
+    mavenLocal()// Crucial: Looks for the HytaleServer.jar you manually installed
+    maven {
+        name = "hytale-release"
+        url = uri("https://maven.hytale.com/release")
+    }
+    maven {
+        name = "hytale-pre-release"
+        url = uri("https://maven.hytale.com/pre-release")
+    }
 }
 
 dependencies {
@@ -28,7 +36,7 @@ java {
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 

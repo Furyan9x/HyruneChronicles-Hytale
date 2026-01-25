@@ -22,7 +22,11 @@ public class CheckTagsCommand extends AbstractPlayerCommand {
     }
 
     @Override
-    protected void execute(@Nonnull CommandContext ctx, @Nonnull Store<EntityStore> store, @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef, @Nonnull World world) {
+    protected void execute(@Nonnull CommandContext ctx,
+                           @Nonnull Store<EntityStore> store,
+                           @Nonnull Ref<EntityStore> ref,
+                           @Nonnull PlayerRef playerRef,
+                           @Nonnull World world) {
         DisplayNameComponent comp = store.getComponent(ref, DisplayNameComponent.getComponentType());
 
         if (comp != null) {

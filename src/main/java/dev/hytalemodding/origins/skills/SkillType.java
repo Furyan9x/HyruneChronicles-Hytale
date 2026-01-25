@@ -1,7 +1,5 @@
 package dev.hytalemodding.origins.skills;
 
-
-
 public enum SkillType {
     // Combat
     ATTACK("Attack", "Determines weapon accuracy and tier."),
@@ -9,18 +7,29 @@ public enum SkillType {
     DEFENCE("Defence", "Increases damage mitigation and armor tier."),
     RANGED("Ranged", "Increases bow/crossbow damage and accuracy."),
     MAGIC("Magic", "Increases spell damage and mana pool."),
-    DIVINITY("Spirit", "Increases healing potency and mana regen."), // Your "Healer" equivalent
+    RESTORATION("Restoration", "Increases healing potency and mana regen."), // Your "Healer" equivalent
     CONSTITUTION("Constitution", "Determines maximum health points."),
+    SLAYER("Slayer", "Temporary Description."),
 
     // Gathering (Examples for the grid)
     MINING("Mining", "Extract ores from rocks."),
     WOODCUTTING("Woodcutting", "Chop trees for logs."),
     FISHING("Fishing", "Catch fish from water sources."),
+    FARMING("Farming", "Plant and harvest crops for food."),
 
-    // Artisan
-    SMITHING("Smithing", "Forge weapons and armor."),
-    COOKING("Cooking", "Prepare food for healing."),
-    ALCHEMY("Alchemy", "Brew potions and transmutations.");
+    // Artisan / Crafting
+    SMELTING("Smelting", "Process materials in furnaces and salvage stations."),
+    ARCANE_ENGINEERING("Arcane Engineering", "Craft magical devices at the Arcanist's Workbench."),
+    ARMORSMITHING("Armorsmithing", "Forge and repair armor at the Armorer's Workbench."),
+    WEAPONSMITHING("Weaponsmithing", "Forge weapons at the Blacksmith's Anvil."),
+    COOKING("Cooking", "Prepare meals at campfires and stoves."),
+    LEATHERWORKING("Leatherworking", "Cure hides at the Tanning Rack."),
+    ARCHITECT("Architect", "Build structures at the Builder and Furniture workbenches."),
+    ALCHEMY("Alchemy", "Brew potions and transmutations at the Alchemist's Workbench."),
+
+    //Misc
+    AGILITY("Agility", "Increased movement speed and jump height.");
+
 
     private final String displayName;
     private final String description;
@@ -38,7 +47,9 @@ public enum SkillType {
         return description;
     }
 
-    // Helper to get a 2-letter code for the UI icon (e.g. "AT", "ST")
+    /**
+     * Returns a two-letter code for UI fallback icons.
+     */
     public String getIconCode() {
         return displayName.substring(0, 2).toUpperCase();
     }

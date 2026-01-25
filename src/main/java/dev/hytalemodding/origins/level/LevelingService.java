@@ -17,14 +17,11 @@ public class LevelingService {
 
     private static LevelingService instance;
 
-    // Core Dependencies
     private final LevelFormula formula;
     private final LevelRepository repository;
 
-    // 1. The Cache
     private final Map<UUID, PlayerLvlData> cache = new ConcurrentHashMap<>();
 
-    // 2. The Listeners
     private final List<LevelUpListener> levelUpListeners = new ArrayList<>();
     private final List<XpGainListener> xpGainListeners = new ArrayList<>();
 
@@ -39,23 +36,19 @@ public class LevelingService {
     }
 
     /**
-     * Internal helper: Get data from Cache first, then Disk.
+     * Returns cached data or loads from the repository if missing.
      */
     private PlayerLvlData get(UUID id) {
-        return this.cache.computeIfAbsent(id, (uuid) -> {
+        return this.cache.computeIfAbsent(id, uuid -> {
             PlayerLvlData stored = this.repository.load(uuid);
             return stored != null ? stored : new PlayerLvlData(uuid);
         });
     }
 
-    // --- Public API: SKILLS ---
-
     /**
      * Gets the current level for a specific skill (1-99).
      */
     public int getSkillLevel(UUID id, SkillType skill) {
-        // You will need to update PlayerLvlData to support this method
-        // e.g., return tracks.get(skill).getLevel();
         return this.get(id).getSkillLevel(skill);
     }
 
@@ -77,13 +70,14 @@ public class LevelingService {
         return total;
     }
 
+
     /**
      * Calculates the Combat Level using the RuneScape formula.
      */
     public int getCombatLevel(UUID id) {
         int def = getSkillLevel(id, SkillType.DEFENCE);
-        int hp  = getSkillLevel(id, SkillType.CONSTITUTION);
-        int div = getSkillLevel(id, SkillType.DIVINITY); // Prayer equivalent
+        int hp = getSkillLevel(id, SkillType.CONSTITUTION);
+        int res = getSkillLevel(id, SkillType.RESTORATION); // Prayer equivalent
 
         int att = getSkillLevel(id, SkillType.ATTACK);
         int str = getSkillLevel(id, SkillType.STRENGTH);
@@ -91,12 +85,12 @@ public class LevelingService {
         int magic = getSkillLevel(id, SkillType.MAGIC);
 
         // Base = 0.25 * (Def + HP + Prayer)
-        double base = 0.25 * (def + hp + div);
+        double base = 0.25 * (def + hp + res);
 
         // Calculate max offense contribution
         double melee = 0.325 * (att + str);
         double ranged = 0.325 * (1.5 * range); // Ranged/Magic are weighted heavier
-        double mage   = 0.325 * (1.5 * magic);
+        double mage = 0.325 * (1.5 * magic);
 
         double maxOffense = Math.max(melee, Math.max(ranged, mage));
 
@@ -107,7 +101,9 @@ public class LevelingService {
      * Adds XP to a specific skill. Handles leveling up logic.
      */
     public void addSkillXp(UUID id, SkillType skill, long amount) {
-        if (amount <= 0) return;
+        if (amount <= 0) {
+            return;
+        }
 
         PlayerLvlData data = this.get(id);
 
@@ -123,26 +119,27 @@ public class LevelingService {
         int newLevel = this.formula.getLevelForXp(newXp);
 
         if (newLevel > currentLevel) {
-            // Handle multi-level jumps (e.g. huge XP drop)
             for (int i = currentLevel + 1; i <= newLevel; i++) {
                 int finalI = i;
                 this.levelUpListeners.forEach(l -> l.onLevelUp(id, finalI, skill.getDisplayName()));
             }
-            // Update level in data
             data.setSkillLevel(skill, newLevel);
         }
 
-        // 4. Save & Notify
         this.repository.save(data);
-        this.xpGainListeners.forEach(l -> l.onXpGain(id, amount, skill)); // Updated listener signature
+        this.xpGainListeners.forEach(l -> l.onXpGain(id, amount, skill));
     }
 
     /**
      * Manually sets a skill's level (Admin commands / Debug).
      */
     public void setSkillLevel(UUID id, SkillType skill, int level) {
-        if (level < 1) level = 1;
-        if (level > 99) level = 99; // Or whatever your max is
+        if (level < 1) {
+            level = 1;
+        }
+        if (level > 99) {
+            level = 99;
+        }
 
         PlayerLvlData data = this.get(id);
         long targetXp = this.formula.getXpForLevel(level);
@@ -153,23 +150,20 @@ public class LevelingService {
         this.repository.save(data);
     }
 
+    public LevelFormula getLevelFormula() {
+        return this.formula;
+    }
+
     /**
      * Saves the player's data to disk and removes it from the cache.
      * Call this on player disconnect.
      */
     public void unload(UUID id) {
-        if (this.cache.containsKey(id)) {
-            PlayerLvlData data = this.cache.get(id);
-
-            // Save to Disk
+        PlayerLvlData data = this.cache.remove(id);
+        if (data != null) {
             this.repository.save(data);
-
-            // Remove from Memory
-            this.cache.remove(id);
         }
     }
-
-    // --- Listener Registration ---
 
     public void registerLevelUpListener(LevelUpListener listener) {
         this.levelUpListeners.add(listener);
