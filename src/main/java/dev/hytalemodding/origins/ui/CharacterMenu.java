@@ -33,8 +33,6 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
 
     private static final String COLOR_YELLOW = "#ffff00";
     private static final String COLOR_ORANGE = "#ff981f"; // For selected skills.
-    private static final String TAB_BG_SELECTED = "#000000(0.5)";
-    private static final String TAB_BG_UNSELECTED = "#000000(0.2)";
     private static final int PROGRESS_BAR_WIDTH = 112;
     private static final int PROGRESS_BAR_HEIGHT = 4;
     private static final String TAB_SERVER_INFO = "ServerInfo";
@@ -227,12 +225,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         cmd.set("#TabAttributes.Visible", showAttributes);
         cmd.set("#TabSkills.Visible", showSkills);
         cmd.set("#TabFriends.Visible", showFriends);
-
-        cmd.set("#TabServerInfoBtn.Background", showServerInfo ? TAB_BG_SELECTED : TAB_BG_UNSELECTED);
-        cmd.set("#TabQuestsBtn.Background", showQuests ? TAB_BG_SELECTED : TAB_BG_UNSELECTED);
-        cmd.set("#TabAttributesBtn.Background", showAttributes ? TAB_BG_SELECTED : TAB_BG_UNSELECTED);
-        cmd.set("#TabSkillsBtn.Background", showSkills ? TAB_BG_SELECTED : TAB_BG_UNSELECTED);
-        cmd.set("#TabFriendsBtn.Background", showFriends ? TAB_BG_SELECTED : TAB_BG_UNSELECTED);
+        cmd.set("#TabBar.SelectedTab", this.selectedTab);
     }
 
     private String getTabTitle() {

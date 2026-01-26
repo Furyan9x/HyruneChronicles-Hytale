@@ -6,11 +6,16 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.item.config.CraftingRecipe;
+import com.hypixel.hytale.server.core.entity.ItemUtils;
 import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.MaterialQuantity;
+import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.Window;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
 import com.hypixel.hytale.builtin.crafting.window.BenchWindow;
@@ -18,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
+import dev.hytalemodding.origins.skills.SkillType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,6 +39,8 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
 public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
+    private static final float DOUBLE_PROC_CHANCE_PER_LEVEL = 0.20f / 99.0f;
+    private static final float DOUBLE_PROC_CHANCE_CAP = 0.20f;
 
     private static Class<?> craftingManagerClass;
     private static Class<?> craftingJobClass;
@@ -124,6 +132,7 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
                     int delta = completed - lastCompleted;
                     CraftingRecipe recipe = (CraftingRecipe) jobRecipeField.get(job);
                     grantCraftingXp(player, uuid, recipe, delta);
+                    applyDoubleCraft(player, uuid, recipe, delta, store);
                     entry.setValue(completed);
                 }
 
@@ -173,6 +182,79 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
         }
 
         service.addSkillXp(uuid, match.skill, perItemXp * quantity);
+    }
+
+    private void applyDoubleCraft(Player player,
+                                  UUID uuid,
+                                  @Nullable CraftingRecipe recipe,
+                                  int quantity,
+                                  Store<EntityStore> store) {
+        if (recipe == null || quantity <= 0 || player == null) {
+            return;
+        }
+
+        MaterialQuantity output = recipe.getPrimaryOutput();
+        if (output == null || output.getItemId() == null) {
+            return;
+        }
+
+        CraftingSkillRegistry.SkillReward match = CraftingSkillRegistry.findByItemId(output.getItemId());
+        if (match == null) {
+            return;
+        }
+
+        if (match.skill != SkillType.COOKING && match.skill != SkillType.ALCHEMY) {
+            return;
+        }
+
+        LevelingService service = LevelingService.get();
+        if (service == null) {
+            return;
+        }
+
+        int level = service.getSkillLevel(uuid, match.skill);
+        if (level <= 0) {
+            return;
+        }
+
+        float chance = Math.min(DOUBLE_PROC_CHANCE_CAP,
+            level * DOUBLE_PROC_CHANCE_PER_LEVEL);
+        if (java.util.concurrent.ThreadLocalRandom.current().nextFloat() >= chance) {
+            return;
+        }
+
+        Inventory inventory = player.getInventory();
+        if (inventory == null) {
+            return;
+        }
+
+        ItemStack baseStack = output.toItemStack();
+        if (baseStack == null) {
+            return;
+        }
+
+        int extraQuantity = baseStack.getQuantity() * quantity;
+        if (extraQuantity <= 0) {
+            return;
+        }
+
+        ItemContainer storage = inventory.getStorage();
+        if (storage == null) {
+            return;
+        }
+
+        ItemStack extra = new ItemStack(baseStack.getItemId(), extraQuantity);
+        var transaction = storage.addItemStack(extra);
+        ItemStack remainder = transaction.getRemainder();
+        if (remainder != null && remainder.getQuantity() > 0) {
+            PlayerRef playerRef = Universe.get().getPlayer(uuid);
+            if (playerRef != null && playerRef.getReference() != null) {
+                ItemUtils.dropItem(playerRef.getReference(), remainder, store);
+                player.sendMessage(Message.raw(
+                    "Inventory full - extra items dropped at your feet."
+                ));
+            }
+        }
     }
 
     @Nullable

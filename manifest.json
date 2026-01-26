@@ -1,16 +1,25 @@
 {
-    "Group": "hyskills",
-    "Name": "HySkills",
-    "Version": "1.1.1",
-    "Description": "A RuneScape-like leveling system for Hytale.",
+    "Group": "GoneFishing",
+    "Name": "GoneFishing",
+    "Version": "0.2.0",
+    "Description": "A fishing mod for HyTale",
     "Authors": [
         {
-            "Name": "Chemica1"
+            "Name": "Mrbysco"
+        },
+        {
+            "Name": "ShyNieke"
         }
     ],
+    "Website": "https://www.curseforge.com/hytale/mods/gone-fishing",
     "ServerVersion": "*",
-    "Dependencies": {},
+    "Dependencies": {
+        "Hytale:EntityModule": "*"
+    },
+    "OptionalDependencies": {
+        
+    },
     "DisabledByDefault": false,
-    "Main": "com.hyskills.HySkills",
+    "Main": "com.mrbysco.gonefishing.GoneFishingPlugin",
     "IncludesAssetPack": true
 }

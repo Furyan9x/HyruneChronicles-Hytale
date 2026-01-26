@@ -1,0 +1,88 @@
+$C = "../Common.ui";
+
+@HeaderSearch = Group {
+  @MarginRight = 10;
+
+  Anchor: (Width: 200, Right: 0);
+
+  CompactTextField #SearchInput {
+    Anchor: (Height: 30, Right: @MarginRight);
+    CollapsedWidth: 200;
+    ExpandedWidth: 200;
+    PlaceholderText: %server.customUI.searchPlaceholder;
+    Style: (FontSize: 16);
+    PlaceholderStyle: (TextColor: #3d5a85, RenderUppercase: true, FontSize: 14);
+    Padding: (Horizontal: 12, Left: 34);
+    Decoration: (
+      Default: (
+        Icon: (Texture: "../Common/SearchIcon.png", Width: 16, Height: 16, Offset: 9),
+        ClearButtonStyle: $C.@ClearButtonStyle
+      )
+    );
+  }
+};
+
+Group #Main {
+  LayoutMode: Left;
+  FlexWeight: 1;
+  Group #LeftGroup {
+    LayoutMode: Top;
+    Anchor: (Width: 200);
+    Group #Filters {
+      LayoutMode: Top;
+      Anchor: (Width: 200);
+      DropdownBox #ProviderDropDown {
+        Anchor: (Width: 200, Height: 34, Top: 5, Bottom: 5);
+        Style: (...$C.@DefaultDropdownBoxStyle);
+        MaxSelection: 1;
+        ShowLabel: true;
+        Value: "Curseforge";
+
+        DropdownEntry { Text: "Curseforge"; Value: "Curseforge"; Selected: true;}
+        DropdownEntry { Text: "Modtale"; Value: "Modtale"; }
+      }
+      @HeaderSearch #SearchBar {}
+      Label #TagsLabel {
+        Style: (TextColor: #ffffff, FontSize: 18, RenderBold: true);
+        Text: "Filters";
+      }
+      Group #Tags {
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        LayoutMode: TopScrolling;
+        Anchor: (Height: 500, Top: 10, Bottom: 10);
+      }
+      $C.@TextButton #SearchButton {
+        @Text = "Search";
+        Anchor: (Right: 15);
+      }
+    }
+  }
+  Group #RightGroup {
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    LayoutMode: Top;
+    Anchor: (Width: 630, Height: 640, Horizontal: 1);
+    FlexWeight: 1;
+    Padding: (Left: 4);
+    Group #ModListHeader {
+      LayoutMode: Top;
+      Padding: (Horizontal: 5);
+    }
+    Group #ModBody {
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      LayoutMode: TopScrolling;
+      Anchor: (Top: 10, Bottom: 10);
+      FlexWeight: 1;
+      Padding: (Horizontal: 5);
+      Group #SpinnerCenter {
+        LayoutMode: CenterMiddle;
+        FlexWeight: 1;
+        $C.@DefaultSpinner #Spinner {}
+      }
+    }
+    $C.@ContentSeparator #Separator {}
+    Group #ModListFooter {
+      LayoutMode: Left;
+      Padding: (Horizontal: 5, Top: 10);
+    }
+  }
+}

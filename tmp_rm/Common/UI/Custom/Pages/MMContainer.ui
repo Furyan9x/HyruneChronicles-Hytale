@@ -1,0 +1,36 @@
+$Sounds = "Sounds.ui";
+
+@MMIconOnlyTopTabAnchor = Anchor(Width: 82, Height: 62, Right: 5, Bottom: -14);
+
+@MMIconOnlyTopTabStyle = TabStyleState(
+  Background: "Images/Tab.png",
+  Overlay: "Images/TabOverlay.png",
+  IconAnchor: (Width: 44, Height: 44),
+  LabelStyle: (FontSize: 19),
+  Anchor: @MMIconOnlyTopTabAnchor
+);
+
+@MMIconOnlyTopTabsStyle = TabNavigationStyle(
+  TabStyle: (
+    Default: @MMIconOnlyTopTabStyle,
+    Hovered: (...@MMIconOnlyTopTabStyle, Anchor: (...@MMIconOnlyTopTabAnchor, Bottom: -5)),
+    Pressed: (...@MMIconOnlyTopTabStyle, Anchor: (...@MMIconOnlyTopTabAnchor, Bottom: -8))
+  ),
+  SelectedTabStyle: (
+    Default: (
+      ...@MMIconOnlyTopTabStyle,
+      Anchor: (...@MMIconOnlyTopTabAnchor, Bottom: 0),
+      IconAnchor: (Width: 44, Height: 44),
+      Overlay: "Images/TabSelectedOverlay.png"
+    )
+  ),
+  TabSounds: $Sounds.@MMDefaultTabNavigation
+);
+
+@MMDefaultTooltipBackground = (TexturePath: "Images/ItemTooltipDefault.png", Border: 24);
+@MMButtonTextTooltipStyle = TextTooltipStyle(
+  Background: @MMDefaultTooltipBackground,
+  MaxWidth: 400,
+  LabelStyle: (Wrap: true, FontSize: 16),
+  Padding: 24
+);

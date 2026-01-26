@@ -3,6 +3,24 @@ $C = "../Common.ui";
 // Reuse your existing button/text styles
 @SkillTextStyle = LabelStyle(FontSize: 16, TextColor: #ffcc00, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
 @PageTitleStyle = LabelStyle(FontSize: 20, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+@TabIconAnchor = Anchor(Width: 40, Height: 32);
+@TabButtonAnchor = Anchor(Width: 52, Height: 32);
+@CharacterTabStyle = TabStyleState(
+  Background: "Images/Tab.png",
+  Overlay: "Images/TabOverlay.png",
+  IconAnchor: @TabIconAnchor,
+  Anchor: @TabButtonAnchor
+);
+@CharacterTabsStyle = TabNavigationStyle(
+  TabStyle: (
+    Default: @CharacterTabStyle,
+    Hovered: @CharacterTabStyle,
+    Pressed: @CharacterTabStyle
+  ),
+  SelectedTabStyle: (
+    Default: (...@CharacterTabStyle, Overlay: "Images/TabSelectedOverlay.png")
+  )
+);
 
 $C.@PageOverlay {
   $C.@DecoratedContainer {
@@ -28,59 +46,35 @@ $C.@PageOverlay {
       LayoutMode: Top;
       Padding: (Top: 10, Left: 20, Right: 20, Bottom: 80); // Space for Header/Footer
 
-      Group #TabBar {
-        LayoutMode: Left;
-        Anchor: (Height: 36);
-        Padding: (Left: 4, Right: 4);
+      TabNavigation #TabBar {
+        Anchor: (Height: 36, Left: 4, Right: 4);
+        Style: @CharacterTabsStyle;
+        SelectedTab: "Skills";
 
-        Button #TabServerInfoBtn {
-          Anchor: (Width: 40, Height: 32);
-          Background: #000000(0.2);
-
-          Group #TabServerInfoIcon {
-            Anchor: (Width: 20, Height: 20);
-            Background: "Icons/TabServerInfo.png";
-          }
+        TabButton #TabServerInfoBtn {
+          Id: "ServerInfo";
+          Icon: "server_info.png";
+          IconSelected: "server_info.png";
         }
-        Group { Anchor: (Width: 6); }
-        Button #TabQuestsBtn {
-          Anchor: (Width: 40, Height: 32);
-          Background: #000000(0.2);
-
-          Group #TabQuestsIcon {
-            Anchor: (Width: 20, Height: 20);
-            Background: "Icons/TabQuests.png";
-          }
+        TabButton #TabQuestsBtn {
+          Id: "Quests";
+          Icon: "quests.png";
+          IconSelected: "quests.png";
         }
-        Group { Anchor: (Width: 6); }
-        Button #TabAttributesBtn {
-          Anchor: (Width: 40, Height: 32);
-          Background: #000000(0.2);
-
-          Group #TabAttributesIcon {
-            Anchor: (Width: 20, Height: 20);
-            Background: "Icons/TabAttributes.png";
-          }
+        TabButton #TabAttributesBtn {
+          Id: "Attributes";
+          Icon: "attributes.png";
+          IconSelected: "attributes.png";
         }
-        Group { Anchor: (Width: 6); }
-        Button #TabSkillsBtn {
-          Anchor: (Width: 40, Height: 32);
-          Background: #000000(0.2);
-
-          Group #TabSkillsIcon {
-            Anchor: (Width: 20, Height: 20);
-            Background: "Icons/TabSkills.png";
-          }
+        TabButton #TabSkillsBtn {
+          Id: "Skills";
+          Icon: "skills.png";
+          IconSelected: "skills.png";
         }
-        Group { Anchor: (Width: 6); }
-        Button #TabFriendsBtn {
-          Anchor: (Width: 40, Height: 32);
-          Background: #000000(0.2);
-
-          Group #TabFriendsIcon {
-            Anchor: (Width: 20, Height: 20);
-            Background: "Icons/TabFriends.png";
-          }
+        TabButton #TabFriendsBtn {
+          Id: "Friends";
+          Icon: "friends_list.png";
+          IconSelected: "friends_list.png";
         }
       }
 

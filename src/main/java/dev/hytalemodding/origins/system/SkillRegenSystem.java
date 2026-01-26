@@ -57,7 +57,7 @@ public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
         int agilityLevel = service.getSkillLevel(playerRef.getUuid(), SkillType.AGILITY);
 
         applyManaRegen(statMap, magicLevel, dt);
-        // Mirror vanilla behavior by pausing stamina regen while sprinting or in combat.
+
         if (!isSprinting(holder) && !CombatStateTracker.isInCombat(playerRef.getUuid())) {
             applyStaminaRegen(statMap, agilityLevel, dt);
         }

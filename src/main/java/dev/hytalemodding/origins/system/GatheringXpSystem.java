@@ -37,26 +37,89 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
     private static final Map<String, Reward> WOODCUTTING_KEYWORDS = new HashMap<>();
     private static final Map<String, Reward> FARMING_BLOCKS = new HashMap<>();
     private static final Map<String, Reward> FARMING_KEYWORDS = new HashMap<>();
-    private static final Map<String, Integer> TOOL_LEVELS = new HashMap<>();
-
+    private static final Reward DEFAULT_FARMING_REWARD = new Reward(1, 10);
+    private static final String[] FARMING_KEYWORDS_LIST = {
+            "crop",
+            "mushroom",
+            "wheat",
+            "turnip",
+            "tomato",
+            "rice",
+            "pumpkin",
+            "potato",
+            "onion",
+            "lettuce",
+            "cotton",
+            "corn",
+            "chilli",
+            "cauliflower",
+            "carrot",
+            "berry",
+            "aubergine",
+            "apple",
+            "flower",
+            "fiber",
+            "cactus",
+            "coral",
+            "fruit",
+            "fern",
+            "hay"
+    };
     static {
         // Mining examples.
         MINING_KEYWORDS.put("copper", new Reward(1, 5));
         MINING_KEYWORDS.put("iron", new Reward(1, 8));
         MINING_KEYWORDS.put("gold", new Reward(10, 20));
         MINING_KEYWORDS.put("diamond", new Reward(30, 60));
+        MINING_KEYWORDS.put("adamantite", new Reward(20, 30));
+        MINING_KEYWORDS.put("cobalt", new Reward(20, 30));
+        MINING_KEYWORDS.put("mithril", new Reward(30, 40));
+        MINING_KEYWORDS.put("onyxium", new Reward(40, 50));
+        MINING_KEYWORDS.put("silver", new Reward(10, 18));
+        MINING_KEYWORDS.put("thorium", new Reward(35, 45));
+        MINING_KEYWORDS.put("rock", new Reward(1, 2));
 
         // Woodcutting examples.
         WOODCUTTING_KEYWORDS.put("oak", new Reward(1, 8));
         WOODCUTTING_KEYWORDS.put("pine", new Reward(5, 12));
+        WOODCUTTING_KEYWORDS.put("wisteria", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("windwillow", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("stormbark", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("spiral", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("sallow", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("redwood", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("poisoned", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("petrified", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("palo", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("palm", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("maple", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("jungle", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("ice", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("gumboab", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("gnarled", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("fire", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("fir", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("fig_blue", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("dry", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("crystal", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("cedar", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("camphor", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("burnt", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("bottletree", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("birch", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("beech", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("banyan", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("bamboo", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("azure", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("aspen", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("ash", new Reward(1, 8));
+        WOODCUTTING_KEYWORDS.put("amber", new Reward(1, 8));
 
-        // Farming example (mature crops only).
-        FARMING_KEYWORDS.put("wheat", new Reward(1, 6));
+        // Farming examples (mature crops only).
+        for (String keyword : FARMING_KEYWORDS_LIST) {
+            FARMING_KEYWORDS.put(keyword, DEFAULT_FARMING_REWARD);
+        }
 
-        // Tool level requirements (material -> min level).
-        TOOL_LEVELS.put("crude", 1);
-        TOOL_LEVELS.put("copper", 10);
-        TOOL_LEVELS.put("iron", 15);
     }
 
     public GatheringXpSystem() {
@@ -121,21 +184,23 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
             return;
         }
 
-        Reward farmingReward = findReward(blockId, FARMING_BLOCKS, FARMING_KEYWORDS);
+        Reward farmingReward = findFarmingReward(blockId);
         if (farmingReward != null) {
-            if (!isMatureCrop(store, blockType, event)) {
+            World world = store.getExternalData().getWorld();
+            if (!isMatureCrop(world, blockType, event.getTargetBlock())) {
                 return;
             }
-            if (isSickle(itemId) && isToolRestricted(playerRef, SkillType.FARMING, itemId, event)) {
+            if (isSickleItemId(itemId) && isToolRestricted(playerRef, SkillType.FARMING, itemId, event)) {
                 return;
             }
             if (isRestricted(playerRef, SkillType.FARMING, farmingReward, event)) {
                 return;
             }
             long xp = farmingReward.xp;
-            if (isSickle(itemId)) {
+            if (isSickleItemId(itemId)) {
                 xp = Math.round(xp * 1.25);
             }
+            FarmingHarvestTracker.recordBreak(playerRef.getUuid());
             LevelingService.get().addSkillXp(playerRef.getUuid(), SkillType.FARMING, xp);
         }
     }
@@ -160,7 +225,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
             return false;
         }
 
-        Integer requiredLevel = getToolRequiredLevel(itemId);
+        Integer requiredLevel = ToolRequirementRegistry.getRequiredLevel(itemId);
         if (requiredLevel == null) {
             return false;
         }
@@ -210,18 +275,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
         return id.contains("pickaxe") || id.contains("pick") && id.contains("axe");
     }
 
-    @Nullable
-    private static Integer getToolRequiredLevel(String itemId) {
-        String id = itemId.toLowerCase(Locale.ROOT);
-        for (Map.Entry<String, Integer> entry : TOOL_LEVELS.entrySet()) {
-            if (id.contains(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-
-    private static boolean isSickle(@Nullable String itemId) {
+    static boolean isSickleItemId(@Nullable String itemId) {
         if (itemId == null) {
             return false;
         }
@@ -238,18 +292,21 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
     /**
      * Returns true when the farming block is at its final growth stage.
      */
-    private static boolean isMatureCrop(Store<EntityStore> store, BlockType blockType, BreakBlockEvent event) {
+    static boolean isMatureCrop(World world, BlockType blockType, com.hypixel.hytale.math.vector.Vector3i target) {
         FarmingData farmingData = blockType.getFarming();
         if (farmingData == null || farmingData.getStages() == null) {
             return false;
         }
 
-        World world = store.getExternalData().getWorld();
-        if (world == null || event.getTargetBlock() == null) {
+        String blockId = blockType.getId();
+        if (blockId != null && blockId.toLowerCase(Locale.ROOT).contains("stagefinal")) {
+            return true;
+        }
+
+        if (world == null || target == null) {
             return false;
         }
 
-        var target = event.getTargetBlock();
         ChunkStore chunkStore = world.getChunkStore();
         Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(ChunkUtil.indexChunkFromBlock(target.x, target.z));
         if (chunkRef == null || !chunkRef.isValid()) {
@@ -271,7 +328,9 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
             return false;
         }
 
-        int blockIndexColumn = ChunkUtil.indexBlockInColumn(target.x, target.y, target.z);
+        int localX = ChunkUtil.localCoordinate(target.x);
+        int localZ = ChunkUtil.localCoordinate(target.z);
+        int blockIndexColumn = ChunkUtil.indexBlockInColumn(localX, target.y, localZ);
         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndexColumn);
         if (blockRef == null || !blockRef.isValid()) {
             return false;
@@ -299,9 +358,20 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
         return currentStage >= stages.length - 1;
     }
 
-    private static final class Reward {
-        private final int minLevel;
-        private final long xp;
+    static Reward findFarmingReward(String blockId) {
+        return findReward(blockId, FARMING_BLOCKS, FARMING_KEYWORDS);
+    }
+
+    static Reward findFarmingHarvestReward(String itemId) {
+        if (itemId == null) {
+            return null;
+        }
+        return findReward(itemId.toLowerCase(Locale.ROOT), FARMING_BLOCKS, FARMING_KEYWORDS);
+    }
+
+    static final class Reward {
+        final int minLevel;
+        final long xp;
 
         private Reward(int minLevel, long xp) {
             this.minLevel = minLevel;
