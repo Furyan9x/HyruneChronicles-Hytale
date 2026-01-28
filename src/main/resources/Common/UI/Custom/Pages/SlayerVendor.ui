@@ -1,0 +1,189 @@
+$C = "../Common.ui";
+
+@TitleStyle = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true);
+@TitleCenterStyle = LabelStyle(...@TitleStyle, HorizontalAlignment: Center, VerticalAlignment: Center);
+@BodyStyle = LabelStyle(FontSize: 13, TextColor: #f7e9cd);
+@BodyCenterStyle = LabelStyle(...@BodyStyle, HorizontalAlignment: Center, VerticalAlignment: Center);
+
+$C.@PageOverlay {
+  Group #VendorRoot {
+    Anchor: (Width: 840, Height: 560);
+    LayoutMode: Top;
+    Padding: (Top: 12, Left: 16, Right: 16, Bottom: 12);
+    Background: #2b1b12(0.9);
+
+    Group #VendorHeader {
+      Anchor: (Left: 0, Right: 0, Height: 24);
+
+      Label #VendorTitle {
+        Text: "Slayer Rewards";
+        Style: @TitleCenterStyle;
+        Anchor: (Left: 0, Right: 0, Height: 24);
+      }
+
+      TextButton #VendorClose {
+        Anchor: (Right: 0, Top: 0, Width: 24, Height: 24);
+        Text: "X";
+      }
+    }
+
+    Group { Anchor: (Height: 10); }
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 40);
+
+      Label #VendorBody {
+        Text: "Spend Slayer points on unique rewards.";
+        Style: @BodyCenterStyle;
+        Anchor: (Left: 0, Right: 0, Height: 40);
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group #ShopScroll {
+      LayoutMode: TopScrolling;
+      Anchor: (Height: 360, Left: 0, Right: 0);
+      Padding: (Right: 6);
+
+      Group #ShopRow1 {
+        LayoutMode: Left;
+        Anchor: (Height: 120);
+
+        Group { FlexWeight: 1; }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 1"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 2"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 3"; Style: @BodyStyle; }
+        }
+        Group { FlexWeight: 1; }
+      }
+
+      Group { Anchor: (Height: 12); }
+
+      Group #ShopRow2 {
+        LayoutMode: Left;
+        Anchor: (Height: 120);
+
+        Group { FlexWeight: 1; }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 4"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 5"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 6"; Style: @BodyStyle; }
+        }
+        Group { FlexWeight: 1; }
+      }
+
+      Group { Anchor: (Height: 12); }
+
+      Group #ShopRow3 {
+        LayoutMode: Left;
+        Anchor: (Height: 120);
+
+        Group { FlexWeight: 1; }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 7"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 8"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 9"; Style: @BodyStyle; }
+        }
+        Group { FlexWeight: 1; }
+      }
+
+      Group { Anchor: (Height: 12); }
+
+      Group #ShopRow4 {
+        LayoutMode: Left;
+        Anchor: (Height: 120);
+
+        Group { FlexWeight: 1; }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 10"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 11"; Style: @BodyStyle; }
+        }
+        Group { Anchor: (Width: 12); }
+        Group {
+          Anchor: (Width: 240, Height: 100);
+          Background: #000000(0.25);
+          Padding: (Full: 8);
+          Label { Text: "Placeholder Item 12"; Style: @BodyStyle; }
+        }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Height: 12); }
+
+    Group #VendorStats {
+      Anchor: (Left: 16, Bottom: 16, Height: 48);
+      LayoutMode: Top;
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Height: 20);
+        Label { Text: "Slayer Points"; Style: @BodyStyle; Anchor: (Width: 140); }
+        Label #VendorPoints { Text: "0"; Style: @BodyStyle; }
+      }
+      Group { Anchor: (Height: 4); }
+      Group {
+        LayoutMode: Left;
+        Anchor: (Height: 20);
+        Label { Text: "Tasks Completed"; Style: @BodyStyle; Anchor: (Width: 140); }
+        Label #VendorTasks { Text: "0"; Style: @BodyStyle; }
+      }
+    }
+  }
+}

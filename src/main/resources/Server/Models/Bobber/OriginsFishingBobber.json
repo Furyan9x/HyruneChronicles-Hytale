@@ -16,5 +16,34 @@
   },
   "MinScale": 1.5,
   "MaxScale": 1.5,
-  "DefaultAttachments": []
+  "DefaultAttachments": [],
+  "AnimationSets": {
+    "Idle": {
+      "Animations": [
+        {
+          "Animation": "NPC/MISC/Bobber/Animations/idle.blockyanim",
+          "Looping": true,
+          "Speed": 1.0
+        }
+      ]
+    },
+    "Cast": {
+      "Animations": [
+        {
+          "Animation": "NPC/MISC/Bobber/Animations/cast.blockyanim",
+          "Looping": false,
+          "Speed": 1.0
+        }
+      ]
+    },
+    "Bite": {
+      "Animations": [
+        {
+          "Animation": "NPC/MISC/Bobber/Animations/bite.blockyanim",
+          "Looping": false,
+          "Speed": 1.0
+        }
+      ]
+    }
+  }
 }

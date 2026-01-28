@@ -14,6 +14,7 @@ public class FishingBobberComponent implements Component<EntityStore> {
     private int timeUntilCatch;
     private int catchTimer;
     private int bobberAge;
+    private String currentAnimation;
 
     public FishingBobberComponent() {
         this.timeUntilCatch = -1;
@@ -26,6 +27,7 @@ public class FishingBobberComponent implements Component<EntityStore> {
         this.canCatch = false;
         this.catchTimer = 0;
         this.bobberAge = 0;
+        this.currentAnimation = null;
         setRandomTimeUntilCatch();
     }
 
@@ -47,6 +49,14 @@ public class FishingBobberComponent implements Component<EntityStore> {
 
     public void setBobberAge(int bobberAge) {
         this.bobberAge = bobberAge;
+    }
+
+    public String getCurrentAnimation() {
+        return currentAnimation;
+    }
+
+    public void setCurrentAnimation(String currentAnimation) {
+        this.currentAnimation = currentAnimation;
     }
 
     public boolean canCatchFish() {
@@ -102,6 +112,7 @@ public class FishingBobberComponent implements Component<EntityStore> {
         copy.timeUntilCatch = this.timeUntilCatch;
         copy.catchTimer = this.catchTimer;
         copy.bobberAge = this.bobberAge;
+        copy.currentAnimation = this.currentAnimation;
         return copy;
     }
 }

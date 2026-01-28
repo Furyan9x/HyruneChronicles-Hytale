@@ -16,9 +16,11 @@ import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
@@ -36,6 +38,7 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHa
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.modules.physics.component.PhysicsValues;
 import com.hypixel.hytale.server.core.modules.physics.component.Velocity;
+import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -48,10 +51,10 @@ import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+// Handles casting and reeling for the fishing rod interaction.
 public class FishingInteraction extends SimpleInstantInteraction {
     public static final BuilderCodec<FishingInteraction> CODEC = BuilderCodec.builder(
             FishingInteraction.class,
@@ -65,6 +68,8 @@ public class FishingInteraction extends SimpleInstantInteraction {
     private static final String MODEL_ASSET_ID = "OriginsFishingBobber";
     private static final String CAST_SOUND_ID = "SFX_Origins_Fishing_Rod_Cast";
     private static final String REEL_SOUND_ID = "SFX_Origins_Fishing_Rod_Reel";
+    private static final String CAST_ANIMATION_NAME = "Cast";
+    private static final int CAST_ANIMATION_TICKS = 40;
 
     @Override
     protected void firstRun(@NonNullDecl InteractionType interactionType,
@@ -97,8 +102,6 @@ public class FishingInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        playerRef.sendMessage(Message.raw("OriginsFishing: interaction triggered."));
-
         Inventory inventory = player.getInventory();
         if (inventory == null) {
             context.getState().state = InteractionState.Failed;
@@ -113,16 +116,20 @@ public class FishingInteraction extends SimpleInstantInteraction {
             return;
         }
 
+        if (FishingCastSystem.hasPendingCast(playerRef.getUuid())) {
+            FishingCastSystem.cancelPendingCast(playerRef.getUuid());
+            playerRef.sendMessage(Message.raw("You stop casting."));
+            return;
+        }
+
         Vector3i target = getTargetWater(world, entityRef, commandBuffer);
         if (target == null) {
-            playerRef.sendMessage(Message.raw("OriginsFishing: no water target."));
             context.getState().state = InteractionState.Failed;
             return;
         }
 
         BlockType blockType = getBlockType(world, target);
         if (blockType == null || blockType.getId() == null) {
-            playerRef.sendMessage(Message.raw("OriginsFishing: target block missing."));
             return;
         }
 
@@ -144,14 +151,23 @@ public class FishingInteraction extends SimpleInstantInteraction {
             ? service.getSkillLevel(playerRef.getUuid(), SkillType.FISHING)
             : 1;
 
-        UUID bobberId = spawnBobber(commandBuffer, target, playerRef, baitOpt.get().definition, level);
-        if (bobberId != null) {
-            updateRodMetadata(inventory, bobberId);
-            playCastSound(playerRef);
-            playerRef.sendMessage(Message.raw("You cast your line."));
+        if (!FishingCastSystem.queueCast(
+            playerRef.getUuid(),
+            playerRef.getWorldUuid(),
+            target,
+            baitOpt.get().definition,
+            level,
+            CAST_ANIMATION_TICKS
+        )) {
+            playerRef.sendMessage(Message.raw("You are already casting."));
+            return;
         }
+
+        playCastAnimation(entityRef, commandBuffer, held);
+        playerRef.sendMessage(Message.raw("You cast your line."));
     }
 
+    // Reels the bobber and awards a catch if the bite window is active.
     private static void handleReel(PlayerRef playerRef,
                                    Inventory inventory,
                                    FishingMetaData metaData,
@@ -246,13 +262,14 @@ public class FishingInteraction extends SimpleInstantInteraction {
         hotbar.setItemStackForSlot((short) slot, updated);
     }
 
-    private static UUID spawnBobber(CommandBuffer<EntityStore> commandBuffer,
-                                    Vector3i target,
-                                    PlayerRef playerRef,
-                                    FishingRegistry.BaitDefinition bait,
-                                    int fishingLevel) {
+    // Spawns the bobber entity in-world and attaches fishing state.
+    static UUID spawnBobber(Store<EntityStore> store,
+                            Vector3i target,
+                            PlayerRef playerRef,
+                            FishingRegistry.BaitDefinition bait,
+                            int fishingLevel) {
         Holder<EntityStore> holder = EntityStore.REGISTRY.newHolder();
-        EntityStore entityStore = commandBuffer.getExternalData();
+        EntityStore entityStore = (EntityStore) store.getExternalData();
 
         Vector3d position = new Vector3d(target.x + 0.5, target.y - 0.05, target.z + 0.5);
         Vector3f rotation = new Vector3f(0f, 0f, 0f);
@@ -284,11 +301,11 @@ public class FishingInteraction extends SimpleInstantInteraction {
         bobber.init(playerRef.getUuid(), bait, fishingLevel);
         holder.addComponent(Origins.getFishingBobberComponentType(), bobber);
 
-        commandBuffer.addEntity(holder, AddReason.SPAWN);
+        store.addEntity(holder, AddReason.SPAWN);
         return uuid;
     }
 
-    private static void updateRodMetadata(Inventory inventory, UUID bobberId) {
+    static void updateRodMetadata(Inventory inventory, UUID bobberId) {
         if (inventory == null) {
             return;
         }
@@ -323,7 +340,7 @@ public class FishingInteraction extends SimpleInstantInteraction {
         hotbar.replaceItemStackInSlot((short) slot, current, updated);
     }
 
-    private static void playCastSound(PlayerRef playerRef) {
+    static void playCastSound(PlayerRef playerRef) {
         int soundIndex = SoundEvent.getAssetMap().getIndex(CAST_SOUND_ID);
         SoundUtil.playSoundEvent2dToPlayer(playerRef, soundIndex, SoundCategory.SFX);
     }
@@ -331,6 +348,38 @@ public class FishingInteraction extends SimpleInstantInteraction {
     private static void playReelSound(PlayerRef playerRef) {
         int soundIndex = SoundEvent.getAssetMap().getIndex(REEL_SOUND_ID);
         SoundUtil.playSoundEvent2dToPlayer(playerRef, soundIndex, SoundCategory.SFX);
+    }
+
+    private static void playCastAnimation(Ref<EntityStore> playerRef,
+                                          CommandBuffer<EntityStore> commandBuffer,
+                                          ItemStack held) {
+        if (playerRef == null || commandBuffer == null || held == null) {
+            return;
+        }
+
+        Item item = held.getItem();
+        if (item != null) {
+            String animationsId = item.getPlayerAnimationsId();
+            if (animationsId != null && !animationsId.isEmpty()) {
+                AnimationUtils.playAnimation(
+                    playerRef,
+                    AnimationSlot.Action,
+                    animationsId,
+                    CAST_ANIMATION_NAME,
+                    true,
+                    commandBuffer
+                );
+                return;
+            }
+        }
+
+        AnimationUtils.playAnimation(
+            playerRef,
+            AnimationSlot.Action,
+            CAST_ANIMATION_NAME,
+            true,
+            commandBuffer
+        );
     }
 
     private static Vector3i getTargetWater(World world,

@@ -18,7 +18,9 @@ import dev.hytalemodding.origins.system.FarmingHarvestListener;
 import dev.hytalemodding.origins.system.FarmingHarvestPickupSystem;
 import dev.hytalemodding.origins.system.FishingBobberComponent;
 import dev.hytalemodding.origins.system.FishingBobberSystem;
+import dev.hytalemodding.origins.system.FishingCastSystem;
 import dev.hytalemodding.origins.system.FishingInteraction;
+import dev.hytalemodding.origins.system.FishingRodIdleSystem;
 import dev.hytalemodding.origins.events.PlayerJoinListener;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.level.formulas.LevelFormula;
@@ -37,9 +39,20 @@ import dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem;
 import dev.hytalemodding.origins.system.WoodcuttingSpeedSystem;
 import dev.hytalemodding.origins.util.NameplateManager;
 import com.hypixel.hytale.server.core.event.events.player.PlayerInteractEvent;
+import dev.hytalemodding.origins.slayer.JsonSlayerRepository;
+import dev.hytalemodding.origins.slayer.SlayerService;
+import dev.hytalemodding.origins.slayer.SlayerTaskDefinition;
+import dev.hytalemodding.origins.slayer.SlayerTaskRegistry;
+import dev.hytalemodding.origins.slayer.SlayerTaskTier;
+import dev.hytalemodding.origins.slayer.SlayerTaskKillSystem;
+import dev.hytalemodding.origins.slayer.BuilderActionOpenSlayerDialogue;
+import com.hypixel.hytale.server.npc.NPCPlugin;
+import com.hypixel.hytale.server.npc.asset.builder.BuilderFactory;
+import com.hypixel.hytale.server.npc.instructions.Action;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
+import java.util.List;
 
 /**
  * Origins - RPG Leveling System for Hytale
@@ -56,6 +69,7 @@ public class Origins extends JavaPlugin {
     public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static Origins instance;
     private LevelingService service;
+    private SlayerService slayerService;
     private static ComponentType<EntityStore, FishingBobberComponent> fishingBobberComponentType;
 
     /**
@@ -79,6 +93,16 @@ public class Origins extends JavaPlugin {
         // Initialize core services.
         this.service = new LevelingService(formula, levelRepository);
 
+        // Initialize Slayer services.
+        SlayerTaskRegistry slayerTaskRegistry = buildSlayerTaskRegistry();
+        for (String issue : slayerTaskRegistry.validate()) {
+            LOGGER.at(Level.WARNING).log("Slayer task registry issue: " + issue);
+        }
+        JsonSlayerRepository slayerRepository = new JsonSlayerRepository("./origins_data");
+        this.slayerService = new SlayerService(slayerRepository, slayerTaskRegistry);
+
+        registerSlayerNpcActions();
+
         // Initialize nameplate manager
         NameplateManager.init(this.service);
 
@@ -86,7 +110,7 @@ public class Origins extends JavaPlugin {
             .registerComponent(FishingBobberComponent.class, FishingBobberComponent::new);
 
         // Register event listeners
-        PlayerJoinListener joinListener = new PlayerJoinListener(this.service);
+        PlayerJoinListener joinListener = new PlayerJoinListener(this.service, this.slayerService);
         this.getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, joinListener::onPlayerJoin);
         this.getEventRegistry().registerGlobal(DrainPlayerFromWorldEvent.class, joinListener::onPlayerLeave);
         this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingHarvestListener()::onPlayerInteract);
@@ -113,12 +137,15 @@ public class Origins extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new TimedCraftingXpSystem());
         this.getEntityStoreRegistry().registerSystem(new FarmingHarvestPickupSystem());
         this.getEntityStoreRegistry().registerSystem(new FishingBobberSystem());
+        this.getEntityStoreRegistry().registerSystem(new FishingCastSystem());
+        this.getEntityStoreRegistry().registerSystem(new FishingRodIdleSystem());
         this.getEntityStoreRegistry().registerSystem(new MiningSpeedSystem());
         this.getEntityStoreRegistry().registerSystem(new MiningDurabilitySystem());
         this.getEntityStoreRegistry().registerSystem(new WoodcuttingSpeedSystem());
         this.getEntityStoreRegistry().registerSystem(new WoodcuttingDurabilitySystem());
         this.getEntityStoreRegistry().registerSystem(new SkillRegenSystem());
         this.getEntityStoreRegistry().registerSystem(new SyncTaskSystem());
+        this.getEntityStoreRegistry().registerSystem(new SlayerTaskKillSystem(this.slayerService));
 
 
         LOGGER.at(Level.INFO).log("Origins leveling system initialized successfully!");
@@ -131,6 +158,56 @@ public class Origins extends JavaPlugin {
      */
     public static LevelingService getService() {
         return instance.service;
+    }
+
+    public static SlayerService getSlayerService() {
+        return instance.slayerService;
+    }
+
+    private void registerSlayerNpcActions() {
+        NPCPlugin npcPlugin = NPCPlugin.get();
+        if (npcPlugin == null) {
+            return;
+        }
+
+        BuilderFactory<Action> actionFactory = npcPlugin.getBuilderManager().getFactory(Action.class);
+        if (actionFactory == null) {
+            actionFactory = new BuilderFactory<>(Action.class, NPCPlugin.FACTORY_CLASS_ACTION);
+            npcPlugin.getBuilderManager().registerFactory(actionFactory);
+        }
+
+        actionFactory.add("OpenSlayerDialogue", BuilderActionOpenSlayerDialogue::new);
+    }
+
+    private SlayerTaskRegistry buildSlayerTaskRegistry() {
+        SlayerTaskRegistry registry = new SlayerTaskRegistry();
+
+        registry.registerTier(new SlayerTaskTier(1, 19, List.of(
+                new SlayerTaskDefinition("tier1_rats_a", "Rat", 8, 14),
+                new SlayerTaskDefinition("tier1_rats_b", "Rat", 10, 16)
+        )));
+
+        registry.registerTier(new SlayerTaskTier(20, 39, List.of(
+                new SlayerTaskDefinition("tier20_rats_a", "Rat", 12, 18),
+                new SlayerTaskDefinition("tier20_rats_b", "Rat", 14, 20)
+        )));
+
+        registry.registerTier(new SlayerTaskTier(40, 59, List.of(
+                new SlayerTaskDefinition("tier40_rats_a", "Rat", 18, 26),
+                new SlayerTaskDefinition("tier40_rats_b", "Rat", 20, 28)
+        )));
+
+        registry.registerTier(new SlayerTaskTier(60, 79, List.of(
+                new SlayerTaskDefinition("tier60_rats_a", "Rat", 24, 34),
+                new SlayerTaskDefinition("tier60_rats_b", "Rat", 26, 38)
+        )));
+
+        registry.registerTier(new SlayerTaskTier(80, 99, List.of(
+                new SlayerTaskDefinition("tier80_rats_a", "Rat", 32, 46),
+                new SlayerTaskDefinition("tier80_rats_b", "Rat", 36, 52)
+        )));
+
+        return registry;
     }
 
     public static ComponentType<EntityStore, FishingBobberComponent> getFishingBobberComponentType() {

@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import dev.hytalemodding.origins.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.util.NameplateManager;
+import dev.hytalemodding.origins.slayer.SlayerService;
 
 import java.util.UUID;
 
@@ -16,9 +17,11 @@ import java.util.UUID;
 public class PlayerJoinListener {
 
     private final LevelingService service;
+    private final SlayerService slayerService;
 
-    public PlayerJoinListener(LevelingService service) {
+    public PlayerJoinListener(LevelingService service, SlayerService slayerService) {
         this.service = service;
+        this.slayerService = slayerService;
     }
 
     /**
@@ -35,6 +38,7 @@ public class PlayerJoinListener {
             SkillStatBonusApplier.apply(holder, uuid);
             PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
             SkillStatBonusApplier.applyMovementSpeed(playerRef);
+            slayerService.getPlayerData(uuid);
         }
     }
 
@@ -48,6 +52,7 @@ public class PlayerJoinListener {
         if (playerComp != null) {
             UUID uuid = playerComp.getUuid();
             service.unload(uuid);
+            slayerService.unload(uuid);
         }
     }
 }

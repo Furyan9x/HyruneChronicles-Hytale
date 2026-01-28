@@ -1,0 +1,53 @@
+{
+  "UseFirstPersonOverrides": false,
+  "Camera": {
+    "Pitch": {
+      "AngleRange": {
+        "Max": 60,
+        "Min": -30
+      },
+      "TargetNodes": [
+        "Head",
+        "RShoulder"
+      ]
+    },
+    "Yaw": {
+      "AngleRange": {
+        "Max": 45,
+        "Min": -45
+      },
+      "TargetNodes": [
+        "Head"
+      ]
+    }
+  },
+  "WiggleWeights": {
+    "Pitch": 2.5,
+    "PitchDeceleration": 0.1,
+    "Roll": 0.1,
+    "RollDeceleration": 0.1,
+    "X": 2.5,
+    "XDeceleration": 0.1,
+    "Y": 0.1,
+    "YDeceleration": 0.1,
+    "Z": 0.1,
+    "ZDeceleration": 0.1
+  },
+  "Animations": {
+    "Cast": {
+      "ThirdPerson": "Characters/Animations/Fishing_Cast.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Fishing_Cast.blockyanim",
+      "FirstPerson": "Characters/Animations/Fishing_Cast.blockyanim",
+      "Speed": 1,
+      "BlendingDuration": 0.05,
+      "ThirdPersonFace": "Characters/Animations/Fishing_Cast.blockyanim"
+    },
+    "Idle": {
+      "ThirdPerson": "Characters/Animations/Fishing_Idle.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Fishing_Idle.blockyanim",
+      "ThirdPersonFace": "Characters/Animations/Fishing_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Fishing_Idle.blockyanim",
+      "Looping": true
+    }
+  }
+}

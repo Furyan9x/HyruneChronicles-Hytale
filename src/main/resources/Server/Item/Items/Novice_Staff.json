@@ -1,0 +1,70 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Weapon_Staff_Wizard.name"
+  },
+  "Categories": [
+    "Items.Tools"
+  ],
+  "Icon": "Icons/ItemsGenerated/Novice_Staff.png",
+  "Quality": "Common",
+  "ItemLevel": 40,
+  "Model": "Items/Weapons/Novice_Staff/Novice_Staff.blockymodel",
+  "PlayerAnimationsId": "Staff",
+  "Interactions": {
+    "Primary": "Staff_Primary",
+    "Secondary": "Staff_Primary"
+  },
+  "InteractionVars": {
+    "Staff_Cast_Summon_Charged": {
+      "Interactions": [
+        {
+          "Parent": "Staff_Cast_Summon_Charged",
+          "Costs": {
+            "Mana": 50
+          }
+        }
+      ]
+    },
+    "Staff_Cast_Summon_Cost": {
+      "Interactions": [
+        {
+          "Parent": "Staff_Cast_Cost",
+          "StatModifiers": {
+            "Mana": -50
+          }
+        }
+      ]
+    },
+    "Staff_Cast_Summon_Launch": "Staff_Cast_Launch",
+    "Staff_Cast_Summon_Effect": "Staff_Cast_Effect",
+    "Staff_Cast_Summon_Fail": "Staff_Cast_Fail",
+    "Spear_Swing_Left_Damage": "Spear_Swing_Left_Damage",
+    "Spear_Swing_Right_Damage": "Spear_Swing_Right_Damage",
+    "Spear_Swing_Left_Effect": "Spear_Swing_Left_Effect",
+    "Spear_Swing_Right_Effect": "Spear_Swing_Right_Effect"
+  },
+  "IconProperties": {
+    "Scale": 0.4,
+    "Rotation": [
+      18,
+      171,
+      44
+    ],
+    "Translation": [
+      -36,
+      -33
+    ]
+  },
+  "Texture": "Items/Weapons/Novice_Staff/Novice_Staff_Texture.png",
+  "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Left.blockyanim",
+  "Tags": {
+    "Type": [
+      "Weapon"
+    ],
+    "Family": [
+      "Staff"
+    ]
+  },
+  "Weapon": {},
+  "ItemSoundSetId": "ISS_Weapons_Wood"
+}

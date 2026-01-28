@@ -1,0 +1,261 @@
+
+$S = "hyskills_styles.ui";
+
+Group {
+    Anchor: (Width: 900, Height: 700);
+    LayoutMode: Left;
+
+    // Left Panel (Menu)
+    Group #LeftPanel {
+        Anchor: (Width: 160);
+        Background: $S.@BgDark;
+        LayoutMode: Top;
+        Padding: (Full: 16);
+
+        Label {
+            Text: "HYSKILLS";
+            Anchor: (Height: 30);
+            Style: $S.@SubHeaderStyle;
+        }
+
+        Group { Anchor: (Height: 10); }
+
+        // Static Menu (Overview, Leaderboard)
+        Group #StaticMenu {
+            LayoutMode: Top;
+            Anchor: (Height: 80); // Adjust height based on button count (2 buttons * 40px approx)
+        }
+
+        Group { Anchor: (Height: 20); }
+
+        Label {
+            Text: "YOUR SKILLS";
+            Anchor: (Height: 20);
+            Style: (FontSize: 11, TextColor: #4a5568, RenderBold: true);
+        }
+
+        // Scrollable Skill List (Buttons)
+        Group #SkillMenu {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            Padding: (Right: 5);
+        }
+        
+        Group { Anchor: (Height: 20); }
+        
+        TextButton #CloseButton {
+            Text: "CLOSE";
+            Anchor: (Height: 30);
+            Style: $S.@MenuButtonStyle;
+        }
+    }
+
+    // Right Panel (Content)
+    Group #RightPanel {
+        FlexWeight: 1;
+        Background: $S.@BgLight;
+        LayoutMode: TopScrolling;
+        Padding: (Full: 24);
+        
+        // --- OVERVIEW VIEW (Default) ---
+        Group #OverviewView {
+            LayoutMode: Top;
+            
+            Label {
+                Text: "PLAYER OVERVIEW";
+                Anchor: (Height: 40);
+                Style: $S.@HeaderStyle;
+            }
+            $S.@Divider {}
+            Group { Anchor: (Height: 20); }
+            
+            Label { Text: "SKILL LEVELS"; Anchor: (Height: 20); Style: $S.@SubHeaderStyle; }
+            Group { Anchor: (Height: 10); }
+            
+            Group #OverviewSkillsContainer {
+                LayoutMode: Top;
+                Anchor: (Width: 610);
+                Padding: (Right: 0);
+                // Populated by Java
+            }
+            
+            Group { Anchor: (Height: 30); }
+            
+            Label { Text: "CURRENT STATS"; Anchor: (Height: 20); Style: $S.@SubHeaderStyle; }
+            Group { Anchor: (Height: 10); }
+            
+            Group #OverviewStatsContainer {
+                LayoutMode: Top;
+                Anchor: (Width: 610);
+                Padding: (Right: 0);
+                // Populated by Java
+            }
+        }
+
+        // --- DETAIL VIEW (Selected Skill) ---
+        Group #DetailView {
+            LayoutMode: Top;
+            Visible: false;
+            
+            // Header
+            Label #SkillTitle {
+                Text: "Select a Skill";
+                Anchor: (Height: 40);
+                Style: $S.@HeaderStyle;
+            }
+            
+            // Description
+            Label #SkillDescription {
+                Text: "Skill Description";
+                Style: (FontSize: 14, TextColor: $S.@TextSecondary, Wrap: true);
+                Visible: false;
+            }
+            
+            $S.@Divider {}
+            Group { Anchor: (Height: 20); }
+            
+            // Skill Stats Grid
+            Group #StatsContainer {
+                LayoutMode: Left;
+                Anchor: (Height: 80);
+                
+                Group {
+                    FlexWeight: 1;
+                    LayoutMode: Top;
+                    Label #LevelValue { Text: "-"; Anchor: (Height: 40); Style: (FontSize: 32, TextColor: $S.@TextAccent, RenderBold: true); }
+                    Label { Text: "CURRENT LEVEL"; Anchor: (Height: 20); Style: $S.@SubHeaderStyle; }
+                }
+                
+                Group {
+                    FlexWeight: 1;
+                    LayoutMode: Top;
+                    Label #XpValue { Text: "-"; Anchor: (Height: 40); Style: (FontSize: 32, TextColor: #4aff7f, RenderBold: true); }
+                    Label { Text: "EXPERIENCE"; Anchor: (Height: 20); Style: $S.@SubHeaderStyle; }
+                }
+            }
+            
+            Group { Anchor: (Height: 40); }
+            
+            Group {
+                LayoutMode: Left;
+                Anchor: (Height: 20);
+                
+                Label { Text: "PROGRESS"; Style: $S.@SubHeaderStyle; }
+                Group { FlexWeight: 1; }
+                Label #ProgressText {
+                    Text: "0% to next level";
+                    Style: $S.@SubHeaderStyle;
+                }
+            }
+            Group { Anchor: (Height: 10); }
+            
+            // Progress Bar
+            Group {
+                Anchor: (Width: 500, Height: 12);
+                LayoutMode: Left;
+                Background: "XPBackground.png";
+                
+                Group #SkillProgressBarFill {
+                    Anchor: (Width: 0, Height: 12);
+                    Background: "XPFill.png";
+                }
+            }
+            
+            Group { Anchor: (Height: 10); }
+
+            Group { Anchor: (Height: 20); }
+            $S.@Divider {}
+            Group { Anchor: (Height: 20); }
+            
+            // Tab Bar
+            Group #TabBar {
+                LayoutMode: Left;
+                Anchor: (Height: 30);
+                
+                TextButton #TabTriggers {
+                    Text: "HOW TO LEVEL UP";
+                    Anchor: (Height: 30);
+                    FlexWeight: 1;
+                    Style: $S.@TabButtonStyle;
+                }
+                Group { Anchor: (Width: 10); }
+                TextButton #TabUnlocks {
+                    Text: "UNLOCKS";
+                    Anchor: (Height: 30);
+                    FlexWeight: 1;
+                    Style: $S.@TabButtonStyle;
+                }
+                Group { Anchor: (Width: 10); }
+                TextButton #TabLockedItems {
+                    Text: "LOCKED ITEMS";
+                    Anchor: (Height: 30);
+                    FlexWeight: 1;
+                    Style: $S.@TabButtonStyle;
+                }
+            }
+            
+            Group { Anchor: (Height: 20); }
+
+            // Tab Content
+            Group #TriggersTab {
+                LayoutMode: Top;
+                Visible: true;
+                Group #TriggersContainer { LayoutMode: Top; }
+            }
+
+            Group #UnlocksTab {
+                LayoutMode: Top;
+                Visible: false;
+                Group #UnlocksContainer { LayoutMode: Top; }
+            }
+
+            Group #LockedItemsTab {
+                LayoutMode: Top;
+                Visible: false;
+                Group #LockedItemsContainer { LayoutMode: Top; }
+            }
+        }
+        
+        // --- LEADERBOARD VIEW ---
+        Group #LeaderboardView {
+            LayoutMode: Top;
+            Visible: false;
+            
+            Label {
+                Text: "TOP PLAYERS";
+                Anchor: (Height: 40);
+                Style: $S.@HeaderStyle;
+            }
+            $S.@Divider {}
+            Group { Anchor: (Height: 20); }
+            
+            // Header Row
+            Group {
+                LayoutMode: Left;
+                Anchor: (Height: 30);
+                Padding: (Full: 4);
+                
+                Label { 
+                    Text: "Rank"; 
+                    Style: $S.@SubHeaderStyle; 
+                    Anchor: (Width: 60); 
+                }
+                Label { 
+                    Text: "Player"; 
+                    Style: (FontSize: 12, TextColor: $S.@TextSecondary, RenderUppercase: true, LetterSpacing: 2, HorizontalAlignment: Center); 
+                    FlexWeight: 1; 
+                }
+                Label { 
+                    Text: "Total Level"; 
+                    Style: (FontSize: 12, TextColor: $S.@TextSecondary, RenderUppercase: true, LetterSpacing: 2, HorizontalAlignment: Center); 
+                    Anchor: (Width: 100); 
+                }
+            }
+            
+            Group #LeaderboardContainer {
+                LayoutMode: Top;
+                Anchor: (Width: 600);
+            }
+        }
+    }
+}

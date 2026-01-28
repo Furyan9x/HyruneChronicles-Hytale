@@ -1,0 +1,5 @@
+Group {
+    LayoutMode: Left;
+    Anchor: (Width: 610);
+    Padding: (Bottom: 0);
+}

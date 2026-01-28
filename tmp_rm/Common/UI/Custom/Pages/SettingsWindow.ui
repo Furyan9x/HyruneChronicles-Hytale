@@ -1,9 +1,0 @@
-Group #SettingsGroup {
-  LayoutMode: MiddleCenter;
-  FlexWeight: 1;
-  Label  {
-    Style: (Wrap: true);
-    Text: "Settings are still work in progress! please come back later!";
-    Visible: true;
-  }
-}

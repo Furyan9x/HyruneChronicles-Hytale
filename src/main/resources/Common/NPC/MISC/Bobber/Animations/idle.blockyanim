@@ -1,0 +1,136 @@
+{
+    "formatVersion":  1,
+    "duration":  210,
+    "holdLastKeyframe":  false,
+    "nodeAnimations":  {
+                           "Bobber":  {
+                                          "position":  [
+                                                           {
+                                                               "time":  30,
+                                                               "delta":  {
+                                                                             "x":  0.099999999999999992,
+                                                                             "y":  -0.5,
+                                                                             "z":  0
+                                                                         },
+                                                               "interpolationType":  "linear"
+                                                           },
+                                                           {
+                                                               "time":  60,
+                                                               "delta":  {
+                                                                             "x":  -0.099999999999999992,
+                                                                             "y":  -0.19999999999999998,
+                                                                             "z":  0
+                                                                         },
+                                                               "interpolationType":  "linear"
+                                                           },
+                                                           {
+                                                               "time":  100,
+                                                               "delta":  {
+                                                                             "x":  0,
+                                                                             "y":  -0.52899999999999991,
+                                                                             "z":  0
+                                                                         },
+                                                               "interpolationType":  "linear"
+                                                           },
+                                                           {
+                                                               "time":  140,
+                                                               "delta":  {
+                                                                             "x":  -0.099999999999999992,
+                                                                             "y":  -0.124,
+                                                                             "z":  -0.19999999999999998
+                                                                         },
+                                                               "interpolationType":  "linear"
+                                                           },
+                                                           {
+                                                               "time":  180,
+                                                               "delta":  {
+                                                                             "x":  -0.18,
+                                                                             "y":  -0.45899999999999996,
+                                                                             "z":  0
+                                                                         },
+                                                               "interpolationType":  "linear"
+                                                           },
+                                                           {
+                                                               "time":  210,
+                                                               "delta":  {
+                                                                             "x":  -0.053,
+                                                                             "y":  -0.206,
+                                                                             "z":  0
+                                                                         },
+                                                               "interpolationType":  "linear"
+                                                           }
+                                                       ],
+                                          "orientation":  [
+                                                              {
+                                                                  "time":  30,
+                                                                  "delta":  {
+                                                                                "x":  0,
+                                                                                "y":  0,
+                                                                                "z":  -0.008716,
+                                                                                "w":  0.099618999999999985
+                                                                            },
+                                                                  "interpolationType":  "linear"
+                                                              },
+                                                              {
+                                                                  "time":  60,
+                                                                  "delta":  {
+                                                                                "x":  0,
+                                                                                "y":  0,
+                                                                                "z":  0.0065399999999999989,
+                                                                                "w":  0.099785999999999986
+                                                                            },
+                                                                  "interpolationType":  "linear"
+                                                              },
+                                                              {
+                                                                  "time":  100,
+                                                                  "delta":  {
+                                                                                "x":  0.008714,
+                                                                                "y":  4.0999999999999994E-05,
+                                                                                "z":  0.0027999999999999995,
+                                                                                "w":  0.09958
+                                                                            },
+                                                                  "interpolationType":  "linear"
+                                                              },
+                                                              {
+                                                                  "time":  140,
+                                                                  "delta":  {
+                                                                                "x":  -0.003268,
+                                                                                "y":  -0.00094499999999999988,
+                                                                                "z":  -0.006317999999999999,
+                                                                                "w":  0.099742
+                                                                            },
+                                                                  "interpolationType":  "linear"
+                                                              },
+                                                              {
+                                                                  "time":  180,
+                                                                  "delta":  {
+                                                                                "x":  -0.0024939999999999997,
+                                                                                "y":  -0.001091,
+                                                                                "z":  0.006277,
+                                                                                "w":  0.099766
+                                                                            },
+                                                                  "interpolationType":  "linear"
+                                                              },
+                                                              {
+                                                                  "time":  210,
+                                                                  "delta":  {
+                                                                                "x":  0.00049899999999999988,
+                                                                                "y":  -0.00076699999999999989,
+                                                                                "z":  -0.000918,
+                                                                                "w":  0.099992
+                                                                            },
+                                                                  "interpolationType":  "linear"
+                                                              }
+                                                          ],
+                                          "shapeStretch":  [
+
+                                                           ],
+                                          "shapeVisible":  [
+
+                                                           ],
+                                          "shapeUvOffset":  [
+
+                                                            ]
+                                      }
+                       }
+}

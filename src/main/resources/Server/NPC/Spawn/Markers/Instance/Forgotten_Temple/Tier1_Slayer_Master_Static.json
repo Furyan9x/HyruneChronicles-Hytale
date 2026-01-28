@@ -1,0 +1,13 @@
+{
+  "Model": "NPC_Spawn_Marker",
+  "NPCs": [
+    {
+      "Name": "Tier1_Slayer_Master_Static",
+      "Weight": 100,
+      "SpawnAfterGameTime": "P1D"
+    }
+  ],
+  "ExclusionRadius": 8,
+  "MaxDropHeight": 4,
+  "DeactivationDistance": 1000
+}

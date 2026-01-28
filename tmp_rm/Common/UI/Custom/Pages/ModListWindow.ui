@@ -1,6 +1,0 @@
-$C = "../Common.ui";
-
-Group #Main {
-  LayoutMode: TopScrolling;
-  ScrollbarStyle: $C.@DefaultScrollbarStyle;
-}
