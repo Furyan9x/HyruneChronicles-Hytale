@@ -24,6 +24,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
+import dev.hytalemodding.origins.registry.CraftingSkillRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,8 +40,8 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
 public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
-    private static final float DOUBLE_PROC_CHANCE_PER_LEVEL = 0.20f / 99.0f;
-    private static final float DOUBLE_PROC_CHANCE_CAP = 0.20f;
+    public static final float DOUBLE_PROC_CHANCE_PER_LEVEL = 0.20f / 99.0f;
+    public static final float DOUBLE_PROC_CHANCE_CAP = 0.20f;
 
     private static Class<?> craftingManagerClass;
     private static Class<?> craftingJobClass;

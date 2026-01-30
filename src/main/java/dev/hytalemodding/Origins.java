@@ -10,16 +10,17 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import dev.hytalemodding.origins.commands.CharacterCommand;
 import dev.hytalemodding.origins.commands.CheckTagsCommand;
+import dev.hytalemodding.origins.commands.ClearNpcHologramsCommand;
 import dev.hytalemodding.origins.commands.SetSkillCommand;
 import dev.hytalemodding.origins.database.JsonLevelRepository;
 import dev.hytalemodding.origins.bonus.SkillStatBonusListener;
 import dev.hytalemodding.origins.events.LevelingVisualsListener;
-import dev.hytalemodding.origins.system.FarmingHarvestListener;
+import dev.hytalemodding.origins.events.FarmingHarvestListener;
 import dev.hytalemodding.origins.system.FarmingHarvestPickupSystem;
-import dev.hytalemodding.origins.system.FishingBobberComponent;
+import dev.hytalemodding.origins.component.FishingBobberComponent;
 import dev.hytalemodding.origins.system.FishingBobberSystem;
 import dev.hytalemodding.origins.system.FishingCastSystem;
-import dev.hytalemodding.origins.system.FishingInteraction;
+import dev.hytalemodding.origins.interaction.FishingInteraction;
 import dev.hytalemodding.origins.system.FishingRodIdleSystem;
 import dev.hytalemodding.origins.events.PlayerJoinListener;
 import dev.hytalemodding.origins.level.LevelingService;
@@ -33,6 +34,7 @@ import dev.hytalemodding.origins.system.MiningDurabilitySystem;
 import dev.hytalemodding.origins.system.MiningSpeedSystem;
 import dev.hytalemodding.origins.system.SkillCombatBonusSystem;
 import dev.hytalemodding.origins.system.SkillRegenSystem;
+import dev.hytalemodding.origins.events.ArmorRequirementListener;
 import dev.hytalemodding.origins.system.SyncTaskSystem;
 import dev.hytalemodding.origins.system.TimedCraftingXpSystem;
 import dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem;
@@ -49,6 +51,13 @@ import dev.hytalemodding.origins.slayer.BuilderActionOpenSlayerDialogue;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.asset.builder.BuilderFactory;
 import com.hypixel.hytale.server.npc.instructions.Action;
+import dev.hytalemodding.origins.npc.NpcLevelComponent;
+import dev.hytalemodding.origins.npc.NpcLevelConfig;
+import dev.hytalemodding.origins.npc.NpcLevelConfigRepository;
+import dev.hytalemodding.origins.npc.NpcLevelService;
+import dev.hytalemodding.origins.npc.NpcLevelAssignmentSystem;
+import dev.hytalemodding.origins.npc.NpcCombatScalingSystem;
+import dev.hytalemodding.origins.npc.NpcLevelDisplaySystem;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -70,7 +79,9 @@ public class Origins extends JavaPlugin {
     private static Origins instance;
     private LevelingService service;
     private SlayerService slayerService;
+    private NpcLevelService npcLevelService;
     private static ComponentType<EntityStore, FishingBobberComponent> fishingBobberComponentType;
+    private static ComponentType<EntityStore, NpcLevelComponent> npcLevelComponentType;
 
     /**
      * Constructs the Origins plugin.
@@ -101,6 +112,11 @@ public class Origins extends JavaPlugin {
         JsonSlayerRepository slayerRepository = new JsonSlayerRepository("./origins_data");
         this.slayerService = new SlayerService(slayerRepository, slayerTaskRegistry);
 
+        // Initialize NPC level services.
+        NpcLevelConfigRepository npcLevelConfigRepository = new NpcLevelConfigRepository("./origins_data");
+        NpcLevelConfig npcLevelConfig = npcLevelConfigRepository.loadOrCreate();
+        this.npcLevelService = new NpcLevelService(npcLevelConfig);
+
         registerSlayerNpcActions();
 
         // Initialize nameplate manager
@@ -108,12 +124,18 @@ public class Origins extends JavaPlugin {
 
         fishingBobberComponentType = this.getEntityStoreRegistry()
             .registerComponent(FishingBobberComponent.class, FishingBobberComponent::new);
+        npcLevelComponentType = this.getEntityStoreRegistry()
+            .registerComponent(NpcLevelComponent.class, NpcLevelComponent::new);
 
         // Register event listeners
         PlayerJoinListener joinListener = new PlayerJoinListener(this.service, this.slayerService);
         this.getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, joinListener::onPlayerJoin);
         this.getEventRegistry().registerGlobal(DrainPlayerFromWorldEvent.class, joinListener::onPlayerLeave);
         this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingHarvestListener()::onPlayerInteract);
+        this.getEventRegistry().registerGlobal(
+            com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent.class,
+            new ArmorRequirementListener()::onInventoryChange
+        );
         this.getCodecRegistry(Interaction.CODEC).register(
             "OriginsFishing",
             FishingInteraction.class,
@@ -126,6 +148,7 @@ public class Origins extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new CheckTagsCommand());
         this.getCommandRegistry().registerCommand(new CharacterCommand());
         this.getCommandRegistry().registerCommand(new SetSkillCommand());
+        this.getCommandRegistry().registerCommand(new ClearNpcHologramsCommand());
 
         // Register ECS systems
         this.getEntityStoreRegistry().registerSystem(new CombatStateSystem());
@@ -146,6 +169,9 @@ public class Origins extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new SkillRegenSystem());
         this.getEntityStoreRegistry().registerSystem(new SyncTaskSystem());
         this.getEntityStoreRegistry().registerSystem(new SlayerTaskKillSystem(this.slayerService));
+        this.getEntityStoreRegistry().registerSystem(new NpcLevelAssignmentSystem(this.npcLevelService));
+        this.getEntityStoreRegistry().registerSystem(new NpcCombatScalingSystem(this.npcLevelService));
+        this.getEntityStoreRegistry().registerSystem(new NpcLevelDisplaySystem());
 
 
         LOGGER.at(Level.INFO).log("Origins leveling system initialized successfully!");
@@ -163,6 +189,15 @@ public class Origins extends JavaPlugin {
     public static SlayerService getSlayerService() {
         return instance.slayerService;
     }
+
+    public static ComponentType<EntityStore, NpcLevelComponent> getNpcLevelComponentType() {
+        return npcLevelComponentType;
+    }
+
+    public static NpcLevelService getNpcLevelService() {
+        return instance != null ? instance.npcLevelService : null;
+    }
+
 
     private void registerSlayerNpcActions() {
         NPCPlugin npcPlugin = NPCPlugin.get();
@@ -214,3 +249,4 @@ public class Origins extends JavaPlugin {
         return fishingBobberComponentType;
     }
 }
+

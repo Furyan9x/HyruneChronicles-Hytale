@@ -21,14 +21,17 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Origins;
+import dev.hytalemodding.origins.component.FishingBobberComponent;
+import dev.hytalemodding.origins.interaction.FishingInteraction;
+import dev.hytalemodding.origins.registry.FishingRegistry;
 
 import javax.annotation.Nonnull;
 
 public class FishingBobberSystem extends EntityTickingSystem<EntityStore> {
-    static final int MIN_BITE_TICKS = 120;
-    static final int MAX_BITE_TICKS = 240;
-    static final int MIN_BITE_WINDOW_TICKS = 40;
-    static final int MAX_BITE_WINDOW_TICKS = 80;
+    public static final int MIN_BITE_TICKS = 120;
+    public static final int MAX_BITE_TICKS = 240;
+    public static final int MIN_BITE_WINDOW_TICKS = 40;
+    public static final int MAX_BITE_WINDOW_TICKS = 80;
     private static final String BITE_SOUND_ID = "SFX_Player_Swim";
     private static final int MAX_TETHER_DISTANCE = 12;
     private static final String ANIM_IDLE = "Idle";

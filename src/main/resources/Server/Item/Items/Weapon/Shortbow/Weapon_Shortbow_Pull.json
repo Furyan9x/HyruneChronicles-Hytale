@@ -1,0 +1,69 @@
+{
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Weapon_Shortbow_Pull.name"
+                              },
+    "Parent":  "Weapon_Shortbow_Combat",
+    "Interactions":  {
+                         "Primary":  "Bow_Combat_Shoot_Charging",
+                         "Secondary":  "Daggers_Bash",
+                         "Ability1":  {
+                                          "Interactions":  [
+                                                               {
+                                                                   "Type":  "StatsCondition",
+                                                                   "Costs":  {
+                                                                                 "SignatureEnergy":  100
+                                                                             },
+                                                                   "ValueType":  "Percent",
+                                                                   "Next":  {
+                                                                                "Type":  "ChangeStat",
+                                                                                "Next":  "Bow_Pull_Pullshot",
+                                                                                "StatModifiers":  {
+                                                                                                      "SignatureEnergy":  -100
+                                                                                                  },
+                                                                                "ValueType":  "Percent"
+                                                                            }
+                                                               }
+                                                           ],
+                                          "Tags":  {
+                                                       "Attack":  [
+                                                                      "Melee"
+                                                                  ]
+                                                   }
+                                      }
+                     },
+    "Recipe":  {
+                   "TimeSeconds":  4,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Cobalt",
+                                     "Quantity":  10
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Heavy",
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Fabric_Scrap_Shadoweave",
+                                     "Quantity":  3
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Weapon_Bow"
+                                                               ],
+                                                "Id":  "Weapon_Bench",
+                                                "RequiredTierLevel":  2
+                                            },
+                                            {
+                                                "Type":  "DiagramCrafting",
+                                                "Categories":  [
+                                                                   "Weapons.Bow"
+                                                               ],
+                                                "Id":  "Armory"
+                                            }
+                                        ]
+               }
+}

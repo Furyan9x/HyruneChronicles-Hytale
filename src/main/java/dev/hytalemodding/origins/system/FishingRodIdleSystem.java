@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.origins.registry.FishingRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.Set;

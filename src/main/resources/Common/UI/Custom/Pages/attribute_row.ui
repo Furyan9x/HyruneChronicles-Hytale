@@ -1,0 +1,19 @@
+$C = "../Common.ui";
+
+@AttrLabelStyle = LabelStyle(FontSize: 12, TextColor: #e6d9c3, VerticalAlignment: Center);
+@AttrValueStyle = LabelStyle(FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End);
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 18);
+
+  Label #AttrLabel {
+    Anchor: (Width: 260, Height: 18);
+    Style: @AttrLabelStyle;
+  }
+  Group { FlexWeight: 1; }
+  Label #AttrValue {
+    Anchor: (Width: 120, Height: 18);
+    Style: @AttrValueStyle;
+  }
+}

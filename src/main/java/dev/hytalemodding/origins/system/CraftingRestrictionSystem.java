@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.inventory.MaterialQuantity;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
+import dev.hytalemodding.origins.registry.CraftingSkillRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

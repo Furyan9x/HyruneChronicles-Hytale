@@ -1,0 +1,110 @@
+{
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Tool_Hatchet_Onyxium.name"
+                              },
+    "Parent":  "Tool_Hatchet_Crude",
+    "Model":  "Items/Tools/Hatchet/Onyxium.blockymodel",
+    "Texture":  "Items/Tools/Hatchet/Onyxium_Texture.png",
+    "Recipe":  {
+                   "Input":  [
+                                 {
+                                     "Quantity":  7,
+                                     "ItemId":  "Ingredient_Bar_Onyxium"
+                                 },
+                                 {
+                                     "Quantity":  2,
+                                     "ItemId":  "Ingredient_Leather_Heavy"
+                                 },
+                                 {
+                                     "Quantity":  4,
+                                     "ItemId":  "Ingredient_Fabric_Scrap_Shadoweave"
+                                 }
+                             ],
+                   "TimeSeconds":  4,
+                   "KnowledgeRequired":  false,
+                   "BenchRequirement":  [
+                                            {
+                                                "Categories":  [
+                                                                   "Workbench_Tools"
+                                                               ],
+                                                "RequiredTierLevel":  3,
+                                                "Id":  "Workbench",
+                                                "Type":  "Crafting"
+                                            }
+                                        ]
+               },
+    "Tool":  {
+                 "Specs":  [
+                               {
+                                   "Power":  1,
+                                   "GatherType":  "SoftBlocks"
+                               },
+                               {
+                                   "Power":  0.05,
+                                   "GatherType":  "Soils"
+                               },
+                               {
+                                   "Power":  0.5,
+                                   "GatherType":  "Woods"
+                               },
+                               {
+                                   "Power":  0.05,
+                                   "GatherType":  "Rocks"
+                               },
+                               {
+                                   "Power":  0.5,
+                                   "GatherType":  "Benches"
+                               },
+                               {
+                                   "Power":  0.017,
+                                   "GatherType":  "VolcanicRocks"
+                               },
+                               {
+                                   "Power":  0.048,
+                                   "GatherType":  "OreCopper"
+                               },
+                               {
+                                   "Power":  0.048,
+                                   "GatherType":  "OreIron"
+                               },
+                               {
+                                   "Power":  0.048,
+                                   "GatherType":  "OreSilver"
+                               },
+                               {
+                                   "Power":  0.048,
+                                   "GatherType":  "OreGold"
+                               },
+                               {
+                                   "Power":  0.046,
+                                   "GatherType":  "OreThorium"
+                               },
+                               {
+                                   "Power":  0.046,
+                                   "GatherType":  "OreCobalt"
+                               },
+                               {
+                                   "Power":  0.046,
+                                   "GatherType":  "OreAdamantite"
+                               },
+                               {
+                                   "Power":  0.042,
+                                   "GatherType":  "OreMithril"
+                               }
+                           ],
+                 "DurabilityLossBlockTypes":  [
+                                                  {
+                                                      "BlockSets":  [
+                                                                        "Stone",
+                                                                        "Rock",
+                                                                        "Ores",
+                                                                        "Soil"
+                                                                    ],
+                                                      "DurabilityLossOnHit":  0.25
+                                                  }
+                                              ]
+             },
+    "Icon":  "Icons/ItemsGenerated/Tool_Hatchet_Onyxium.png",
+    "MaxDurability":  450,
+    "Quality":  "Epic"
+}

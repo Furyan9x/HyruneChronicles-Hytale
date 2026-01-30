@@ -30,6 +30,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
 
     private static final String MAIN_UI = "Pages/SkillEntry.ui";
     private static final String CELL_UI = "Pages/character_stats.ui";
+    private static final String ATTR_ROW_UI = "Pages/attribute_row.ui";
+    private static final String UNLOCK_ROW_UI = "Pages/skill_unlock_row.ui";
 
     private static final String COLOR_YELLOW = "#ffff00";
     private static final String COLOR_ORANGE = "#ff981f"; // For selected skills.
@@ -42,9 +44,18 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final String TAB_FRIENDS = "Friends";
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+    private static final String ATTR_TOGGLE_ACTION = "ToggleAttributeCategory";
+    private static final String ATTR_CATEGORY_COMBAT = "Combat";
+    private static final String ATTR_CATEGORY_GATHERING = "Gathering";
+    private static final String ATTR_CATEGORY_MISC = "Misc";
+    private static final String DEFAULT_DETAIL_TITLE = "Select a skill";
+    private static final String DEFAULT_DETAIL_DESC = "Click a skill to see its bonuses.";
 
     private SkillType selectedSkill = null;
     private String selectedTab = TAB_SKILLS;
+    private boolean combatExpanded = true;
+    private boolean gatheringExpanded = true;
+    private boolean miscExpanded = true;
 
     public CharacterMenu(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss, SkillMenuData.CODEC);
@@ -60,6 +71,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         this.applyTabState(commandBuilder);
         this.populateServerInfo(commandBuilder);
         this.buildSkillGrid(commandBuilder, eventBuilder, uuid, levelingService);
+        this.buildAttributes(commandBuilder, eventBuilder, uuid, levelingService);
+        this.buildSkillDetailsPanel(commandBuilder, this.selectedSkill);
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnClose", EventData.of("Button", "Close"), false);
 
@@ -68,6 +81,13 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabAttributesBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_ATTRIBUTES), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabSkillsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_SKILLS), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabFriendsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_FRIENDS), false);
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrCombatToggle",
+            EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_COMBAT), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrGatheringToggle",
+            EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_GATHERING), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrMiscToggle",
+            EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_MISC), false);
     }
 
     /**
@@ -160,11 +180,10 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 if (data.skillId != null) {
                     try {
                         this.selectedSkill = SkillType.valueOf(data.skillId);
-
                         UICommandBuilder refreshCmd = new UICommandBuilder();
                         UIEventBuilder refreshEvt = new UIEventBuilder();
-
                         this.buildSkillGrid(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
+                        this.buildSkillDetailsPanel(refreshCmd, this.selectedSkill);
                         this.sendUpdate(refreshCmd, refreshEvt, false);
                     } catch (IllegalArgumentException e) {
                         System.err.println("Invalid skill selected: " + data.skillId);
@@ -181,6 +200,17 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                     if (TAB_SERVER_INFO.equals(this.selectedTab)) {
                         this.populateServerInfo(refreshCmd);
                     }
+                    if (TAB_ATTRIBUTES.equals(this.selectedTab)) {
+                        this.buildAttributes(refreshCmd, new UIEventBuilder(), this.playerRef.getUuid(), LevelingService.get());
+                    }
+                    this.sendUpdate(refreshCmd, new UIEventBuilder(), false);
+                }
+                break;
+            case ATTR_TOGGLE_ACTION:
+                if (data.category != null) {
+                    toggleAttributeCategory(data.category);
+                    UICommandBuilder refreshCmd = new UICommandBuilder();
+                    this.buildAttributes(refreshCmd, new UIEventBuilder(), this.playerRef.getUuid(), LevelingService.get());
                     this.sendUpdate(refreshCmd, new UIEventBuilder(), false);
                 }
                 break;
@@ -225,8 +255,235 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         cmd.set("#TabAttributes.Visible", showAttributes);
         cmd.set("#TabSkills.Visible", showSkills);
         cmd.set("#TabFriends.Visible", showFriends);
+        cmd.set("#Footer.Visible", showSkills);
         cmd.set("#TabBar.SelectedTab", this.selectedTab);
+
     }
+
+    private void buildAttributes(UICommandBuilder cmd,
+                                 UIEventBuilder evt,
+                                 UUID uuid,
+                                 LevelingService service) {
+        cmd.set("#AttrCombatToggle.Text", combatExpanded ? "-" : "+");
+        cmd.set("#AttrGatheringToggle.Text", gatheringExpanded ? "-" : "+");
+        cmd.set("#AttrMiscToggle.Text", miscExpanded ? "-" : "+");
+
+        cmd.set("#AttrCombatContent.Visible", combatExpanded);
+        cmd.set("#AttrGatheringContent.Visible", gatheringExpanded);
+        cmd.set("#AttrMiscContent.Visible", miscExpanded);
+
+        cmd.clear("#AttrCombatContent");
+        cmd.clear("#AttrGatheringContent");
+        cmd.clear("#AttrMiscContent");
+
+        if (combatExpanded) {
+            int row = 0;
+            for (AttributeEntry entry : buildCombatAttributes(uuid, service)) {
+                appendAttributeRow(cmd, "#AttrCombatContent", row++, entry);
+            }
+        }
+
+        if (gatheringExpanded) {
+            int row = 0;
+            for (AttributeEntry entry : buildGatheringAttributes(uuid, service)) {
+                appendAttributeRow(cmd, "#AttrGatheringContent", row++, entry);
+            }
+        }
+
+        if (miscExpanded) {
+            int row = 0;
+            for (AttributeEntry entry : buildMiscAttributes(uuid, service)) {
+                appendAttributeRow(cmd, "#AttrMiscContent", row++, entry);
+            }
+        }
+    }
+
+    private void buildSkillDetailsPanel(UICommandBuilder cmd, SkillType skill) {
+        SkillDetailRegistry.SkillDetail detail = SkillDetailRegistry.getDetail(skill);
+        if (detail == null) {
+            cmd.set("#SkillDetailTitle.Text", DEFAULT_DETAIL_TITLE);
+            cmd.set("#SkillDetailDesc.Text", DEFAULT_DETAIL_DESC);
+            cmd.set("#SkillUnlockHeader.Visible", false);
+            cmd.set("#SkillUnlockScroll.Visible", false);
+            cmd.clear("#SkillUnlockList");
+            appendUnlockRow(cmd, "#SkillUnlockList", 0,
+                new SkillDetailRegistry.SkillUnlock(1, "No unlocks yet."));
+            return;
+        }
+
+        cmd.set("#SkillUnlockHeader.Visible", true);
+        cmd.set("#SkillUnlockScroll.Visible", true);
+        cmd.set("#SkillDetailTitle.Text", detail.title);
+        cmd.set("#SkillDetailDesc.Text", detail.description);
+        cmd.clear("#SkillUnlockList");
+
+        int row = 0;
+        for (SkillDetailRegistry.SkillUnlock unlock : detail.unlocks) {
+            appendUnlockRow(cmd, "#SkillUnlockList", row++, unlock);
+        }
+    }
+
+    private void appendUnlockRow(UICommandBuilder cmd, String container, int index, SkillDetailRegistry.SkillUnlock unlock) {
+        cmd.append(container, UNLOCK_ROW_UI);
+        String rowRoot = container + "[" + index + "]";
+        cmd.set(rowRoot + " #UnlockLevel.Text", "Lv " + unlock.level);
+        cmd.set(rowRoot + " #UnlockText.Text", unlock.text);
+    }
+
+    private void appendAttributeRow(UICommandBuilder cmd,
+                                    String container,
+                                    int index,
+                                    AttributeEntry entry) {
+        cmd.append(container, ATTR_ROW_UI);
+        String rowRoot = container + "[" + index + "]";
+        cmd.set(rowRoot + " #AttrLabel.Text", entry.label);
+        cmd.set(rowRoot + " #AttrValue.Text", entry.value);
+    }
+
+    private AttributeEntry[] buildCombatAttributes(UUID uuid, LevelingService service) {
+        int attack = service.getSkillLevel(uuid, SkillType.ATTACK);
+        int strength = service.getSkillLevel(uuid, SkillType.STRENGTH);
+        int defence = service.getSkillLevel(uuid, SkillType.DEFENCE);
+        int ranged = service.getSkillLevel(uuid, SkillType.RANGED);
+        int magic = service.getSkillLevel(uuid, SkillType.MAGIC);
+
+        double meleeDamageBonus = attack * dev.hytalemodding.origins.system.SkillCombatBonusSystem.ATTACK_DAMAGE_PER_LEVEL;
+        double meleeCritChance = Math.min(
+            dev.hytalemodding.origins.system.SkillCombatBonusSystem.STRENGTH_CRIT_CHANCE_CAP,
+            strength * dev.hytalemodding.origins.system.SkillCombatBonusSystem.STRENGTH_CRIT_CHANCE_PER_LEVEL
+        );
+        double meleeCritMultiplier = dev.hytalemodding.origins.system.SkillCombatBonusSystem.STRENGTH_CRIT_BASE_MULTIPLIER
+            + (strength * dev.hytalemodding.origins.system.SkillCombatBonusSystem.STRENGTH_CRIT_DAMAGE_BONUS_PER_LEVEL);
+        double damageReduction = Math.min(
+            dev.hytalemodding.origins.system.SkillCombatBonusSystem.DEFENCE_DAMAGE_REDUCTION_CAP,
+            defence * dev.hytalemodding.origins.system.SkillCombatBonusSystem.DEFENCE_DAMAGE_REDUCTION_PER_LEVEL
+        );
+
+        double rangedDamageBonus = ranged * dev.hytalemodding.origins.system.SkillCombatBonusSystem.RANGED_DAMAGE_PER_LEVEL;
+        double rangedCritChance = Math.min(
+            dev.hytalemodding.origins.system.SkillCombatBonusSystem.RANGED_CRIT_CHANCE_CAP,
+            ranged * dev.hytalemodding.origins.system.SkillCombatBonusSystem.RANGED_CRIT_CHANCE_PER_LEVEL
+        );
+        double rangedCritMultiplier = dev.hytalemodding.origins.system.SkillCombatBonusSystem.RANGED_CRIT_BASE_MULTIPLIER
+            + (ranged * dev.hytalemodding.origins.system.SkillCombatBonusSystem.RANGED_CRIT_DAMAGE_BONUS_PER_LEVEL);
+
+        double magicDamageBonus = magic * dev.hytalemodding.origins.system.SkillCombatBonusSystem.MAGIC_DAMAGE_PER_LEVEL;
+        double magicCritChance = Math.min(
+            dev.hytalemodding.origins.system.SkillCombatBonusSystem.MAGIC_CRIT_CHANCE_CAP,
+            magic * dev.hytalemodding.origins.system.SkillCombatBonusSystem.MAGIC_CRIT_CHANCE_PER_LEVEL
+        );
+        double magicCritMultiplier = dev.hytalemodding.origins.system.SkillCombatBonusSystem.MAGIC_CRIT_BASE_MULTIPLIER
+            + (magic * dev.hytalemodding.origins.system.SkillCombatBonusSystem.MAGIC_CRIT_DAMAGE_BONUS_PER_LEVEL);
+
+        return new AttributeEntry[]{
+            new AttributeEntry("Melee damage bonus", formatBonusPercent(meleeDamageBonus)),
+            new AttributeEntry("Melee crit chance", formatPercent(meleeCritChance)),
+            new AttributeEntry("Melee crit multiplier", formatMultiplier(meleeCritMultiplier)),
+            new AttributeEntry("Damage reduction", formatPercent(damageReduction)),
+            new AttributeEntry("Ranged damage bonus", formatBonusPercent(rangedDamageBonus)),
+            new AttributeEntry("Ranged crit chance", formatPercent(rangedCritChance)),
+            new AttributeEntry("Ranged crit multiplier", formatMultiplier(rangedCritMultiplier)),
+            new AttributeEntry("Magic damage bonus", formatBonusPercent(magicDamageBonus)),
+            new AttributeEntry("Magic crit chance", formatPercent(magicCritChance)),
+            new AttributeEntry("Magic crit multiplier", formatMultiplier(magicCritMultiplier))
+        };
+    }
+
+    private AttributeEntry[] buildGatheringAttributes(UUID uuid, LevelingService service) {
+        int mining = service.getSkillLevel(uuid, SkillType.MINING);
+        int woodcutting = service.getSkillLevel(uuid, SkillType.WOODCUTTING);
+        int farming = service.getSkillLevel(uuid, SkillType.FARMING);
+        int cooking = service.getSkillLevel(uuid, SkillType.COOKING);
+        int alchemy = service.getSkillLevel(uuid, SkillType.ALCHEMY);
+
+        double miningSpeed = mining * dev.hytalemodding.origins.system.MiningSpeedSystem.MINING_DAMAGE_PER_LEVEL;
+        double miningDurability = Math.min(
+            dev.hytalemodding.origins.system.MiningDurabilitySystem.MINING_DURABILITY_REDUCTION_CAP,
+            mining * dev.hytalemodding.origins.system.MiningDurabilitySystem.MINING_DURABILITY_REDUCTION_PER_LEVEL
+        );
+        double woodcuttingSpeed = woodcutting * dev.hytalemodding.origins.system.WoodcuttingSpeedSystem.WOODCUTTING_DAMAGE_PER_LEVEL;
+        double woodcuttingDurability = Math.min(
+            dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem.WOODCUTTING_DURABILITY_REDUCTION_CAP,
+            woodcutting * dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem.WOODCUTTING_DURABILITY_REDUCTION_PER_LEVEL
+        );
+        double farmingYieldBonus = dev.hytalemodding.origins.system.FarmingHarvestPickupSystem.MAX_YIELD_BONUS
+            * (Math.min(farming, 99) / 99.0);
+        double sickleXpBonus = dev.hytalemodding.origins.system.FarmingHarvestPickupSystem.SICKLE_XP_BONUS - 1.0;
+        double cookingDoubleProc = Math.min(
+            dev.hytalemodding.origins.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_CAP,
+            cooking * dev.hytalemodding.origins.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_PER_LEVEL
+        );
+        double alchemyDoubleProc = Math.min(
+            dev.hytalemodding.origins.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_CAP,
+            alchemy * dev.hytalemodding.origins.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_PER_LEVEL
+        );
+
+        return new AttributeEntry[]{
+            new AttributeEntry("Mining speed bonus", formatBonusPercent(miningSpeed)),
+            new AttributeEntry("Mining durability reduction", formatPercent(miningDurability)),
+            new AttributeEntry("Woodcutting speed bonus", formatBonusPercent(woodcuttingSpeed)),
+            new AttributeEntry("Woodcutting durability reduction", formatPercent(woodcuttingDurability)),
+            new AttributeEntry("Farming yield bonus", formatBonusPercent(farmingYieldBonus)),
+            new AttributeEntry("Farming sickle XP bonus", formatBonusPercent(sickleXpBonus)),
+            new AttributeEntry("Cooking double proc chance", formatPercent(cookingDoubleProc)),
+            new AttributeEntry("Alchemy double proc chance", formatPercent(alchemyDoubleProc))
+        };
+    }
+
+    private AttributeEntry[] buildMiscAttributes(UUID uuid, LevelingService service) {
+        int constitution = service.getSkillLevel(uuid, SkillType.CONSTITUTION);
+        int magic = service.getSkillLevel(uuid, SkillType.MAGIC);
+        int agility = service.getSkillLevel(uuid, SkillType.AGILITY);
+
+        double healthBonus = constitution * dev.hytalemodding.origins.bonus.SkillStatBonusApplier.HEALTH_PER_CONSTITUTION;
+        double manaBonus = magic * dev.hytalemodding.origins.bonus.SkillStatBonusApplier.MANA_MAX_PER_MAGIC;
+        double staminaBonus = agility * dev.hytalemodding.origins.bonus.SkillStatBonusApplier.STAMINA_MAX_PER_AGILITY;
+        double manaRegen = magic * dev.hytalemodding.origins.bonus.SkillStatBonusApplier.MANA_REGEN_PER_MAGIC;
+        double staminaRegen = agility * dev.hytalemodding.origins.bonus.SkillStatBonusApplier.STAMINA_REGEN_PER_AGILITY;
+        double moveSpeedBonus = (agility / 99.0) * dev.hytalemodding.origins.bonus.SkillStatBonusApplier.MOVEMENT_SPEED_BONUS_AT_99;
+
+        return new AttributeEntry[]{
+            new AttributeEntry("Max health bonus", formatFlat(healthBonus)),
+            new AttributeEntry("Max mana bonus", formatFlat(manaBonus)),
+            new AttributeEntry("Max stamina bonus", formatFlat(staminaBonus)),
+            new AttributeEntry("Mana regen per sec", formatFlat(manaRegen)),
+            new AttributeEntry("Stamina regen per sec", formatFlat(staminaRegen)),
+            new AttributeEntry("Movement speed bonus", formatBonusPercent(moveSpeedBonus))
+        };
+    }
+
+    private void toggleAttributeCategory(String category) {
+        switch (category) {
+            case ATTR_CATEGORY_COMBAT:
+                combatExpanded = !combatExpanded;
+                break;
+            case ATTR_CATEGORY_GATHERING:
+                gatheringExpanded = !gatheringExpanded;
+                break;
+            case ATTR_CATEGORY_MISC:
+                miscExpanded = !miscExpanded;
+                break;
+            default:
+                break;
+        }
+    }
+
+    private String formatPercent(double value) {
+        return String.format(java.util.Locale.US, "%.1f%%", value * 100.0);
+    }
+
+    private String formatBonusPercent(double value) {
+        return String.format(java.util.Locale.US, "+%.1f%%", value * 100.0);
+    }
+
+    private String formatMultiplier(double value) {
+        return String.format(java.util.Locale.US, "x%.2f", value);
+    }
+
+    private String formatFlat(double value) {
+        return String.format(java.util.Locale.US, "+%.2f", value);
+    }
+
 
     private String getTabTitle() {
         switch (this.selectedTab) {
@@ -351,15 +608,29 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         static final String KEY_BUTTON = "Button";
         static final String KEY_SKILL_ID = "SkillID";
         static final String KEY_TAB_ID = "TabID";
+        static final String KEY_CATEGORY = "Category";
 
         public static final BuilderCodec<SkillMenuData> CODEC = BuilderCodec.builder(SkillMenuData.class, SkillMenuData::new)
                 .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
                 .addField(new KeyedCodec<>(KEY_SKILL_ID, Codec.STRING), (d, s) -> d.skillId = s, d -> d.skillId)
                 .addField(new KeyedCodec<>(KEY_TAB_ID, Codec.STRING), (d, s) -> d.tabId = s, d -> d.tabId)
+                .addField(new KeyedCodec<>(KEY_CATEGORY, Codec.STRING), (d, s) -> d.category = s, d -> d.category)
                 .build();
 
         private String button;
         private String skillId;
         private String tabId;
+        private String category;
     }
+
+    private static final class AttributeEntry {
+        private final String label;
+        private final String value;
+
+        private AttributeEntry(String label, String value) {
+            this.label = label;
+            this.value = value;
+        }
+    }
+
 }

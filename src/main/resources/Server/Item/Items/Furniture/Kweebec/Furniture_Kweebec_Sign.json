@@ -1,0 +1,91 @@
+{
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Furniture_Kweebec_Sign.name"
+                              },
+    "PlayerAnimationsId":  "Block",
+    "Categories":  [
+                       "Furniture.Signs"
+                   ],
+    "Set":  "Furniture_Kweebec",
+    "Icon":  "Icons/ItemsGenerated/Furniture_Kweebec_Sign.png",
+    "IconProperties":  {
+                           "Rotation":  [
+                                            22.5,
+                                            45,
+                                            22.5
+                                        ],
+                           "Scale":  0.785,
+                           "Translation":  [
+                                               0,
+                                               -13.8
+                                           ]
+                       },
+    "Interactions":  {
+                         "Primary":  "Block_Primary",
+                         "Secondary":  "Block_Secondary"
+                     },
+    "BlockType":  {
+                      "BlockParticleSetId":  "Wood",
+                      "BlockSoundSetId":  "Wood",
+                      "CustomModel":  "Blocks/Decorative_Sets/Kweebec/Sign.blockymodel",
+                      "CustomModelTexture":  [
+                                                 {
+                                                     "Texture":  "Blocks/Decorative_Sets/Kweebec/Sign_Texture.png",
+                                                     "Weight":  1
+                                                 }
+                                             ],
+                      "DrawType":  "Model",
+                      "Gathering":  {
+                                        "Soft":  {
+                                                     "IsWeaponBreakable":  false
+                                                 }
+                                    },
+                      "HitboxType":  "Sign_Top",
+                      "Material":  "Solid",
+                      "Opacity":  "Transparent",
+                      "ParticleColor":  "#633625",
+                      "VariantRotation":  "NESW"
+                  },
+    "ResourceTypes":  [
+                          {
+                              "Id":  "Fuel"
+                          },
+                          {
+                              "Id":  "Charcoal"
+                          }
+                      ],
+    "Tags":  {
+                 "Type":  [
+                              "Furniture"
+                          ],
+                 "Family":  [
+                                "Kweebec"
+                            ]
+             },
+    "ItemSoundSetId":  "ISS_Blocks_Wood",
+    "Recipe":  {
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Furniture_Crude_Candle",
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Tree_Sap",
+                                     "Quantity":  1
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Type":  "Crafting",
+                                                "Id":  "Furniture_Bench",
+                                                "Categories":  [
+                                                                   "Furniture_Lighting"
+                                                               ]
+                                            }
+                                        ]
+               }
+}

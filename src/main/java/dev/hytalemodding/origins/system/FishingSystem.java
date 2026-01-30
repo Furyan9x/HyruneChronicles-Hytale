@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.origins.registry.FishingRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.Map;

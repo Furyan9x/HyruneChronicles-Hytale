@@ -22,6 +22,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
+import dev.hytalemodding.origins.registry.ToolRequirementRegistry;
+import dev.hytalemodding.origins.util.FarmingHarvestTracker;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -275,7 +277,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
         return id.contains("pickaxe") || id.contains("pick") && id.contains("axe");
     }
 
-    static boolean isSickleItemId(@Nullable String itemId) {
+    public static boolean isSickleItemId(@Nullable String itemId) {
         if (itemId == null) {
             return false;
         }
@@ -292,7 +294,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
     /**
      * Returns true when the farming block is at its final growth stage.
      */
-    static boolean isMatureCrop(World world, BlockType blockType, com.hypixel.hytale.math.vector.Vector3i target) {
+    public static boolean isMatureCrop(World world, BlockType blockType, com.hypixel.hytale.math.vector.Vector3i target) {
         FarmingData farmingData = blockType.getFarming();
         if (farmingData == null || farmingData.getStages() == null) {
             return false;
@@ -358,7 +360,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
         return currentStage >= stages.length - 1;
     }
 
-    static Reward findFarmingReward(String blockId) {
+    public static Reward findFarmingReward(String blockId) {
         return findReward(blockId, FARMING_BLOCKS, FARMING_KEYWORDS);
     }
 
@@ -369,9 +371,9 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
         return findReward(itemId.toLowerCase(Locale.ROOT), FARMING_BLOCKS, FARMING_KEYWORDS);
     }
 
-    static final class Reward {
-        final int minLevel;
-        final long xp;
+    public static final class Reward {
+        public final int minLevel;
+        public final long xp;
 
         private Reward(int minLevel, long xp) {
             this.minLevel = minLevel;

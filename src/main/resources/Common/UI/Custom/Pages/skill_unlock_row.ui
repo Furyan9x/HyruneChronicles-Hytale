@@ -1,0 +1,19 @@
+$C = "../Common.ui";
+
+@UnlockLevelStyle = LabelStyle(FontSize: 11, TextColor: #d9c6a5, RenderBold: true, VerticalAlignment: Start);
+@UnlockTextStyle = LabelStyle(FontSize: 11, TextColor: #f7e9cd, VerticalAlignment: Start, Wrap: true);
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 32);
+
+  Label #UnlockLevel {
+    Anchor: (Width: 44, Height: 32);
+    Style: @UnlockLevelStyle;
+  }
+  Group { Anchor: (Width: 6); }
+  Label #UnlockText {
+    Anchor: (Left: 0, Right: 0, Height: 32);
+    Style: @UnlockTextStyle;
+  }
+}

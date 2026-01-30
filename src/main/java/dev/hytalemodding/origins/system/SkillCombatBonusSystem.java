@@ -21,12 +21,17 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.Message;
 import dev.hytalemodding.Origins;
+import dev.hytalemodding.origins.registry.CombatRequirementRegistry;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
@@ -51,6 +56,8 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
     public static final float MAGIC_CRIT_DAMAGE_BONUS_PER_LEVEL = 1.0f / 99.0f;
     public static final float MAGIC_CRIT_BASE_MULTIPLIER = 1.5f;
     private static final boolean DEBUG_PROJECTILE = false;
+    private static final long WEAPON_WARNING_COOLDOWN_MS = 2000;
+    private static final Map<UUID, Long> LAST_WEAPON_WARNING = new ConcurrentHashMap<>();
 
     public SkillCombatBonusSystem() {
         super(Damage.class);
@@ -109,6 +116,12 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
 
         PlayerRef attackerPlayerRef = attacker.getPlayerRef();
         if (attackerPlayerRef == null) {
+            return;
+        }
+
+        String weaponId = getHeldItemIdentifier(attacker);
+        if (isWeaponRestricted(attackerPlayerRef, weaponId)) {
+            damage.setAmount(0f);
             return;
         }
 
@@ -216,6 +229,11 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
+        if (isWeaponRestricted(attackerPlayerRef, weaponId)) {
+            damage.setAmount(0f);
+            return;
+        }
+
         boolean ranged = isRangedWeapon(weaponId);
         boolean magic = !ranged && isMagicWeapon(weaponId);
         if (DEBUG_PROJECTILE) {
@@ -294,7 +312,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         damage.setAmount(damage.getAmount() * multiplier);
     }
 
-    private static boolean isRangedWeapon(String weaponId) {
+    public static boolean isRangedWeapon(String weaponId) {
         String id = weaponId.toLowerCase();
         return id.contains("shortbow")
             || id.contains("longbow")
@@ -303,7 +321,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             || id.contains("sling");
     }
 
-    private static boolean isMagicWeapon(String weaponId) {
+    public static boolean isMagicWeapon(String weaponId) {
         String id = weaponId.toLowerCase();
         return id.contains("wand")
             || id.contains("staff")
@@ -311,7 +329,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             || id.contains("scepter");
     }
 
-    private static String getHeldItemIdentifier(Player player) {
+    public static String getHeldItemIdentifier(Player player) {
         if (player == null) {
             return null;
         }
@@ -335,6 +353,51 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         }
 
         return null;
+    }
+
+    private static boolean isWeaponRestricted(PlayerRef attackerRef, String weaponId) {
+        if (attackerRef == null || weaponId == null) {
+            return false;
+        }
+
+        Integer required = CombatRequirementRegistry.getRequiredLevel(weaponId);
+        if (required == null) {
+            return false;
+        }
+
+        SkillType skill = SkillType.ATTACK;
+        if (isMagicWeapon(weaponId)) {
+            skill = SkillType.MAGIC;
+        } else if (isRangedWeapon(weaponId)) {
+            skill = SkillType.RANGED;
+        }
+
+        LevelingService service = Origins.getService();
+        int level = service.getSkillLevel(attackerRef.getUuid(), skill);
+        if (level >= required) {
+            return false;
+        }
+
+        sendWeaponWarning(attackerRef, skill, required);
+        return true;
+    }
+
+    private static void sendWeaponWarning(PlayerRef playerRef, SkillType skill, int requiredLevel) {
+        long now = System.currentTimeMillis();
+        Long last = LAST_WEAPON_WARNING.get(playerRef.getUuid());
+        if (last != null && now - last < WEAPON_WARNING_COOLDOWN_MS) {
+            return;
+        }
+        LAST_WEAPON_WARNING.put(playerRef.getUuid(), now);
+
+        if (playerRef.getReference() != null && playerRef.getReference().isValid()) {
+            Player player = playerRef.getReference().getStore().getComponent(playerRef.getReference(), Player.getComponentType());
+            if (player != null) {
+                player.sendMessage(Message.raw(
+                    "You need " + skill.getDisplayName() + " level " + requiredLevel + " to use this weapon."
+                ));
+            }
+        }
     }
 
     private static boolean isProjectileCause(DamageCause cause) {

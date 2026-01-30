@@ -11,6 +11,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.origins.interaction.FishingInteraction;
+import dev.hytalemodding.origins.registry.FishingRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
@@ -22,12 +24,12 @@ public class FishingCastSystem extends TickingSystem<EntityStore> {
     private static final Map<UUID, PendingCast> PENDING_CASTS = new ConcurrentHashMap<>();
     private static final int MAX_CAST_DISTANCE = 10;
 
-    static boolean queueCast(UUID playerId,
-                             UUID worldId,
-                             Vector3i target,
-                             FishingRegistry.BaitDefinition bait,
-                             int fishingLevel,
-                             int delayTicks) {
+    public static boolean queueCast(UUID playerId,
+                                    UUID worldId,
+                                    Vector3i target,
+                                    FishingRegistry.BaitDefinition bait,
+                                    int fishingLevel,
+                                    int delayTicks) {
         if (playerId == null || worldId == null || target == null || bait == null || delayTicks < 0) {
             return false;
         }
@@ -37,11 +39,11 @@ public class FishingCastSystem extends TickingSystem<EntityStore> {
         ) == null;
     }
 
-    static boolean hasPendingCast(UUID playerId) {
+    public static boolean hasPendingCast(UUID playerId) {
         return playerId != null && PENDING_CASTS.containsKey(playerId);
     }
 
-    static void cancelPendingCast(UUID playerId) {
+    public static void cancelPendingCast(UUID playerId) {
         if (playerId != null) {
             PENDING_CASTS.remove(playerId);
         }

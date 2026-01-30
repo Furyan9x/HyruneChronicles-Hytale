@@ -55,6 +55,29 @@
       -33
     ]
   },
+  "Recipe": {
+    "TimeSeconds": 4,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Stick",
+        "Quantity": 8
+      },
+      {
+        "ResourceTypeId": "Rubble",
+        "Quantity": 4
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Tools"
+        ]
+      }
+    ]
+  },
   "Texture": "Items/Weapons/Novice_Staff/Novice_Staff_Texture.png",
   "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Left.blockyanim",
   "Tags": {

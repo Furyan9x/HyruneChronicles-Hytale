@@ -3,11 +3,17 @@ $C = "../Common.ui";
 // Reuse your existing button/text styles
 @SkillTextStyle = LabelStyle(FontSize: 16, TextColor: #ffcc00, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
 @PageTitleStyle = LabelStyle(FontSize: 20, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+@AttrHeaderStyle = LabelStyle(FontSize: 12, TextColor: #d9c6a5, RenderBold: true, VerticalAlignment: Center);
+@AttrLabelStyle = LabelStyle(FontSize: 12, TextColor: #e6d9c3, VerticalAlignment: Center);
+@AttrValueStyle = LabelStyle(FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End);
+@DetailTitleStyle = LabelStyle(FontSize: 14, TextColor: #f2d38a, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+@DetailHeaderStyle = LabelStyle(FontSize: 12, TextColor: #d9c6a5, RenderBold: true, VerticalAlignment: Center);
+@DetailBodyStyle = LabelStyle(FontSize: 12, TextColor: #f7e9cd, Wrap: true);
 @TabIconAnchor = Anchor(Width: 40, Height: 32);
 @TabButtonAnchor = Anchor(Width: 52, Height: 32);
 @CharacterTabStyle = TabStyleState(
   Background: "Images/Tab.png",
-  Overlay: "Images/TabOverlay.png",
+  Overlay: (TexturePath: "Images/TabOverlay.png", Border: 0),
   IconAnchor: @TabIconAnchor,
   Anchor: @TabButtonAnchor
 );
@@ -18,13 +24,13 @@ $C = "../Common.ui";
     Pressed: @CharacterTabStyle
   ),
   SelectedTabStyle: (
-    Default: (...@CharacterTabStyle, Overlay: "Images/TabSelectedOverlay.png")
+    Default: (...@CharacterTabStyle, Overlay: (TexturePath: "Images/TabSelectedOverlay.png", Border: 0))
   )
 );
 
 $C.@PageOverlay {
   $C.@DecoratedContainer {
-    Anchor: (Width: 500, Height: 600); // Taller, narrower like RS
+    Anchor: (Width: 720, Height: 600); // Wider to fit skill details
 
     // --- TITLE ---
     #Title {
@@ -141,14 +147,94 @@ $C.@PageOverlay {
         }
       }
       Group #TabQuests { LayoutMode: Top; Visible: false; }
-      Group #TabAttributes { LayoutMode: Top; Visible: false; }
+      Group #TabAttributes {
+        LayoutMode: Top;
+        Visible: false;
+
+        Group #AttributesScroll {
+          LayoutMode: TopScrolling;
+          Anchor: (Left: 0, Right: 0, Height: 420);
+          Padding: (Right: 6);
+
+          Group #AttrCombatCategory {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0);
+
+            Group #AttrCombatHeader {
+              LayoutMode: Left;
+              Anchor: (Height: 24, Left: 0, Right: 0);
+              Background: #000000(0.25);
+              Padding: (Left: 8, Right: 2);
+
+              Label #AttrCombatTitle { Text: "Combat"; Style: @AttrHeaderStyle; }
+              Group { FlexWeight: 1; }
+              TextButton #AttrCombatToggle { Anchor: (Width: 20, Height: 18, Top: -1); Text: "-"; }
+            }
+
+            Group #AttrCombatContent {
+              LayoutMode: Top;
+              Anchor: (Left: 8, Right: 8);
+              Padding: (Top: 6, Bottom: 6);
+            }
+          }
+
+          Group { Anchor: (Height: 8); }
+
+          Group #AttrGatheringCategory {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0);
+
+            Group #AttrGatheringHeader {
+              LayoutMode: Left;
+              Anchor: (Height: 24, Left: 0, Right: 0);
+              Background: #000000(0.25);
+              Padding: (Left: 8, Right: 2);
+
+              Label #AttrGatheringTitle { Text: "Gathering + Crafting"; Style: @AttrHeaderStyle; }
+              Group { FlexWeight: 1; }
+              TextButton #AttrGatheringToggle { Anchor: (Width: 20, Height: 18, Top: -1); Text: "-"; }
+            }
+
+            Group #AttrGatheringContent {
+              LayoutMode: Top;
+              Anchor: (Left: 8, Right: 8);
+              Padding: (Top: 6, Bottom: 6);
+            }
+          }
+
+          Group { Anchor: (Height: 8); }
+
+          Group #AttrMiscCategory {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0);
+
+            Group #AttrMiscHeader {
+              LayoutMode: Left;
+              Anchor: (Height: 24, Left: 0, Right: 0);
+              Background: #000000(0.25);
+              Padding: (Left: 8, Right: 2);
+
+              Label #AttrMiscTitle { Text: "Miscellaneous"; Style: @AttrHeaderStyle; }
+              Group { FlexWeight: 1; }
+              TextButton #AttrMiscToggle { Anchor: (Width: 20, Height: 18, Top: -1); Text: "-"; }
+            }
+
+            Group #AttrMiscContent {
+              LayoutMode: Top;
+              Anchor: (Left: 8, Right: 8);
+              Padding: (Top: 6, Bottom: 6);
+            }
+          }
+        }
+      }
 
       Group #TabSkills {
-        LayoutMode: Top;
+        LayoutMode: Left;
         Visible: true;
 
         Group #SkillsGrid {
           LayoutMode: Left;
+          FlexWeight: 1;
 
           // COLUMN 1
           Group #Col1 {
@@ -166,6 +252,45 @@ $C.@PageOverlay {
           Group #Col3 {
               LayoutMode: Top;
               FlexWeight: 1;
+          }
+        }
+
+        Group { Anchor: (Width: 10); }
+
+        Group #SkillDetailPanel {
+          LayoutMode: Top;
+          Anchor: (Width: 210, Height: 420);
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Background: #000000(0.25);
+
+          Label #SkillDetailTitle {
+            Text: "Select a skill";
+            Style: @DetailTitleStyle;
+            Anchor: (Height: 18);
+          }
+          Group { Anchor: (Height: 6); }
+          Label #SkillDetailDesc {
+            Text: "Click a skill to see its bonuses.";
+            Style: @DetailBodyStyle;
+            Anchor: (Height: 110, Left: 2);
+          }
+
+          Group { Anchor: (Height: 8); }
+          Label #SkillUnlockHeader {
+            Text: "Unlocks";
+            Style: (...@DetailHeaderStyle, HorizontalAlignment: Center);
+            Anchor: (Height: 16, Left: 0, Right: 0);
+          }
+          Group { Anchor: (Height: 4); }
+
+          Group #SkillUnlockScroll {
+            LayoutMode: TopScrolling;
+            Anchor: (Height: 200, Left: 0, Right: 0);
+            Padding: (Right: 6);
+
+            Group #SkillUnlockList {
+              LayoutMode: Top;
+            }
           }
         }
       }

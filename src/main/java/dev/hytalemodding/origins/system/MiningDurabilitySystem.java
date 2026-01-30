@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Origins;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
+import dev.hytalemodding.origins.util.MiningUtils;
 
 import javax.annotation.Nonnull;
 

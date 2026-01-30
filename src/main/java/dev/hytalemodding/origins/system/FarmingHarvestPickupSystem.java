@@ -13,14 +13,15 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
+import dev.hytalemodding.origins.util.FarmingHarvestTracker;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
 
     public class FarmingHarvestPickupSystem extends EntityEventSystem<EntityStore, InteractivelyPickupItemEvent> {
         private static final long BREAK_SUPPRESSION_WINDOW_MS = 5000;
-        private static final double SICKLE_XP_BONUS = 1.25;
-        private static final double MAX_YIELD_BONUS = 0.50;
+        public static final double SICKLE_XP_BONUS = 1.25;
+        public static final double MAX_YIELD_BONUS = 0.50;
 
     public FarmingHarvestPickupSystem() {
         super(InteractivelyPickupItemEvent.class);
