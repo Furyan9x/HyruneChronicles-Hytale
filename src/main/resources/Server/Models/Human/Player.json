@@ -1273,6 +1273,15 @@
       ]
     }
   },
+  "RandomAttachmentSets": {
+    "Backpack": {
+      "TradePack": {
+        "Model": "Items/Back/BackpackBig.blockymodel",
+        "Texture": "Items/Back/BackpackBig_Texture.png"
+      },
+      "None": {}
+    }
+  },
   "DefaultAttachments": [
     {
       "Model": "Characters/Body_Attachments/Faces/Player_Face_Detached.blockymodel",
@@ -1315,5 +1324,4 @@
     }
   }
 }
-
 

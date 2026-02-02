@@ -59,12 +59,7 @@ public final class CraftingSkillRegistry {
         rules.add(new SkillRuleSet(
                 SkillType.ARCANE_ENGINEERING,
                 new HashMap<>(),
-                keywordRule("staff", 1, 20, "wand", "book", "grimoire", "totem", "robe", "focus", "enchantment", "portalkey", "teleporter", "portal")
-        ));
-        rules.add(new SkillRuleSet(
-                SkillType.ARMORSMITHING,
-                new HashMap<>(),
-                keywordRule("armor", 1, 20, "shield")
+                keywordRule("staff", 1, 20, "wand", "book", "grimoire", "totem", "robe", "focus", "enchantment", "portalkey", "teleporter", "portal", "cloth")
         ));
         rules.add(new SkillRuleSet(
                 SkillType.WEAPONSMITHING,
@@ -95,6 +90,11 @@ public final class CraftingSkillRegistry {
                 SkillType.FARMING,
                 new HashMap<>(),
                 keywordRule("fertilizer", 1, 20, "coop", "hoe", "capture", "shears", "bucket", "watering", "feedbag", "seeds", "sapling", "life_essence")
+        ));
+        rules.add(new SkillRuleSet(
+                SkillType.ARMORSMITHING,
+                new HashMap<>(),
+                keywordRule("armor", 1, 20, "shield")
         ));
 
         RULES = Collections.unmodifiableList(rules);

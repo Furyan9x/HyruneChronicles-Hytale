@@ -60,7 +60,7 @@
     "KnowledgeRequired": false,
     "Input": [
       {
-        "ItemId": "Ingredient_Stick",
+        "ResourceTypeId": "Wood_Trunk",
         "Quantity": 8
       },
       {
@@ -70,10 +70,10 @@
     ],
     "BenchRequirement": [
       {
-        "Id": "Workbench",
+        "Id": "Arcanebench",
         "Type": "Crafting",
         "Categories": [
-          "Workbench_Tools"
+          "Arcane_Misc"
         ]
       }
     ]

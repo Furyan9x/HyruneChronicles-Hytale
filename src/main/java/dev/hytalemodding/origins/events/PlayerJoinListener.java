@@ -8,6 +8,7 @@ import dev.hytalemodding.origins.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.util.NameplateManager;
 import dev.hytalemodding.origins.slayer.SlayerService;
+import dev.hytalemodding.origins.tradepack.TradePackManager;
 
 import java.util.UUID;
 
@@ -39,6 +40,7 @@ public class PlayerJoinListener {
             PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
             SkillStatBonusApplier.applyMovementSpeed(playerRef);
             slayerService.getPlayerData(uuid);
+            TradePackManager.sync(playerComp);
         }
     }
 
@@ -53,6 +55,7 @@ public class PlayerJoinListener {
             UUID uuid = playerComp.getUuid();
             service.unload(uuid);
             slayerService.unload(uuid);
+            TradePackManager.clear(uuid);
         }
     }
 }

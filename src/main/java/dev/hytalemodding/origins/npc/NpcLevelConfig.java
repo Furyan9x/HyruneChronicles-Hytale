@@ -5,10 +5,10 @@ import java.util.List;
 
 public class NpcLevelConfig {
     private int defaultLevel = 1;
-    private int defaultVariance = 2;
+    private int defaultVariance = 3;
     private String defaultWeakness = CombatStyle.MELEE.name();
     private double weaknessMultiplier = 1.20;
-    private double resistanceMultiplier = 0.90;
+    private double resistanceMultiplier = 0.80;
     private List<String> excludedNpcIds = new ArrayList<>();
     private List<NpcLevelGroup> groups = new ArrayList<>();
     private List<NpcLevelOverride> overrides = new ArrayList<>();

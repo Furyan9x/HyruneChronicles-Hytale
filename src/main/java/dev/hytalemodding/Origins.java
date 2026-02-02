@@ -8,19 +8,19 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
-import dev.hytalemodding.origins.commands.CharacterCommand;
-import dev.hytalemodding.origins.commands.CheckTagsCommand;
-import dev.hytalemodding.origins.commands.ClearNpcHologramsCommand;
-import dev.hytalemodding.origins.commands.SetSkillCommand;
+import dev.hytalemodding.origins.commands.*;
+import dev.hytalemodding.origins.component.GameModeDataComponent;
 import dev.hytalemodding.origins.database.JsonLevelRepository;
 import dev.hytalemodding.origins.bonus.SkillStatBonusListener;
 import dev.hytalemodding.origins.events.LevelingVisualsListener;
 import dev.hytalemodding.origins.events.FarmingHarvestListener;
+import dev.hytalemodding.origins.gamemode.BuilderActionOpenGameModeDialogue;
 import dev.hytalemodding.origins.system.FarmingHarvestPickupSystem;
 import dev.hytalemodding.origins.component.FishingBobberComponent;
 import dev.hytalemodding.origins.system.FishingBobberSystem;
 import dev.hytalemodding.origins.system.FishingCastSystem;
 import dev.hytalemodding.origins.interaction.FishingInteraction;
+import dev.hytalemodding.origins.interaction.RepairBenchInteraction;
 import dev.hytalemodding.origins.system.FishingRodIdleSystem;
 import dev.hytalemodding.origins.events.PlayerJoinListener;
 import dev.hytalemodding.origins.level.LevelingService;
@@ -35,6 +35,7 @@ import dev.hytalemodding.origins.system.MiningSpeedSystem;
 import dev.hytalemodding.origins.system.SkillCombatBonusSystem;
 import dev.hytalemodding.origins.system.SkillRegenSystem;
 import dev.hytalemodding.origins.events.ArmorRequirementListener;
+import dev.hytalemodding.origins.events.TradePackInventoryListener;
 import dev.hytalemodding.origins.system.SyncTaskSystem;
 import dev.hytalemodding.origins.system.TimedCraftingXpSystem;
 import dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem;
@@ -60,6 +61,7 @@ import dev.hytalemodding.origins.npc.NpcCombatScalingSystem;
 import dev.hytalemodding.origins.npc.NpcLevelDisplaySystem;
 
 import javax.annotation.Nonnull;
+import javax.swing.text.html.parser.Entity;
 import java.util.logging.Level;
 import java.util.List;
 
@@ -82,6 +84,7 @@ public class Origins extends JavaPlugin {
     private NpcLevelService npcLevelService;
     private static ComponentType<EntityStore, FishingBobberComponent> fishingBobberComponentType;
     private static ComponentType<EntityStore, NpcLevelComponent> npcLevelComponentType;
+    private static ComponentType<EntityStore, GameModeDataComponent> gameModeDataComponentType;
 
     /**
      * Constructs the Origins plugin.
@@ -118,6 +121,7 @@ public class Origins extends JavaPlugin {
         this.npcLevelService = new NpcLevelService(npcLevelConfig);
 
         registerSlayerNpcActions();
+        registerGameModeNPCActions();
 
         // Initialize nameplate manager
         NameplateManager.init(this.service);
@@ -126,6 +130,8 @@ public class Origins extends JavaPlugin {
             .registerComponent(FishingBobberComponent.class, FishingBobberComponent::new);
         npcLevelComponentType = this.getEntityStoreRegistry()
             .registerComponent(NpcLevelComponent.class, NpcLevelComponent::new);
+        gameModeDataComponentType = this.getEntityStoreRegistry()
+            .registerComponent(GameModeDataComponent.class, GameModeDataComponent::new);
 
         // Register event listeners
         PlayerJoinListener joinListener = new PlayerJoinListener(this.service, this.slayerService);
@@ -136,10 +142,19 @@ public class Origins extends JavaPlugin {
             com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent.class,
             new ArmorRequirementListener()::onInventoryChange
         );
+        this.getEventRegistry().registerGlobal(
+            com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent.class,
+            new TradePackInventoryListener()::onInventoryChange
+        );
         this.getCodecRegistry(Interaction.CODEC).register(
             "OriginsFishing",
             FishingInteraction.class,
             FishingInteraction.CODEC
+        );
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "OriginsRepairBench",
+            RepairBenchInteraction.class,
+            RepairBenchInteraction.CODEC
         );
         this.service.registerLevelUpListener(new LevelingVisualsListener());
         this.service.registerLevelUpListener(new SkillStatBonusListener());
@@ -213,6 +228,20 @@ public class Origins extends JavaPlugin {
 
         actionFactory.add("OpenSlayerDialogue", BuilderActionOpenSlayerDialogue::new);
     }
+    private void registerGameModeNPCActions() {
+        NPCPlugin npcPlugin = NPCPlugin.get();
+        if (npcPlugin == null) {
+            return;
+        }
+
+        BuilderFactory<Action> actionFactory = npcPlugin.getBuilderManager().getFactory(Action.class);
+        if (actionFactory == null) {
+            actionFactory = new BuilderFactory<>(Action.class, NPCPlugin.FACTORY_CLASS_ACTION);
+            npcPlugin.getBuilderManager().registerFactory(actionFactory);
+        }
+
+        actionFactory.add("OpenGameModeDialogue", BuilderActionOpenGameModeDialogue::new);
+    }
 
     private SlayerTaskRegistry buildSlayerTaskRegistry() {
         SlayerTaskRegistry registry = new SlayerTaskRegistry();
@@ -248,5 +277,7 @@ public class Origins extends JavaPlugin {
     public static ComponentType<EntityStore, FishingBobberComponent> getFishingBobberComponentType() {
         return fishingBobberComponentType;
     }
+    public static ComponentType<EntityStore, GameModeDataComponent> getGameModeDataComponentType() {
+        return gameModeDataComponentType;
+    }
 }
-

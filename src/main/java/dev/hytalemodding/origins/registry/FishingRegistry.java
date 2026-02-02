@@ -27,32 +27,39 @@ public final class FishingRegistry {
     );
 
     private static final List<FishDefinition> FISH = List.of(
-        new FishDefinition("Fish_Bluegill_Item", 1, 10, false, 10, "default"),
+            //common
         new FishDefinition("Fish_Minnow_Item", 1, 10, false, 10, "default"),
-        new FishDefinition("Fish_Crab_Item", 5, 11, false, 10, "default"),
-        new FishDefinition("Fish_Clownfish_Item", 10, 12, false, 9, "default"),
-        new FishDefinition("Fish_Pike_Item", 15, 13, false, 9, "default"),
-        new FishDefinition("Fish_Catfish_Item", 20, 14, false, 8, "default"),
-        new FishDefinition("Fish_Trout_Rainbow_Item", 25, 14, false, 8, "default"),
-        new FishDefinition("Fish_Salmon_Item", 30, 16, false, 7, "default"),
-        new FishDefinition("Fish_Piranha_Item", 35, 17, false, 7, "default"),
-        new FishDefinition("Fish_Eel_Moray_Item", 40, 18, false, 6, "default"),
-        new FishDefinition("Fish_Tang_Blue_Item", 45, 18, false, 6, "default"),
-        new FishDefinition("Fish_Tang_Chevron_Item", 50, 19, false, 6, "default"),
-        new FishDefinition("Fish_Tang_Lemon_Peel_Item", 55, 20, false, 6, "default"),
-        new FishDefinition("Fish_Tang_Sailfin_Item", 60, 20, false, 5, "default"),
-        new FishDefinition("Fish_Lobster_Item", 65, 22, false, 5, "default"),
-        new FishDefinition("Fish_Trilobite_Item", 70, 24, false, 5, "default"),
-        new FishDefinition("Fish_Trilobite_Black_Item", 75, 26, false, 4, "default"),
-        new FishDefinition("Fish_Frostgill_Item", 80, 28, true, 3, "default"),
-        new FishDefinition("Fish_Pufferfish_Item", 85, 30, true, 3, "default"),
-        new FishDefinition("Fish_Jellyfish_Blue_Item", 88, 32, true, 2, "default"),
-        new FishDefinition("Fish_Jellyfish_Cyan_Item", 88, 32, true, 2, "default"),
-        new FishDefinition("Fish_Jellyfish_Green_Item", 88, 32, true, 2, "default"),
-        new FishDefinition("Fish_Jellyfish_Red_Item", 90, 34, true, 2, "default"),
-        new FishDefinition("Fish_Jellyfish_Yellow_Item", 90, 34, true, 2, "default"),
-        new FishDefinition("Fish_Jellyfish_Man_Of_War_Item", 95, 40, true, 1, "default"),
-        new FishDefinition("Fish_Shellfish_Lava_Item", 99, 45, true, 1, "default")
+        new FishDefinition("Fish_Bluegill_Item", 5, 15, false, 10, "default"),
+        new FishDefinition("Fish_Catfish_Item", 10, 20, false, 10, "default"),
+        //uncommon
+        new FishDefinition("Fish_Tang_Blue_Item", 15, 25, false, 9, "default"),
+        new FishDefinition("Fish_Tang_Chevron_Item", 15, 27, false, 9, "default"),
+        new FishDefinition("Fish_Tang_Lemon_Peel_Item", 15, 29, false, 9, "default"),
+        new FishDefinition("Fish_Tang_Sailfin_Item", 15, 31, false, 9, "default"),
+        //rare
+        new FishDefinition("Fish_Trout_Rainbow_Item", 20, 35, false, 8, "default"),
+        new FishDefinition("Fish_Salmon_Item", 25, 45, false, 8, "default"),
+        new FishDefinition("Fish_Clownfish_Item", 30, 55, false, 8, "default"),
+        new FishDefinition("Fish_Pufferfish_Item", 35, 65, true, 8, "default"),
+        //Epic
+        new FishDefinition("Fish_Jellyfish_Blue_Item", 50, 90, true, 7, "default"),
+        new FishDefinition("Fish_Jellyfish_Cyan_Item", 50, 92, true, 7, "default"),
+        new FishDefinition("Fish_Jellyfish_Green_Item", 50, 94, true, 7, "default"),
+        new FishDefinition("Fish_Jellyfish_Red_Item", 50, 96, true, 7, "default"),
+        new FishDefinition("Fish_Jellyfish_Yellow_Item", 50, 98, true, 7, "default"),
+        //legendary
+        new FishDefinition("Fish_Pike_Item", 55, 110, false, 6, "default"),
+        new FishDefinition("Fish_Crab_Item", 58, 135, false, 6, "default"),
+        new FishDefinition("Fish_Lobster_Item", 62, 160, false, 6, "default"),
+        new FishDefinition("Fish_Eel_Moray_Item", 65, 190, false, 5, "default"),
+        new FishDefinition("Fish_Piranha_Item", 68, 210, false, 5, "default"),
+        new FishDefinition("Fish_Trilobite_Item", 70, 250, false, 4, "default"),
+        new FishDefinition("Fish_Piranha_Black_Item", 72, 295, false, 4, "default"),
+        new FishDefinition("Fish_Trilobite_Black_Item", 75, 350, false, 4, "default"),
+        new FishDefinition("Fish_Frostgill_Item", 80, 480, true, 3, "default"),
+        new FishDefinition("Fish_Jellyfish_Man_Of_War_Item", 85, 620, true, 1, "default"),
+        new FishDefinition("Fish_Snapjaw_Item", 95, 795, true, 1, "default"),
+        new FishDefinition("Fish_Shellfish_Lava_Item", 99, 990, true, 1, "default")
     );
 
     private FishingRegistry() {

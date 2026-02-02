@@ -1,39 +1,39 @@
 {
-    "Parent":  "Template_Weapon_Mace",
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Weapon_Mace_Prisma.name"
-                              },
-    "Model":  "Items/Weapons/Mace/Prisma.blockymodel",
-    "Texture":  "Items/Weapons/Mace/Prisma_Texture.png",
-    "Icon":  "Icons/ItemsGenerated/Weapon_Mace_Prisma.png",
-    "Quality":  "Common",
-    "ItemLevel":  50,
-    "Recipe":  {
-                   "TimeSeconds":  5,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Bar_Mithril",
-                                     "Quantity":  10
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Leather_Storm",
-                                     "Quantity":  4
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Voidheart",
-                                     "Quantity":  1
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Weapon_Mace"
-                                                               ],
-                                                "Id":  "Weapon_Bench",
-                                                "RequiredTierLevel":  3
-                                            }
-                                        ]
-               }
+  "Parent": "Template_Weapon_Mace",
+  "TranslationProperties": {
+    "Name": "server.items.Weapon_Mace_Prisma.name"
+  },
+  "Model": "Items/Weapons/Mace/Prisma.blockymodel",
+  "Texture": "Items/Weapons/Mace/Prisma_Texture.png",
+  "Icon": "Icons/ItemsGenerated/Weapon_Mace_Prisma.png",
+  "Quality": "Common",
+  "ItemLevel": 50,
+  "Recipe": {
+    "TimeSeconds": 5,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "Quantity": 6,
+        "ItemId": "Ingredient_Bar_Prisma"
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "Ingredient_Leather_Prismatic"
+      },
+      {
+        "Quantity": 5,
+        "ItemId": "Ingredient_Bolt_Prismaloom"
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Categories": [
+          "Weapon_Mace"
+        ],
+        "Id": "Weapon_Bench",
+        "RequiredTierLevel": 3
+      }
+    ]
+  }
 }

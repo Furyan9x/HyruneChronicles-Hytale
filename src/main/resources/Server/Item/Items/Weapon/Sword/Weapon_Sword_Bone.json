@@ -1,149 +1,145 @@
 {
-    "Parent":  "Template_Weapon_Sword",
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Weapon_Sword_Bone.name"
-                              },
-    "Model":  "NPC/Intelligent/Feran/Models/Weapons/Sword/Bone.blockymodel",
-    "Texture":  "NPC/Intelligent/Feran/Models/Weapons/Sword/Bone_Texture.png",
-    "Icon":  "Icons/ItemsGenerated/Weapon_Sword_Bone.png",
-    "Quality":  "Rare",
-    "ItemLevel":  35,
-    "MaxDurability":  75,
-    "InteractionVars":  {
-                            "Swing_Left_Damage":  {
-                                                      "Interactions":  [
-                                                                           {
-                                                                               "Parent":  "Weapon_Sword_Primary_Swing_Left_Damage",
-                                                                               "DamageCalculator":  {
-                                                                                                        "BaseDamage":  {
-                                                                                                                           "Physical":  10
-                                                                                                                       }
-                                                                                                    },
-                                                                               "DamageEffects":  {
-                                                                                                     "WorldSoundEventId":  "SFX_Sword_T2_Impact",
-                                                                                                     "LocalSoundEventId":  "SFX_Sword_T2_Impact"
-                                                                                                 }
-                                                                           }
-                                                                       ]
-                                                  },
-                            "Swing_Right_Damage":  {
-                                                       "Interactions":  [
-                                                                            {
-                                                                                "Parent":  "Weapon_Sword_Primary_Swing_Right_Damage",
-                                                                                "DamageCalculator":  {
-                                                                                                         "BaseDamage":  {
-                                                                                                                            "Physical":  12
-                                                                                                                        }
-                                                                                                     },
-                                                                                "DamageEffects":  {
-                                                                                                      "WorldSoundEventId":  "SFX_Sword_T2_Impact",
-                                                                                                      "LocalSoundEventId":  "SFX_Sword_T2_Impact"
-                                                                                                  }
-                                                                            }
-                                                                        ]
-                                                   },
-                            "Swing_Down_Damage":  {
-                                                      "Interactions":  [
-                                                                           {
-                                                                               "Parent":  "Weapon_Sword_Primary_Swing_Down_Damage",
-                                                                               "DamageCalculator":  {
-                                                                                                        "BaseDamage":  {
-                                                                                                                           "Physical":  20
-                                                                                                                       }
-                                                                                                    },
-                                                                               "DamageEffects":  {
-                                                                                                     "WorldSoundEventId":  "SFX_Sword_T2_Impact",
-                                                                                                     "LocalSoundEventId":  "SFX_Sword_T2_Impact"
-                                                                                                 }
-                                                                           }
-                                                                       ]
-                                                  },
-                            "Thrust_Damage":  {
-                                                  "Interactions":  [
-                                                                       {
-                                                                           "Parent":  "Weapon_Sword_Primary_Thrust_Damage",
-                                                                           "DamageCalculator":  {
-                                                                                                    "BaseDamage":  {
-                                                                                                                       "Physical":  36
-                                                                                                                   }
-                                                                                                },
-                                                                           "EntityStatsOnHit":  [
-                                                                                                    {
-                                                                                                        "EntityStatId":  "SignatureEnergy",
-                                                                                                        "Amount":  3
-                                                                                                    }
-                                                                                                ],
-                                                                           "DamageEffects":  {
-                                                                                                 "WorldSoundEventId":  "SFX_Sword_T2_Impact",
-                                                                                                 "LocalSoundEventId":  "SFX_Sword_T2_Impact"
-                                                                                             }
-                                                                       }
-                                                                   ]
-                                              },
-                            "Vortexstrike_Spin_Damage":  {
-                                                             "Interactions":  [
-                                                                                  {
-                                                                                      "Parent":  "Weapon_Sword_Signature_Vortexstrike_Spin_Damage",
-                                                                                      "DamageCalculator":  {
-                                                                                                               "BaseDamage":  {
-                                                                                                                                  "Physical":  26
-                                                                                                                              }
-                                                                                                           },
-                                                                                      "EntityStatsOnHit":  [
-
-                                                                                                           ],
-                                                                                      "DamageEffects":  {
-                                                                                                            "WorldSoundEventId":  "SFX_Sword_T2_Impact",
-                                                                                                            "LocalSoundEventId":  "SFX_Sword_T2_Impact"
-                                                                                                        }
-                                                                                  }
-                                                                              ]
-                                                         },
-                            "Vortexstrike_Stab_Damage":  {
-                                                             "Interactions":  [
-                                                                                  {
-                                                                                      "Parent":  "Weapon_Sword_Signature_Vortexstrike_Stab_Damage",
-                                                                                      "DamageCalculator":  {
-                                                                                                               "BaseDamage":  {
-                                                                                                                                  "Physical":  79
-                                                                                                                              }
-                                                                                                           },
-                                                                                      "EntityStatsOnHit":  [
-
-                                                                                                           ],
-                                                                                      "DamageEffects":  {
-                                                                                                            "WorldSoundEventId":  "SFX_Sword_T2_Impact",
-                                                                                                            "LocalSoundEventId":  "SFX_Sword_T2_Impact"
-                                                                                                        }
-                                                                                  }
-                                                                              ]
-                                                         }
-                        },
-    "Recipe":  {
-                   "TimeSeconds":  4.5,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Bone_Fragment",
-                                     "Quantity":  11
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Leather_Heavy",
-                                     "Quantity":  4
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Fabric_Scrap_Cindercloth",
-                                     "Quantity":  3
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Weapon_Sword"
-                                                               ],
-                                                "Id":  "Weapon_Bench",
-                                                "RequiredTierLevel":  3
-                                            }
-                                        ]
-               }
+  "Parent": "Template_Weapon_Sword",
+  "TranslationProperties": {
+    "Name": "server.items.Weapon_Sword_Bone.name"
+  },
+  "Model": "NPC/Intelligent/Feran/Models/Weapons/Sword/Bone.blockymodel",
+  "Texture": "NPC/Intelligent/Feran/Models/Weapons/Sword/Bone_Texture.png",
+  "Icon": "Icons/ItemsGenerated/Weapon_Sword_Bone.png",
+  "Quality": "Common",
+  "ItemLevel": 20,
+  "MaxDurability": 75,
+  "InteractionVars": {
+    "Swing_Left_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Sword_Primary_Swing_Left_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 10
+            }
+          },
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Sword_T2_Impact",
+            "LocalSoundEventId": "SFX_Sword_T2_Impact"
+          }
+        }
+      ]
+    },
+    "Swing_Right_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Sword_Primary_Swing_Right_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 12
+            }
+          },
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Sword_T2_Impact",
+            "LocalSoundEventId": "SFX_Sword_T2_Impact"
+          }
+        }
+      ]
+    },
+    "Swing_Down_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Sword_Primary_Swing_Down_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 20
+            }
+          },
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Sword_T2_Impact",
+            "LocalSoundEventId": "SFX_Sword_T2_Impact"
+          }
+        }
+      ]
+    },
+    "Thrust_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Sword_Primary_Thrust_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 36
+            }
+          },
+          "EntityStatsOnHit": [
+            {
+              "EntityStatId": "SignatureEnergy",
+              "Amount": 3
+            }
+          ],
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Sword_T2_Impact",
+            "LocalSoundEventId": "SFX_Sword_T2_Impact"
+          }
+        }
+      ]
+    },
+    "Vortexstrike_Spin_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Sword_Signature_Vortexstrike_Spin_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 26
+            }
+          },
+          "EntityStatsOnHit": [],
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Sword_T2_Impact",
+            "LocalSoundEventId": "SFX_Sword_T2_Impact"
+          }
+        }
+      ]
+    },
+    "Vortexstrike_Stab_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Sword_Signature_Vortexstrike_Stab_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 79
+            }
+          },
+          "EntityStatsOnHit": [],
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Sword_T2_Impact",
+            "LocalSoundEventId": "SFX_Sword_T2_Impact"
+          }
+        }
+      ]
+    }
+  },
+  "Recipe": {
+    "TimeSeconds": 4.5,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Bone_Fragment",
+        "Quantity": 4
+      },
+      {
+        "Quantity": 1,
+        "ResourceTypeId": "Wood_Trunk"
+      },
+      {
+        "ItemId": "Ingredient_Leather_Heavy",
+        "Quantity": 4
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Categories": [
+          "Weapon_Sword"
+        ],
+        "Id": "Weapon_Bench",
+        "RequiredTierLevel": 3
+      }
+    ]
+  }
 }

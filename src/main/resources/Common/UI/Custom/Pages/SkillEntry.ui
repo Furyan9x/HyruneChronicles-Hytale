@@ -28,6 +28,8 @@ $C = "../Common.ui";
   )
 );
 
+
+
 $C.@PageOverlay {
   $C.@DecoratedContainer {
     Anchor: (Width: 720, Height: 600); // Wider to fit skill details

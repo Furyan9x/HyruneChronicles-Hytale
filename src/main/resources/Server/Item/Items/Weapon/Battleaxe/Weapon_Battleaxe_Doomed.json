@@ -1,65 +1,60 @@
 {
-    "Parent":  "Template_Weapon_Battleaxe",
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Weapon_Battleaxe_Doomed.name"
-                              },
-    "Model":  "NPC/Intelligent/Outlander_Brute/Models/Weapons/Battleaxe/Doomed.blockymodel",
-    "Texture":  "NPC/Intelligent/Outlander_Brute/Models/Weapons/Battleaxe/Doomed_Texture.png",
-    "Icon":  "Icons/ItemsGenerated/Weapon_Battleaxe_Doomed.png",
-    "PlayerAnimationsId":  "Outlander_Brute_Axe",
-    "Quality":  "Rare",
-    "ItemLevel":  35,
-    "MaxDurability":  75,
-    "InteractionVars":  {
-                            "Signature_Whirlwind_Damage":  {
-                                                               "Interactions":  [
-                                                                                    {
-                                                                                        "Parent":  "Weapon_Battleaxe_Signature_Whirlwind_Damage",
-                                                                                        "DamageCalculator":  {
-                                                                                                                 "BaseDamage":  {
-                                                                                                                                    "Physical":  12
-                                                                                                                                }
-                                                                                                             },
-                                                                                        "EntityStatsOnHit":  [
-
-                                                                                                             ],
-                                                                                        "DamageEffects":  {
-                                                                                                              "WorldSoundEventId":  "SFX_Battleaxe_T2_Impact",
-                                                                                                              "LocalSoundEventId":  "SFX_Battleaxe_T2_Impact"
-                                                                                                          }
-                                                                                    }
-                                                                                ]
-                                                           }
-                        },
-    "Recipe":  {
-                   "TimeSeconds":  1.5,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ResourceTypeId":  "Rock",
-                                     "Quantity":  6
-                                 },
-                                 {
-                                     "ResourceTypeId":  "Wood_Trunk",
-                                     "Quantity":  3
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Fibre",
-                                     "Quantity":  4
-                                 },
-                                 {
-                                     "Quantity":  1,
-                                     "ItemId":  "Ingredient_Voidheart"
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Id":  "Workbench",
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Workbench_Survival"
-                                                               ]
-                                            }
-                                        ]
-               }
+  "Parent": "Template_Weapon_Battleaxe",
+  "TranslationProperties": {
+    "Name": "server.items.Weapon_Battleaxe_Doomed.name"
+  },
+  "Model": "NPC/Intelligent/Outlander_Brute/Models/Weapons/Battleaxe/Doomed.blockymodel",
+  "Texture": "NPC/Intelligent/Outlander_Brute/Models/Weapons/Battleaxe/Doomed_Texture.png",
+  "Icon": "Icons/ItemsGenerated/Weapon_Battleaxe_Doomed.png",
+  "PlayerAnimationsId": "Outlander_Brute_Axe",
+  "Quality": "Rare",
+  "ItemLevel": 35,
+  "MaxDurability": 75,
+  "InteractionVars": {
+    "Signature_Whirlwind_Damage": {
+      "Interactions": [
+        {
+          "Parent": "Weapon_Battleaxe_Signature_Whirlwind_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 12
+            }
+          },
+          "EntityStatsOnHit": [],
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Battleaxe_T2_Impact",
+            "LocalSoundEventId": "SFX_Battleaxe_T2_Impact"
+          }
+        }
+      ]
+    }
+  },
+  "Recipe": {
+    "TimeSeconds": 1.5,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Voidheart",
+        "Quantity": 2
+      },
+      {
+        "ItemId": "Ingredient_Bar_Cobalt",
+        "Quantity": 6
+      },
+      {
+        "ItemId": "Ingredient_Leather_Heavy",
+        "Quantity": 2
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Categories": [
+          "Weapon_Battleaxe"
+        ],
+        "Id": "Weapon_Bench",
+        "RequiredTierLevel": 3
+      }
+    ]
+  }
 }

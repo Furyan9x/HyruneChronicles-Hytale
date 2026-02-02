@@ -69,13 +69,13 @@ public class NpcLevelConfigRepository {
 
         groups.add(buildGroup("critters", 2, 2, CombatStyle.MELEE, false,
             List.of("rat", "rabbit", "chicken", "duck", "frog")));
-        groups.add(buildGroup("beasts", 6, 2, CombatStyle.RANGED, false,
+        groups.add(buildGroup("beasts", 6, 4, CombatStyle.RANGED, false,
             List.of("wolf", "bear", "boar", "spider", "bat")));
-        groups.add(buildGroup("undead", 10, 2, CombatStyle.MAGIC, false,
+        groups.add(buildGroup("undead", 10, 3, CombatStyle.MAGIC, false,
             List.of("undead", "skeleton", "zombie", "ghost")));
         groups.add(buildGroup("bandits", 12, 2, CombatStyle.MELEE, false,
             List.of("bandit", "raider", "brigand")));
-        groups.add(buildGroup("elites", 20, 2, CombatStyle.MAGIC, true,
+        groups.add(buildGroup("elites", 20, 4, CombatStyle.MAGIC, true,
             List.of("elite", "boss", "champion")));
 
         config.getGroups().addAll(groups);

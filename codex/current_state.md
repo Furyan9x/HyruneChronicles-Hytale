@@ -6,7 +6,7 @@ Status scale:
 - Planned = placeholder only or not started yet.
 
 ## Skill Order Progress (per codex/skill-order.md)
-1) Attack: Implemented (damage bonus per level + melee crit scaling via Strength). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
+1) Attack: Implemented (damage bonus per level). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
 2) Defence: Implemented (damage reduction per level with cap). Armor level requirements enforced (invalid armor equip is denied).
 3) Strength: Implemented (crit chance + crit damage scaling).
 4) Ranged: Implemented (damage + crit scaling for ranged weapons). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
@@ -22,7 +22,7 @@ Status scale:
 14) Arcane Engineering: Partial (crafting XP rules; RNG crafting system not yet).
 15) Armorsmithing: Partial (crafting XP rules; RNG crafting system not yet).
 16) Weaponsmithing: Partial (crafting XP rules; RNG crafting system not yet).
-17) Fishing: Implemented (custom bobber/cast/idle systems + XP hooks). No level requirements for fish/rods yet, no higher tier rods. 
+17) Fishing: Implemented (custom bobber/cast/idle systems + XP hooks, fish gated by level). No level requirements for rods yet, no higher tier rods. 
 18) Slayer: Implemented (tiered tasks, kill tracking, persistence, turn-in rewards, vendor UI placeholder).
 
 ## Extra Systems (Not in Skill Order)
@@ -32,10 +32,15 @@ Status scale:
 - Nameplates: Implemented (level/class display).
 - Data persistence: Implemented (JSON repositories in ./origins_data).
 - Crafting overrides: base Hytale assets audited with a generator to add/fix recipes, normalize recipe arrays, and enforce bench categories while excluding non-craftable items.
+- Basic trade pack crafting implemented. Craft Trade packs at a trade pack bench, they slow you down and display a model on the players back when in inventory (unintended functionality: makes the character naked. Seek fix.)
+- Repair bench added for safer repairing but not easy on the go. Repair kits for quick repair - lose max durability. Repair bench for repairing with base materials - maintain max durability.
 
-## Crafting Overrides Workflow
+
+## Crafting Overrides
 - Generator: `tools/generate_crafting_recipes.ps1` (audits base assets, applies exclusion rules, normalizes recipe arrays, and writes overrides).
 - Exclusions include debug/test/materials/blocks and specified keywords (bench exclusions list lives in the generator script).
+- first pass on fixing most recipes completed. Need to further refine in future. 
+- re-ordered craftingskillregistry rules so that armor crafted with "leather" or "cloth" in the name gives XP to its respective skill, leatherworking or arcane engineering. 
 
 ## Gear Requirement Maintenance
 - Central registry: `src/main/java/dev/hytalemodding/origins/registry/CombatRequirementRegistry.java`
@@ -51,3 +56,4 @@ Status scale:
 - Event listeners live in `src/main/java/dev/hytalemodding/origins/events`.
 - Utility helpers live in `src/main/java/dev/hytalemodding/origins/util`.
 - Interaction handlers live in `src/main/java/dev/hytalemodding/origins/interaction`.
+

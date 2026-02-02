@@ -12,17 +12,18 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Origins;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
+import dev.hytalemodding.origins.tradepack.TradePackUtils;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 public final class SkillStatBonusApplier {
-    public static final float HEALTH_PER_CONSTITUTION = 1.0f;
-    public static final float MANA_MAX_PER_MAGIC = 2.0f;
+    public static final float HEALTH_PER_CONSTITUTION = 5.0f;
+    public static final float MANA_MAX_PER_MAGIC = 7.0f;
     public static final float STAMINA_MAX_PER_AGILITY = 40.0f / 99.0f;
-    public static final float MOVEMENT_SPEED_BONUS_AT_99 = 0.30f;
+    public static final float MOVEMENT_SPEED_BONUS_AT_99 = 0.35f;
 
-    public static final float MANA_REGEN_PER_MAGIC = 0.1f;
+    public static final float MANA_REGEN_PER_MAGIC = 0.2f;
     public static final float STAMINA_REGEN_PER_AGILITY = 1.0f / 99.0f;
 
     private static final String HEALTH_MODIFIER_ID = "origins:health_bonus";
@@ -75,7 +76,10 @@ public final class SkillStatBonusApplier {
             defaultBaseSpeed = 5.5f;
         }
 
-        movementManager.getSettings().baseSpeed = defaultBaseSpeed * (1.0f + bonus);
+        float packMultiplier = TradePackUtils.hasTradePack(playerRef)
+            ? TradePackUtils.TRADE_PACK_SPEED_MULTIPLIER
+            : 1.0f;
+        movementManager.getSettings().baseSpeed = defaultBaseSpeed * (1.0f + bonus) * packMultiplier;
         if (playerRef.getPacketHandler() != null) {
             movementManager.update(playerRef.getPacketHandler());
         }

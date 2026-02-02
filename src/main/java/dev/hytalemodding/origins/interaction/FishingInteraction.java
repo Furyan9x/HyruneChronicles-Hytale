@@ -341,7 +341,7 @@ public class FishingInteraction extends SimpleInstantInteraction {
             updated = current.withMetadata(FishingMetaData.KEYED_CODEC, metaData);
         }
 
-        hotbar.replaceItemStackInSlot((short) slot, current, updated);
+        hotbar.replaceItemStackInSlot(slot, current, updated);
     }
 
     public static void playCastSound(PlayerRef playerRef) {
