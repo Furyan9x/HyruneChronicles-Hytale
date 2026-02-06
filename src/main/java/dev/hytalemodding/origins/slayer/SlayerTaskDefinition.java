@@ -2,13 +2,13 @@ package dev.hytalemodding.origins.slayer;
 
 public class SlayerTaskDefinition {
     private final String id;
-    private final String targetNpcTypeId;
+    private final String targetGroupId;
     private final int minCount;
     private final int maxCount;
 
-    public SlayerTaskDefinition(String id, String targetNpcTypeId, int minCount, int maxCount) {
+    public SlayerTaskDefinition(String id, String targetGroupId, int minCount, int maxCount) {
         this.id = id;
-        this.targetNpcTypeId = targetNpcTypeId;
+        this.targetGroupId = targetGroupId;
         this.minCount = minCount;
         this.maxCount = maxCount;
     }
@@ -17,8 +17,8 @@ public class SlayerTaskDefinition {
         return id;
     }
 
-    public String getTargetNpcTypeId() {
-        return targetNpcTypeId;
+    public String getTargetGroupId() {
+        return targetGroupId;
     }
 
     public int getMinCount() {

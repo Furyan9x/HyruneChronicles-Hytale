@@ -23,18 +23,20 @@ Status scale:
 15) Armorsmithing: Partial (crafting XP rules; RNG crafting system not yet).
 16) Weaponsmithing: Partial (crafting XP rules; RNG crafting system not yet).
 17) Fishing: Implemented (custom bobber/cast/idle systems + XP hooks, fish gated by level). No level requirements for rods yet, no higher tier rods. 
-18) Slayer: Implemented (tiered tasks, kill tracking, persistence, turn-in rewards, vendor UI placeholder).
+18) Slayer: Partial (tiered tasks, kill tracking and XP awarded per kill based on maxHP, persistence, turn-in rewards, vendor UI second pass done, buy tab working (placeholder items) learn and task tabs empty for now).
+19) Constitution: Implemented (max health bonuses).
+20) Agility: Implemented (stamina regen + movement speed bonuses).
 
-## Extra Systems (Not in Skill Order)
-- Constitution: Implemented (max health bonuses).
-- Agility: Implemented (stamina regen + movement speed bonuses).
+
+## Extra Systems
 - Character UI: Implemented (skills menu with tabs + attributes tab with collapsible categories + skill detail panel).
-- Nameplates: Implemented (level/class display).
+- Nameplates: Implemented (level/class display). *Need to investigate how to completely exclude NPCs from this, so that they retain their "Display Name" property from json. 
 - Data persistence: Implemented (JSON repositories in ./origins_data).
 - Crafting overrides: base Hytale assets audited with a generator to add/fix recipes, normalize recipe arrays, and enforce bench categories while excluding non-craftable items.
 - Basic trade pack crafting implemented. Craft Trade packs at a trade pack bench, they slow you down and display a model on the players back when in inventory (unintended functionality: makes the character naked. Seek fix.)
 - Repair bench added for safer repairing but not easy on the go. Repair kits for quick repair - lose max durability. Repair bench for repairing with base materials - maintain max durability.
-
+- Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode selected, starter kit needs to be improved. 
+- Universal Dialogue system(DialogueRegistry/OriginsDialogue, SimpleDialoguePage for every dialogue we want to create going forward.)
 
 ## Crafting Overrides
 - Generator: `tools/generate_crafting_recipes.ps1` (audits base assets, applies exclusion rules, normalizes recipe arrays, and writes overrides).

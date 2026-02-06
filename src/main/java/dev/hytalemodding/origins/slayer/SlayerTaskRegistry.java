@@ -55,7 +55,7 @@ public class SlayerTaskRegistry {
                 if (task.getId() == null || task.getId().isBlank()) {
                     issues.add("Tier " + tier.getMinLevel() + "-" + tier.getMaxLevel() + " has a task with empty id.");
                 }
-                if (task.getTargetNpcTypeId() == null || task.getTargetNpcTypeId().isBlank()) {
+                if (task.getTargetGroupId() == null || task.getTargetGroupId().isBlank()) {
                     issues.add("Task " + task.getId() + " has empty target NPC id.");
                 }
                 if (task.getMinCount() <= 0) {

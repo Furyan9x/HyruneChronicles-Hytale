@@ -1,0 +1,89 @@
+$C = "../Common.ui";
+
+// -- Local Styles
+@TitleText = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@BodyText = LabelStyle(FontSize: 14, TextColor: #f7e9cd, VerticalAlignment: Center);
+@HeaderCenter = LabelStyle(FontSize: 13, TextColor: #f2d38a, HorizontalAlignment: Center, RenderBold: true);
+@HeaderLeft = LabelStyle(FontSize: 13, TextColor: #f2d38a, HorizontalAlignment: Start, RenderBold: true);
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 780, Height: 540);
+
+
+  Group #Title {
+  Anchor: (Top: 0, Left: 0, Right: 0, Height: 50);
+
+    Label {
+      Text: "Repair Bench";
+      Style: @TitleText;
+      Anchor: (Full: 0); // Fills the title bar area
+    }
+    TextButton #RepairClose {
+    Anchor: (Right: 4, Top: 8, Width: 24, Height: 24); // Manual right padding
+    Text: "X";
+    Style: $C.@HeaderTextButtonStyle;
+    }
+  }
+
+
+  Group #Content {
+    LayoutMode: Top;
+    Padding: (Top: 50, Left: 20, Right: 20, Bottom: 20);
+
+    // -- Subtitle --
+    Label {
+      Text: "Select a damaged item to repair.";
+      Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
+      Anchor: (Height: 55, Left: 0, Right: 0);
+    }
+
+    Group { Anchor: (Height: 35); }
+
+    // -- Header Columns --
+    Group #RepairColumns {
+      LayoutMode: Left;
+      Anchor: (Width: 700, Height: 18);
+      Padding: (Left: 0, Right: 32);
+
+      Label {
+        Text: "Item";
+        Style: @HeaderLeft;
+        Anchor: (Width: 240, Height: 18);
+      }
+      Label {
+        Text: "Durability";
+        Style: @HeaderCenter;
+        Anchor: (Width: 100, Height: 18);
+      }
+      Label {
+        Text: "Cost";
+        Style: @HeaderLeft;
+        Anchor: (Width: 140, Height: 18);
+        Padding: (Left: 14);
+      }
+    }
+
+    Group { Anchor: (Height: 2); }
+
+    // -- Scroll List --
+    Group #RepairListScroll {
+      LayoutMode: TopScrolling;
+      FlexWeight: 1;
+      Anchor: (Left: 0, Right: 0);
+
+      Group #RepairList {
+        LayoutMode: Top;
+        Anchor: (Left: 0, Right: 0);
+        Padding: (Bottom: 4);
+      }
+    }
+
+    // -- Empty State Label --
+    Label #RepairEmpty {
+      Text: "No damaged items available.";
+      Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
+      Anchor: (Height: 30, Left: 0, Right: 0);
+      Visible: false;
+    }
+  }
+}

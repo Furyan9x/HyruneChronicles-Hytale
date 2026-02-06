@@ -37,6 +37,8 @@ public class SlayerPlayerData {
         this.slayerPoints += points;
     }
 
+    public void removeSlayerPoints(int points) {this.slayerPoints -= points;}
+
     public int getCompletedTasks() {
         return completedTasks;
     }

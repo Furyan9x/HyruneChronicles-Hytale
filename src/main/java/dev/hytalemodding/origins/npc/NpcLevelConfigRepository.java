@@ -16,7 +16,9 @@ public class NpcLevelConfigRepository {
     private static final String CONFIG_FILE = "npc_levels.json";
     private static final List<String> DEFAULT_EXCLUDES = List.of(
         "Tier1_Slayer_Master",
-        "Tier1_Slayer_Master_Static"
+        "Slayer_Master",
+        "Hans",
+        "Master_Hans"
     );
 
     private final Gson gson;
@@ -67,16 +69,38 @@ public class NpcLevelConfigRepository {
         config.getExcludedNpcIds().addAll(DEFAULT_EXCLUDES);
         List<NpcLevelConfig.NpcLevelGroup> groups = new ArrayList<>();
 
-        groups.add(buildGroup("critters", 2, 2, CombatStyle.MELEE, false,
-            List.of("rat", "rabbit", "chicken", "duck", "frog")));
-        groups.add(buildGroup("beasts", 6, 4, CombatStyle.RANGED, false,
-            List.of("wolf", "bear", "boar", "spider", "bat")));
-        groups.add(buildGroup("undead", 10, 3, CombatStyle.MAGIC, false,
-            List.of("undead", "skeleton", "zombie", "ghost")));
-        groups.add(buildGroup("bandits", 12, 2, CombatStyle.MELEE, false,
-            List.of("bandit", "raider", "brigand")));
-        groups.add(buildGroup("elites", 20, 4, CombatStyle.MAGIC, true,
-            List.of("elite", "boss", "champion")));
+        // --- TIER 1 MOBS ---
+        // Level 1-5 (The "Rat" phase)
+        groups.add(buildGroup("vermin", 3, 3, CombatStyle.MELEE, false,
+                List.of("rat", "scorpion", "snake", "spider", "bunny", "rabbit", "chicken", "turkey",
+                        "mouse", "frog", "gecko", "meerkat", "squirrel" )));
+
+        // Level 6-12 (Introduction to combat)
+        groups.add(buildGroup("beasts", 8, 4, CombatStyle.MELEE, false,
+                List.of("bison", "boar", "cow", "pig", "sheep", "mouflon", "goat", "camel", "deer", "fox", "hyena",
+                        "toad", "deer", "moose", "horse", "ram", "skrill", "warthog" )));
+
+        // --- TIER 2 MOBS ---
+        // Level 15-22 (Wilderness dangers)
+        groups.add(buildGroup("predators", 18, 4, CombatStyle.RANGED, false,
+                List.of("wolf", "crocodile", "leapard_snow", "tiger_sabertooth" )));
+
+        // Level 20-28 (Humanoid enemies)
+        groups.add(buildGroup("outlaws", 24, 4, CombatStyle.MELEE, false,
+                List.of("goblin", "bandit", "thief", "poacher", "outlander", "trork", "scarak")));
+
+        // --- TIER 3 MOBS ---
+        // Level 30-40
+        groups.add(buildGroup("undead", 35, 5, CombatStyle.MAGIC, false,
+                List.of("zombie", "skeleton", "undead", "ghost", "void", "spawn_void")));
+
+        // Level 40-55 (Heavy hitters)
+        groups.add(buildGroup("brutes", 45, 10, CombatStyle.RANGED, true, // 'true' for Elite?
+                List.of("bear", "trork", "troll", "yeti", "fen_stalker", "emberwulf", "raptor_cave", "rex_cave")));
+
+        // --- BOSSES ---
+        groups.add(buildGroup("bosses", 60, 5, CombatStyle.MAGIC, true,
+                List.of("boss", "chief", "leader", "titan")));
 
         config.getGroups().addAll(groups);
         return config;

@@ -1,0 +1,214 @@
+$C = "../Common.ui";
+
+// --- STYLES ---
+@PageTitleStyle = LabelStyle(FontSize: 24, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+@CardTitleStyle = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center);
+@CardSubStyle = LabelStyle(FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center);
+@DetailTitleStyle = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true);
+@DetailBodyStyle = LabelStyle(FontSize: 14, TextColor: #f7e9cd, Wrap: true);
+@WarningStyle = LabelStyle(FontSize: 13, TextColor: #FF5555, RenderBold: true);
+
+$C.@PageOverlay {
+  Group #GameModeRoot {
+    Anchor: (Width: 900, Height: 550);
+    Background: #15100d(0.98);
+    Padding: (Top: 20, Left: 20, Right: 20, Bottom: 20);
+    LayoutMode: Top;
+
+    // --- HEADER ---
+    Group #Header {
+      Anchor: (Height: 40, Left: 0, Right: 0);
+
+      Label #PageTitle {
+        Text: "CHOOSE YOUR PATH";
+        // Use FlexWeight to take up space, pushing the close button to the right
+        FlexWeight: 1;
+        Style: @PageTitleStyle;
+      }
+
+      // Close Button
+      TextButton #CloseButton {
+         Text: "X";
+         Anchor: (Width: 30, Height: 30, Top: 1, Bottom: 0, Right: 1);
+      }
+    }
+
+    // Spacer
+    Group { Anchor: (Height: 30); }
+
+    // --- THE THREE CARDS ---
+    Group #SelectionPanel {
+      Anchor: (Height: 280, Left: 0, Right: 0);
+      LayoutMode: Left;
+
+      // -- CARD 1: NORMAL --
+      Group #NormalCard {
+        Anchor: (Width: 280, Height: 280);
+        Background: #2b1b12;
+
+        // The "Selected" Highlight (Using explicit anchors to fill)
+        Group #NormalSelected {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: #f2d38a(0.15);
+            Visible: false;
+
+            // Bottom Gold Strip
+            Group { Anchor: (Height: 4, Bottom: 0, Left: 0, Right: 0); Background: #f2d38a; }
+        }
+
+        // Content
+        Group {
+            LayoutMode: Top;
+            // Use anchors to position content slightly down
+            Anchor: (Left: 0, Right: 0, Top: 20, Bottom: 0);
+
+            // Icon Placeholder
+            Group { Anchor: (Width: 100, Height: 100); Background: #000000(0.3); }
+            // Spacer
+            Group { Anchor: (Height: 20); }
+
+            Label { Text: "Normal"; Style: @CardTitleStyle; Anchor: (Height: 24); }
+            Label { Text: "Standard Experience"; Style: @CardSubStyle; Anchor: (Height: 20); }
+        }
+
+        // The Click Interaction
+        Button #NormalButton {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: #000000(0); // Transparent
+        }
+      }
+
+      Group { FlexWeight: 1; } // Spacer
+
+      // -- CARD 2: IRONMAN --
+      Group #IronmanCard {
+        Anchor: (Width: 280, Height: 280);
+        Background: #2b1b12;
+
+        Group #IronmanSelected {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: #f2d38a(0.15);
+            Visible: false;
+            Group { Anchor: (Height: 4, Bottom: 0, Left: 0, Right: 0); Background: #f2d38a; }
+        }
+
+        Group {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0, Top: 20, Bottom: 0);
+
+            Group { Anchor: (Width: 100, Height: 100); Background: #000000(0.3); }
+            Group { Anchor: (Height: 20); }
+            Label { Text: "Ironman"; Style: @CardTitleStyle; Anchor: (Height: 24); }
+            Label { Text: "Self-Sufficient"; Style: @CardSubStyle; Anchor: (Height: 20); }
+        }
+
+        Button #IronmanButton { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #000000(0); }
+      }
+
+      Group { FlexWeight: 1; } // Spacer
+
+      // -- CARD 3: HARDCORE --
+      Group #HardcoreCard {
+        Anchor: (Width: 280, Height: 280);
+        Background: #2b1b12;
+
+        Group #HardcoreSelected {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: #f2d38a(0.15);
+            Visible: false;
+            Group { Anchor: (Height: 4, Bottom: 0, Left: 0, Right: 0); Background: #f2d38a; }
+        }
+
+        Group {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0, Top: 20, Bottom: 0);
+
+            Group { Anchor: (Width: 100, Height: 100); Background: #000000(0.3); }
+            Group { Anchor: (Height: 20); }
+            Label { Text: "Hardcore"; Style: @CardTitleStyle; Anchor: (Height: 24); }
+            Label { Text: "One Life Only"; Style: @CardSubStyle; Anchor: (Height: 20); }
+        }
+
+        Button #HardcoreButton { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #000000(0); }
+      }
+    }
+
+    // Spacer
+    Group { Anchor: (Height: 20); }
+
+    // --- DETAILS PANEL (Footer) ---
+    Group #DetailsPanel {
+      Visible: false;
+      FlexWeight: 1;
+      Background: #000000(0.25);
+      LayoutMode: Left;
+      Padding: (Top: 15, Left: 15, Right: 15, Bottom: 15);
+
+      // Left: Text Info
+      Group {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        // Padding right using a container approach wasn't explicitly in CharacterMenu,
+        // but we can trust FlexWeight to keep us away from the button.
+
+        Label #ConfirmationTitle {
+            Text: "Mode Name";
+            Style: @DetailTitleStyle;
+            Anchor: (Height: 24);
+        }
+
+        Group { Anchor: (Height: 5); }
+
+        Label #ConfirmationDescription {
+            Text: "Description goes here...";
+            Style: @DetailBodyStyle;
+            Anchor: (Height: 60);
+        }
+
+        Label #ConfirmationWarning {
+            Text: "Warning text";
+            Style: @WarningStyle;
+            Anchor: (Height: 20);
+            Visible: false;
+        }
+      }
+
+      // Spacer between text and button
+      Group { Anchor: (Width: 20); }
+
+      // Right: Action Button
+      Group {
+        Anchor: (Width: 200, Top: 0, Bottom: 0);
+
+        // Spacer to push button down to center it vertically
+        // (Since vertical alignment is tricky, manual spacing is safer)
+        Group { Anchor: (Height: 15); }
+
+        TextButton #ConfirmButton {
+            Text: "BEGIN ADVENTURE";
+            Anchor: (Height: 45, Bottom: 5, Left: 0, Right: 0);
+            Style: $C.@DefaultTextButtonStyle;
+        }
+      }
+
+      Group #AlreadySelectedPanel {
+            LayoutMode: Top;
+            Visible: false;
+
+            Label #AlreadySelectedMessage {
+              Text: "You have already chosen your path!";
+              Anchor: (Height: 120);
+              Style: @DetailBodyStyle;
+            }
+
+            Group { Anchor: (Height: 6); }
+
+            TextButton #AlreadySelectedCloseButton {
+              Text: "Close";
+              Anchor: (Height: 20);
+              Background: #000000(0.25);
+            }
+          }
+    }
+  }
+}

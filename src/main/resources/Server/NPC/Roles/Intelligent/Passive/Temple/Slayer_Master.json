@@ -232,7 +232,7 @@
                 "Type": "LockOnInteractionTarget"
               },
               {
-                "Type": "OpenSlayerDialogue"
+                "Type": "OpenDialogue"
               },
               {
                 "Type": "State",

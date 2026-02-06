@@ -1,11 +1,19 @@
 package dev.hytalemodding.origins.slayer;
 
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
+import com.hypixel.hytale.server.core.inventory.container.CombinedItemContainer;
+import com.hypixel.hytale.server.core.inventory.transaction.ItemStackTransaction;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
+import dev.hytalemodding.origins.npc.NpcLevelService;
 import dev.hytalemodding.origins.skills.SkillType;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SlayerService {
@@ -13,10 +21,80 @@ public class SlayerService {
     private final SlayerRepository repository;
     private final SlayerTaskRegistry taskRegistry;
     private final Map<UUID, SlayerPlayerData> cache = new ConcurrentHashMap<>();
+    private final NpcLevelService npcService;
 
-    public SlayerService(SlayerRepository repository, SlayerTaskRegistry taskRegistry) {
+    private final List<ShopItem> shopItems = new ArrayList<>();
+
+    public SlayerService(SlayerRepository repository, SlayerTaskRegistry taskRegistry, NpcLevelService npcService) {
         this.repository = repository;
         this.taskRegistry = taskRegistry;
+        this.npcService = npcService;
+
+        initShop();
+    }
+    private void initShop() {
+        // ID, Display Name, Cost
+        shopItems.add(new ShopItem("Ingredient_Bar_Copper", "Copper Bar", 5));
+        shopItems.add(new ShopItem("Ingredient_Bar_Iron", "Iron Bar", 10));
+        shopItems.add(new ShopItem("Ingredient_Bar_Thorium", "Thorium Bar", 50));
+    }
+
+    public List<ShopItem> getShopItems() {
+        return Collections.unmodifiableList(shopItems);
+    }
+
+    /**
+     * Attempts to purchase an item.
+     * 1. Checks Points.
+     * 2. Checks Inventory Space using Transaction.
+     * 3. Deducts Points only if item fits.
+     */
+    public boolean attemptPurchase(Player player, String itemId, Ref<EntityStore> playerRef, Store<EntityStore> store) {
+        if (player == null) return false;
+
+        // 1. Validate Item
+        ShopItem shopItem = shopItems.stream()
+                .filter(i -> i.getId().equalsIgnoreCase(itemId))
+                .findFirst()
+                .orElse(null);
+
+        if (shopItem == null) return false;
+
+        // 2. Validate Points
+        SlayerPlayerData data = getPlayerData(player.getUuid());
+        if (data.getSlayerPoints() < shopItem.getCost()) {
+            return false; // Not enough points
+        }
+
+        // 3. Handle Inventory Logic
+        Inventory inventory = player.getInventory();
+        if (inventory == null) return false;
+
+        // Get the container that represents Hotbar + Main Inventory
+        CombinedItemContainer container = inventory.getCombinedHotbarFirst();
+
+        // Create the stack we want to give
+        ItemStack stackToAdd = new ItemStack(shopItem.getId(), 1);
+
+        // Try to add it. This calculates if it fits.
+        ItemStackTransaction transaction = container.addItemStack(stackToAdd);
+        ItemStack remainder = transaction.getRemainder();
+
+        // If there is a remainder, it means the item didn't fit.
+        // Since we are adding 1, any remainder means 0 were added.
+        if (remainder != null && !remainder.isEmpty()) {
+            return false; // Inventory Full
+        }
+
+        // 4. Success! Deduct Points & Save
+        data.removeSlayerPoints(shopItem.getCost());
+        repository.save(data);
+
+        // 5. Visual Feedback (Item Pickup Notification)
+        // This makes the item pop up on the right side of the screen
+        player.notifyPickupItem(playerRef, stackToAdd, null, store);
+
+        return true;
     }
 
     public SlayerPlayerData getPlayerData(UUID uuid) {
@@ -42,15 +120,15 @@ public class SlayerService {
         if (task == null) {
             return null;
         }
-
+        String specificTarget = npcService.getRandomIdFromGroup(task.getTargetGroupId());
         int count = taskRegistry.rollKillCount(task);
-        SlayerTaskAssignment assignment = new SlayerTaskAssignment(task.getId(), task.getTargetNpcTypeId(), count);
+        SlayerTaskAssignment assignment = new SlayerTaskAssignment(task.getId(), specificTarget, count);
         data.setAssignment(assignment);
         repository.save(data);
         return assignment;
     }
 
-    public boolean onKill(UUID killerUuid, String npcTypeId) {
+    public boolean onKill(UUID killerUuid, String npcTypeId, long xpAmount) {
         SlayerPlayerData data = getPlayerData(killerUuid);
         SlayerTaskAssignment assignment = normalizeAssignment(data.getAssignment());
         if (assignment == null) {
@@ -65,6 +143,11 @@ public class SlayerService {
 
         assignment.decrement();
         repository.save(data);
+
+        LevelingService leveling = LevelingService.get();
+        if (leveling != null) {
+            leveling.addSkillXp(killerUuid, SkillType.SLAYER, xpAmount);
+        }
         return true;
     }
 

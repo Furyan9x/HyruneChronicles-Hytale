@@ -1,0 +1,66 @@
+$C = "../Common.ui";
+
+
+@RowText = LabelStyle(FontSize: 14, TextColor: #f7e9cd, VerticalAlignment: Center, HorizontalAlignment: Start);
+@RowValue = LabelStyle(FontSize: 14, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+@ButtonLabel = LabelStyle(FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center, RenderBold: true);
+
+Group {
+  LayoutMode: Top;
+  Anchor: (Width: 700, Height: 46); // 40px content + 4px spacer
+
+  Group {
+    LayoutMode: Left;
+    Anchor: (Width: 680, Height: 36);
+    Background: #000000(0.4);
+    Padding: (Left: 12, Right: 12);
+
+    Label #ItemName {
+      Anchor: (Width: 240, Height: 40);
+      Style: @RowText;
+    }
+
+    Label #ItemDurability {
+      Anchor: (Width: 100, Height: 40);
+      Style: @RowValue;
+    }
+    Group { Anchor: (Width: 4); }
+
+    Group #CostContainer {
+      LayoutMode: Left;
+      Anchor: (Width: 140, Height: 40);
+
+      ItemIcon #CostIcon {
+        Anchor: (Width: 24, Height: 24);
+        Padding: (Top: 4);
+      }
+
+      Group { Anchor: (Width: 4); }
+
+      Label #ItemCost {
+        FlexWeight: 1; // Sibling property
+        Anchor: (Height: 40);
+        Style: @RowText;
+      }
+    }
+
+    Group { FlexWeight: 1; }
+
+    Group {
+    LayoutMode: Center;
+    Anchor: (Width: 120, Height: 40);
+
+    TextButton #RepairButton {
+      Anchor: (Width: 125, Height: 28);
+      Text: "Repair";
+      Style: $C.@DefaultTextButtonStyle;
+      Padding: (Top: 0);
+    }
+  }
+
+  // -- Vertical Spacer --
+  Group {
+    Anchor: (Height: 2);
+  }
+}
+}

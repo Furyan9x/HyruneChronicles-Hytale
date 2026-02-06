@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class NpcLevelService {
 
@@ -140,6 +141,21 @@ public class NpcLevelService {
             }
         }
         return false;
+    }
+    /**
+     * Returns a random NPC ID from the specified group ID.
+     * Returns null if group doesn't exist or is empty.
+     */
+    public String getRandomIdFromGroup(String groupId) {
+        for (NpcLevelConfig.NpcLevelGroup group : config.getGroups()) {
+            if (group.getId().equalsIgnoreCase(groupId)) {
+                List<String> contains = group.getMatch().getContains();
+                if (contains == null || contains.isEmpty()) return null;
+
+                return contains.get(ThreadLocalRandom.current().nextInt(contains.size()));
+            }
+        }
+        return null;
     }
 
     private boolean matchesExclude(String value, String excluded) {
