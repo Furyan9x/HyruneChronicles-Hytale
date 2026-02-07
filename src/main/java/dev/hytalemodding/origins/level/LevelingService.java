@@ -6,6 +6,7 @@ import dev.hytalemodding.origins.events.XpGainListener;
 import dev.hytalemodding.origins.level.formulas.LevelFormula;
 import dev.hytalemodding.origins.playerdata.PlayerLvlData;
 import dev.hytalemodding.origins.skills.SkillType;
+import dev.hytalemodding.origins.util.XPDropManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +129,19 @@ public class LevelingService {
 
         this.repository.save(data);
         this.xpGainListeners.forEach(l -> l.onXpGain(id, amount, skill));
+        float progress = calculateSkillProgress(newXp, newLevel);
+        XPDropManager.get().handleXpGain(id, skill.getDisplayName(), amount, progress);
+    }
+
+    private float calculateSkillProgress(long currentXp, int currentLevel) {
+        if (currentLevel >= 99) return 1.0f;
+
+        long xpForCurrentLevel = this.formula.getXpForLevel(currentLevel);
+        long xpForNextLevel = this.formula.getXpForLevel(currentLevel + 1);
+        long xpIntoLevel = currentXp - xpForCurrentLevel;
+        long xpNeededForLevel = xpForNextLevel - xpForCurrentLevel;
+
+        return (float) xpIntoLevel / (float) xpNeededForLevel;
     }
 
     /**

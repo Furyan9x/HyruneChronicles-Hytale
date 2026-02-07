@@ -22,7 +22,7 @@ public class LevelingVisualsListener implements LevelUpListener {
 
         String title = "Level Up!";
         String subtitle = sourceName + " reached Level " + newLevel;
-        String chat = "§6[Origins] §e" + sourceName + "§6 is now Level §e" + newLevel + "§6!";
+        String chat = "[Origins]" + sourceName + " is now Level " + newLevel + "!";
 
         EventTitleUtil.showEventTitleToPlayer(player, Message.raw(title), Message.raw(subtitle), true);
         player.sendMessage(Message.raw(chat));

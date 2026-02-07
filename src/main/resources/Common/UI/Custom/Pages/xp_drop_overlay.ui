@@ -1,0 +1,52 @@
+// XP Drop Overlay - RuneScape style XP notification
+// File: Pages/xp_drop_overlay.ui
+
+@RingSize = 64;
+@IconSize = 28;
+@BackgroundSize = 64;
+
+// Root container - positioned at top center of screen
+Group #XPDropRoot {
+    LayoutMode: Top;
+    Padding: (Top: 60);
+
+    // Container for overlapping icon + ring
+    Group #RingContainer {
+        Anchor: (Width: @RingSize, Height: @RingSize);
+        LayoutMode: Full; // CRITICAL: Allows icon and ring to overlap
+
+
+        // Background layer (static, always visible)
+        Group #BackgroundIcon {
+            Anchor: (Width: @BackgroundSize, Height: @BackgroundSize);
+            Background: (TexturePath: "Images/xpdropbg.png", Color: #ffffff);
+        }
+        // Skill Icon (background layer)
+        Group #SkillIcon {
+            Anchor: (Width: @IconSize, Height: @IconSize);
+            // Default - will be replaced by Java with actual skill icon
+        }
+
+        // Progress Ring (foreground layer)
+        CircularProgressBar #ProgressBarFill {
+            Anchor: (Width: @RingSize, Height: @RingSize);
+            Value: 0;
+            MaskTexturePath: "Images/xpdropfillmask.png";
+            Color: #98fb98; // Teal/cyan color for the progress fill
+        }
+    }
+
+    // Small spacer between ring and text
+    Group { Anchor: (Height: 8); }
+
+    // XP Amount Text (directly below ring)
+    Label #XPAmount {
+        Text: "+0 XP";
+        Style: (
+            FontSize: 16,
+            TextColor: #F3E5AB, // Gold color
+            RenderBold: true,
+            HorizontalAlignment: Center
+        );
+    }
+}

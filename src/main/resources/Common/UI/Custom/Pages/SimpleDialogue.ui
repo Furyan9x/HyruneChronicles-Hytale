@@ -1,0 +1,276 @@
+$C = "../Common.ui";
+
+// ========================================
+// SIMPLE DIALOGUE UI - RuneScape Style
+// ========================================
+// Designed for generic NPC dialogue with:
+// - NPC name at top (gold text)
+// - Dialogue text (dark on parchment)
+// - Up to 8 numbered options
+// ========================================
+
+// Text Styles
+@NPCNameStyle = LabelStyle(
+  FontSize: 16,
+  TextColor: #f2d38a,
+  RenderBold: true,
+  HorizontalAlignment: Center
+);
+
+@DialogueTextStyle = LabelStyle(
+  FontSize: 14,
+  TextColor: #2b1b12,
+  HorizontalAlignment: Start,
+  VerticalAlignment: Center
+);
+
+@OptionNumberStyle = LabelStyle(
+  FontSize: 13,
+  TextColor: #f2d38a,
+  RenderBold: true,
+  HorizontalAlignment: Start,
+  VerticalAlignment: Center
+);
+
+@OptionTextStyle = LabelStyle(
+  FontSize: 13,
+  TextColor: #f7e9cd,
+  HorizontalAlignment: Start,
+  VerticalAlignment: Center
+);
+
+// Main Dialogue Container
+Group #DialogueRoot {
+  Anchor: (Width: 500, Height: 360, Bottom: 80);
+  LayoutMode: Top;
+  Padding: (Full: 12);
+  Background: #2b1b12(0.92);
+
+  // ========== NPC NAME SECTION ==========
+  Group #NPCNameSection {
+    Anchor: (Height: 32);
+    LayoutMode: Top;
+    Padding: (Top: 4, Bottom: 8);
+
+    Group {
+      Anchor: (Height: 1);
+      Background: #f2d38a(0.3);
+    }
+    Label #NpcName {
+      Text: "NPC Name";
+      Style: @NPCNameStyle;
+      Anchor: (Height: 20);
+    }
+
+    // Decorative separator line
+    Group {
+      Anchor: (Height: 1);
+      Background: #f2d38a(0.3);
+    }
+  }
+
+  Group { Anchor: (Height: 4); }
+
+  // ========== DIALOGUE TEXT SECTION ==========
+  Group #DialogueSection {
+    Anchor: (Height: 90);
+    LayoutMode: Top;
+    Background: #e8d5b7(0.95); // Parchment color
+    Padding: (Full: 10);
+
+    Label #DialogueText {
+      Text: "Greetings, adventurer! How can I assist you today?";
+      Style: @DialogueTextStyle;
+    }
+  }
+
+  Group { Anchor: (Height: 8); }
+
+  // ========== OPTIONS SECTION ==========
+  Group #OptionsSection {
+    LayoutMode: Top;
+    FlexWeight: 1;
+
+    // Option 0
+    Button #Option0 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option0Number {
+        Text: "1.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option0Text {
+        Text: "Option 0";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 1
+    Button #Option1 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option1Number {
+        Text: "2.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option1Text {
+        Text: "Option 1";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 2
+    Button #Option2 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option2Number {
+        Text: "3.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option2Text {
+        Text: "Option 2";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 3
+    Button #Option3 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option3Number {
+        Text: "4.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option3Text {
+        Text: "Option 3";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 4
+    Button #Option4 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option4Number {
+        Text: "5.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option4Text {
+        Text: "Option 4";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 5
+    Button #Option5 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option5Number {
+        Text: "6.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option5Text {
+        Text: "Option 5";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 6
+    Button #Option6 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option6Number {
+        Text: "7.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option6Text {
+        Text: "Option 6";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Option 7
+    Button #Option7 {
+      Anchor: (Height: 26);
+      LayoutMode: Left;
+      Visible: false;
+      Background: #000000(0.25);
+      Padding: (Left: 8, Right: 8);
+
+      Label #Option7Number {
+        Text: "8.";
+        Style: @OptionNumberStyle;
+        Anchor: (Width: 20);
+      }
+
+      Label #Option7Text {
+        Text: "Option 7";
+        Style: @OptionTextStyle;
+        FlexWeight: 1;
+      }
+    }
+  }
+}

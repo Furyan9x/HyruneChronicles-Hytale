@@ -1,0 +1,64 @@
+$C = "../Common.ui";
+
+
+// Pages/SlayerVendorEntry.ui
+Group #EntryRoot {
+    Anchor: (Height: 84);
+    LayoutMode: Top; // Vertical Stack: Card + Bottom Margin
+
+    // The Visual Card
+    Group #CardBody {
+        Anchor: (Height: 74);
+        LayoutMode: Left; // Horizontal Stack: Icon -> Text -> Button
+        Background: #000000(0.4); // Darker bg for visibility
+        Padding: (Full: 6);
+
+        // 1. ICON (Fixed Size)
+        Group #IconBox {
+            Anchor: (Width: 62, Height: 62);
+            Background: #000000(0.3);
+
+            ItemIcon #ItemIcon {
+                Anchor: (Full: 0);
+            }
+        }
+
+        Group { Anchor: (Width: 10); } // Spacer
+
+        // 2. INFO (Takes remaining space)
+        Group #InfoBox {
+            LayoutMode: Top;
+            FlexWeight: 1; // EXPAND to fill width
+
+            Group { Anchor: (Height: 10); } // Push text down slightly
+
+            Label #ItemName {
+                Text: "Item Name";
+                Style: (FontSize: 14, TextColor: #f2d38a, RenderBold: true);
+                Anchor: (Height: 18);
+            }
+
+            Label #ItemCost {
+                Text: "0 Points";
+                Style: (FontSize: 12, TextColor: #AAAAAA);
+                Anchor: (Height: 16);
+            }
+        }
+
+        // 3. BUTTON (Fixed Size on Right)
+        Group #ButtonBox {
+            LayoutMode: Top;
+            Anchor: (Width: 80);
+
+            Group { Anchor: (Height: 15); } // Push button down to center
+
+            TextButton #BuyButton {
+                Text: "Buy";
+                Anchor: (Height: 30);
+            }
+        }
+    }
+
+    // Bottom Margin between grid items
+    Group { Anchor: (Height: 10); }
+}

@@ -7,7 +7,7 @@ Status scale:
 
 ## Skill Order Progress (per codex/skill-order.md)
 1) Attack: Implemented (damage bonus per level). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
-2) Defence: Implemented (damage reduction per level with cap). Armor level requirements enforced (invalid armor equip is denied).
+2) Defence: Implemented (damage reduction per level with cap). Armor level requirements are enforced (invalid armor equip is denied).
 3) Strength: Implemented (crit chance + crit damage scaling).
 4) Ranged: Implemented (damage + crit scaling for ranged weapons). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
 5) Magic: Implemented (damage + crit scaling for magic weapons; mana bonuses/regeneration). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
@@ -35,8 +35,10 @@ Status scale:
 - Crafting overrides: base Hytale assets audited with a generator to add/fix recipes, normalize recipe arrays, and enforce bench categories while excluding non-craftable items.
 - Basic trade pack crafting implemented. Craft Trade packs at a trade pack bench, they slow you down and display a model on the players back when in inventory (unintended functionality: makes the character naked. Seek fix.)
 - Repair bench added for safer repairing but not easy on the go. Repair kits for quick repair - lose max durability. Repair bench for repairing with base materials - maintain max durability.
-- Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode selected, starter kit needs to be improved. 
+- Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode is selected; starter kit needs to be improved. 
 - Universal Dialogue system(DialogueRegistry/OriginsDialogue, SimpleDialoguePage for every dialogue we want to create going forward.)
+- Custom XP notifications using notificationsUtil. 
+
 
 ## Crafting Overrides
 - Generator: `tools/generate_crafting_recipes.ps1` (audits base assets, applies exclusion rules, normalizes recipe arrays, and writes overrides).
