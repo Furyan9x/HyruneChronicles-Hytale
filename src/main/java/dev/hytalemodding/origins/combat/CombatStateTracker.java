@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Tracks combat state.
+ */
 public final class CombatStateTracker {
     public static final long COMBAT_GRACE_MS = 3000L;
     private static final Map<UUID, Long> LAST_COMBAT = new ConcurrentHashMap<>();

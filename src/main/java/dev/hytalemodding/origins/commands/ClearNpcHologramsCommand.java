@@ -17,6 +17,9 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Command handler for clear npc holograms.
+ */
 public class ClearNpcHologramsCommand extends AbstractWorldCommand {
 
     public ClearNpcHologramsCommand() {

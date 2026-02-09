@@ -21,6 +21,9 @@ import dev.hytalemodding.origins.skills.SkillType;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for skill regen.
+ */
 public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
     private static final String MANA_ID = "Mana";
     private static final String STAMINA_ID = "Stamina";

@@ -10,6 +10,9 @@ import com.hypixel.hytale.server.npc.instructions.Action;
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
+/**
+ * 
+ */
 public class BuilderActionOpenDialogue extends BuilderActionBase {
     @Nonnull
     @Override

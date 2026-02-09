@@ -2,6 +2,9 @@ package dev.hytalemodding.origins.slayer;
 
 import java.util.List;
 
+/**
+ * Tier definition for slayer task.
+ */
 public class SlayerTaskTier {
     private final int minLevel;
     private final int maxLevel;

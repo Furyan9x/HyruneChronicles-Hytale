@@ -9,6 +9,9 @@ import dev.hytalemodding.origins.util.XPDropManager;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * HUD overlay for x p drop.
+ */
 public class XPDropOverlay extends CustomUIHud {
     private final String skillName;
     private long totalXpGained;

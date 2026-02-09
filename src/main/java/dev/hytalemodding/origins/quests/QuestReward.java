@@ -1,11 +1,15 @@
 package dev.hytalemodding.origins.quests;
 
 import dev.hytalemodding.origins.skills.SkillType;
+import com.hypixel.hytale.logger.HytaleLogger;
+
+import java.util.logging.Level;
 
 /**
  * Base class for quest rewards.
  */
 public abstract class QuestReward {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     
     public abstract String getDisplayText();
     
@@ -60,7 +64,7 @@ public abstract class QuestReward {
         @Override
         public void grant(java.util.UUID playerId) {
             // TODO: Implement item granting through inventory system
-            System.out.println("Granting " + count + "x " + itemId + " to player " + playerId);
+            LOGGER.at(Level.INFO).log("Granting " + count + "x " + itemId + " to player " + playerId);
         }
         
         public String getItemId() { return itemId; }
@@ -86,7 +90,7 @@ public abstract class QuestReward {
         @Override
         public void grant(java.util.UUID playerId) {
             // Unlocks are typically passive/text-only
-            System.out.println("Unlocked: " + unlockText + " for player " + playerId);
+            LOGGER.at(Level.INFO).log("Unlocked: " + unlockText + " for player " + playerId);
         }
         
         public String getUnlockText() { return unlockText; }

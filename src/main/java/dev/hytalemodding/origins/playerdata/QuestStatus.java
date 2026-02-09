@@ -1,4 +1,4 @@
-package dev.hytalemodding.origins.quests;
+package dev.hytalemodding.origins.playerdata;
 
 /**
  * Quest completion status.

@@ -22,11 +22,7 @@ import java.util.logging.Level;
 import static dev.hytalemodding.origins.dialogue.SimpleDialogue.choice;
 
 /**
- *
- *
- *
- *
- *
+ * Registers NPC dialogues and dialogue-bound actions for Origins.
  */
 public class OriginsDialogue {
 
@@ -158,9 +154,9 @@ public class OriginsDialogue {
             if (result == null) {
                 return "You have not completed your task yet.";
             }
-            String message = "Well done. You earned " + result.getPointsAwarded()
-                    + " Slayer points and " + result.getSlayerXpAwarded() + " Slayer XP.";
-            if (result.isItemRewarded()) {
+            String message = "Well done. You earned " + result.pointsAwarded()
+                    + " Slayer points and " + result.slayerXpAwarded() + " Slayer XP.";
+            if (result.itemRewarded()) {
                 message += " A special item reward is pending.";
             }
             return message;
@@ -201,9 +197,10 @@ public class OriginsDialogue {
         }
         try {
             return levelingService.getSkillLevel(playerRef.getUuid(), SkillType.SLAYER);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.at(Level.WARNING).log("Failed to get Slayer level for " + playerRef.getUsername() + ": " + e.getMessage());
             return 1;
         }
     }
 }
+

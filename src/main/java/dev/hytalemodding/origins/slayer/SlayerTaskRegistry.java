@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Registry for slayer task.
+ */
 public class SlayerTaskRegistry {
 
     private final List<SlayerTaskTier> tiers = new ArrayList<>();

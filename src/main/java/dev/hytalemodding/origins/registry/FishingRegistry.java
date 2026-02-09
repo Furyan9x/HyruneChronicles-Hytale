@@ -10,6 +10,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Registry for fishing.
+ */
 public final class FishingRegistry {
     public static final double BITE_SPEED_MAX_BONUS = 0.30;
     public static final double BASE_RARE_CHANCE = 0.02;

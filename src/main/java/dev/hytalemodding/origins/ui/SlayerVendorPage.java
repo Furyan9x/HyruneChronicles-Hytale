@@ -16,12 +16,15 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.slayer.ShopItem;
-import dev.hytalemodding.origins.slayer.SlayerPlayerData;
+import dev.hytalemodding.origins.playerdata.SlayerPlayerData;
 import dev.hytalemodding.origins.slayer.SlayerService;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
+/**
+ * UI page for the Slayer shop and task interface.
+ */
 public class SlayerVendorPage extends InteractiveCustomUIPage<SlayerVendorPage.VendorData> {
 
     private static final String MAIN_UI = "Pages/SlayerVendor.ui";
@@ -89,10 +92,6 @@ public class SlayerVendorPage extends InteractiveCustomUIPage<SlayerVendorPage.V
         // 3. Populate Content based on active tab
         if (isBuy) {
             populateBuyTab(cmd, evt);
-        } else if (isLearn) {
-            // populateLearnTab(cmd, evt); // Stub
-        } else if (isTask) {
-            // populateTaskTab(cmd, evt); // Stub
         }
     }
 
@@ -115,13 +114,13 @@ public class SlayerVendorPage extends InteractiveCustomUIPage<SlayerVendorPage.V
 
             // 3. Set Data
             // Note: Hytale finds nested IDs automatically if unique
-            cmd.set(entryRoot + " #ItemName.Text", item.getDisplayName());
-            cmd.set(entryRoot + " #ItemCost.Text", item.getCost() + " Points");
+            cmd.set(entryRoot + " #ItemName.Text", item.displayName());
+            cmd.set(entryRoot + " #ItemCost.Text", item.cost() + " Points");
 
 
 
             // 4. Bind Button
-            String btnId = ACTION_BUY_PREFIX + item.getId();
+            String btnId = ACTION_BUY_PREFIX + item.id();
             evt.addEventBinding(CustomUIEventBindingType.Activating,
                     entryRoot + " #BuyButton",
                     EventData.of("Button", btnId),
@@ -183,6 +182,9 @@ public class SlayerVendorPage extends InteractiveCustomUIPage<SlayerVendorPage.V
         }
     }
 
+    /**
+     * UI binding payload for vendor actions.
+     */
     public static class VendorData {
         static final String KEY_BUTTON = "Button";
         public static final BuilderCodec<VendorData> CODEC = BuilderCodec.builder(VendorData.class, VendorData::new)

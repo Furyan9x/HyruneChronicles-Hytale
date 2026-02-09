@@ -6,6 +6,9 @@ import dev.hytalemodding.origins.events.LevelUpListener;
 
 import java.util.UUID;
 
+/**
+ * Event listener for skill stat bonuses.
+ */
 public class SkillStatBonusListener implements LevelUpListener {
     @Override
     public void onLevelUp(UUID uuid, int newLevel, String source) {

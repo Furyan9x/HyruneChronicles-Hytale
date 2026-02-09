@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.logger.HytaleLogger;
 import dev.hytalemodding.Origins;
 import dev.hytalemodding.origins.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.origins.level.LevelingService;
@@ -20,12 +21,14 @@ import dev.hytalemodding.origins.util.NameplateManager;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * Debug/admin command to set a skill level for the executing player.
  * Usage: /setskill <skill> <level>
  */
 public class SetSkillCommand extends AbstractPlayerCommand {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private final RequiredArg<String> skillArg;
     private final RequiredArg<Integer> levelArg;
 
@@ -51,12 +54,16 @@ public class SetSkillCommand extends AbstractPlayerCommand {
         int level = ctx.get(levelArg);
 
         LevelingService service = Origins.getService();
+        if (service == null) {
+            ctx.sendMessage(Message.raw("Leveling service is not available."));
+            return;
+        }
         UUID uuid = playerRef.getUuid();
         service.setSkillLevel(uuid, skill, level);
         NameplateManager.update(uuid);
         SkillStatBonusApplier.apply(playerRef);
         SkillStatBonusApplier.applyMovementSpeed(playerRef);
-        this.testQuestSave(uuid);
+        flushQuestData(uuid);
         ctx.sendMessage(Message.raw("Set " + skill.getDisplayName() + " to level " + level + "."));
     }
 
@@ -80,16 +87,10 @@ public class SetSkillCommand extends AbstractPlayerCommand {
     private static String normalize(String value) {
         return value.toLowerCase(Locale.ROOT).replace("_", "").replace(" ", "");
     }
-    public void testQuestSave(UUID playerUuid) {
-        System.out.println("===== MANUAL QUEST SAVE TEST =====");
-        System.out.println("Player UUID: " + playerUuid);
 
+    private void flushQuestData(UUID playerUuid) {
         QuestManager qm = QuestManager.get();
-        System.out.println("QuestManager instance: " + qm);
-        System.out.println("Repository: " + qm.getRepository());
-
-        System.out.println("Calling unload...");
+        LOGGER.at(Level.FINE).log("Flushing quest data for " + playerUuid);
         qm.unload(playerUuid);
-        System.out.println("Unload complete");
     }
 }

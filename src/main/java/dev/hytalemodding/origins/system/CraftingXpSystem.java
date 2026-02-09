@@ -22,10 +22,14 @@ import dev.hytalemodding.origins.registry.CraftingSkillRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * ECS system for crafting xp.
+ */
 public class CraftingXpSystem extends EntityEventSystem<EntityStore, CraftRecipeEvent.Post> {
 
     private static Method benchTierMethod;
@@ -130,8 +134,10 @@ public class CraftingXpSystem extends EntityEventSystem<EntityStore, CraftRecipe
                 benchTierMethod = BenchWindow.class.getDeclaredMethod("getBenchTierLevel");
                 benchTierMethod.setAccessible(true);
                 benchTierReady = true;
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 benchTierReady = false;
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -144,10 +150,15 @@ public class CraftingXpSystem extends EntityEventSystem<EntityStore, CraftRecipe
             if (result instanceof Integer) {
                 return (Integer) result;
             }
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             // Fallback below.
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return 1;
     }
 }
+

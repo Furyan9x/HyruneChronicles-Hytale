@@ -1,5 +1,8 @@
 package dev.hytalemodding.origins.playerdata;
 
+/**
+ * 
+ */
 public class ExperienceTrack {
 
     private int level;

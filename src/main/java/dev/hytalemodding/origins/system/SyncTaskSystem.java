@@ -7,6 +7,9 @@ import dev.hytalemodding.origins.util.SyncManager;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for sync task.
+ */
 public class SyncTaskSystem extends TickingSystem<EntityStore> {
     @Override
     public void tick(float deltaTime, int tick, @Nonnull Store<EntityStore> store) {

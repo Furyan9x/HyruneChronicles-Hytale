@@ -3,6 +3,9 @@ package dev.hytalemodding.origins.slayer;
 
 import java.util.List;
 
+/**
+ * Builds default slayer data.
+ */
 public class SlayerDataInitializer {
 
     public static SlayerTaskRegistry buildRegistry() {

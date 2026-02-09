@@ -12,6 +12,9 @@ import dev.hytalemodding.origins.slayer.SlayerService;
 import dev.hytalemodding.origins.system.*;
 
 
+/**
+ * 
+ */
 public class OriginsSystems {
 
     public static void register(JavaPlugin plugin, SlayerService slayerService, NpcLevelService npcLevelService) {

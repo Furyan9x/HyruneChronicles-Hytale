@@ -27,6 +27,9 @@ import dev.hytalemodding.origins.registry.FishingRegistry;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for fishing bobber.
+ */
 public class FishingBobberSystem extends EntityTickingSystem<EntityStore> {
     public static final int MIN_BITE_TICKS = 120;
     public static final int MAX_BITE_TICKS = 240;

@@ -15,6 +15,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * ECS system for fishing.
+ */
 public class FishingSystem extends TickingSystem<EntityStore> {
     static final int MIN_BITE_TICKS = 120;
     static final int MAX_BITE_TICKS = 240;

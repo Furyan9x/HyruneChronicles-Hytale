@@ -1,5 +1,8 @@
 package dev.hytalemodding.origins.level.formulas;
 
+/**
+ * 
+ */
 public class LevelFormula {
 
     // Standard "Runescape-like" curve constants

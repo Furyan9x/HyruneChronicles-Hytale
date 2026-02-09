@@ -1,36 +1,44 @@
 package dev.hytalemodding.origins.quests;
 
-import java.util.*;
+import com.hypixel.hytale.logger.HytaleLogger;
+import dev.hytalemodding.origins.database.QuestRepository;
+import dev.hytalemodding.origins.playerdata.PlayerQuestData;
+import dev.hytalemodding.origins.playerdata.QuestProgress;
+import dev.hytalemodding.origins.playerdata.QuestStatus;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 /**
  * Manages all quest state and player progression.
- * Singleton service for quest operations.
  */
 public class QuestManager {
-    
-    private static QuestManager instance;
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final QuestManager INSTANCE = new QuestManager();
 
     private QuestRepository repository;
-    
+
     // All registered quests
     private final Map<String, Quest> registeredQuests = new LinkedHashMap<>();
-    
-    // Player quest progress: UUID -> (QuestID -> QuestProgress)
-    private final Map<UUID, Map<String, QuestProgress>> playerQuestData = new ConcurrentHashMap<>();
-    
-    // Player quest points: UUID -> points
-    private final Map<UUID, Integer> questPoints = new ConcurrentHashMap<>();
-    
+
+    // Player quest data: UUID -> PlayerQuestData
+    private final Map<UUID, PlayerQuestData> playerData = new ConcurrentHashMap<>();
+
     private QuestManager() {
         registerDefaultQuests();
     }
-    
+
     public static QuestManager get() {
-        if (instance == null) {
-            instance = new QuestManager();
-        }
-        return instance;
+        return INSTANCE;
     }
 
     public void setRepository(QuestRepository repository) {
@@ -40,58 +48,64 @@ public class QuestManager {
     public QuestRepository getRepository() {
         return repository;
     }
+
     /**
      * Registers all default quests.
      */
     private void registerDefaultQuests() {
         registerQuest(new TheWoodsmansRequest());
-        // Register more quests here as they're created
     }
-    
+
     /**
      * Registers a quest with the manager.
      */
     public void registerQuest(Quest quest) {
+        Objects.requireNonNull(quest, "quest");
         registeredQuests.put(quest.getId(), quest);
     }
-    
+
     /**
      * Gets a quest by ID.
      */
     public Quest getQuest(String questId) {
         return registeredQuests.get(questId);
     }
-    
+
     /**
      * Gets all registered quests.
      */
     public Collection<Quest> getAllQuests() {
         return registeredQuests.values();
     }
-    
+
     /**
      * Gets a player's progress on a specific quest.
-     * Returns null if player hasn't started the quest.
+     * Returns null if the player hasn't started the quest.
      */
     public QuestProgress getQuestProgress(UUID playerId, String questId) {
-        Map<String, QuestProgress> playerQuests = playerQuestData.get(playerId);
-        if (playerQuests == null) {
+        if (playerId == null || questId == null) {
             return null;
         }
-        return playerQuests.get(questId);
+        return getOrCreatePlayerData(playerId).getQuestProgress().get(questId);
     }
-    
+
     /**
      * Gets all quest progress for a player.
      */
     public Map<String, QuestProgress> getAllQuestProgress(UUID playerId) {
-        return playerQuestData.getOrDefault(playerId, new HashMap<>());
+        if (playerId == null) {
+            return new HashMap<>();
+        }
+        return new HashMap<>(getOrCreatePlayerData(playerId).getQuestProgress());
     }
 
     /**
      * Starts a quest for a player.
      */
     public boolean startQuest(UUID playerId, String questId) {
+        if (playerId == null || questId == null) {
+            return false;
+        }
         Quest quest = getQuest(questId);
         if (quest == null) {
             return false;
@@ -114,12 +128,9 @@ public class QuestManager {
         progress.setStartedAt(System.currentTimeMillis());
 
         // Store progress
-        playerQuestData.computeIfAbsent(playerId, k -> new HashMap<>()).put(questId, progress);
-
-        // ✅ SAVE IMMEDIATELY
-        if (repository != null) {
-            repository.save(savePlayerData(playerId));
-        }
+        PlayerQuestData data = getOrCreatePlayerData(playerId);
+        data.getQuestProgress().put(questId, progress);
+        persist(data);
 
         return true;
     }
@@ -128,29 +139,28 @@ public class QuestManager {
      * Attempts to advance a quest stage based on an event.
      */
     public boolean triggerQuestEvent(UUID playerId, String eventType, Object eventData) {
-        Map<String, QuestProgress> playerQuests = playerQuestData.get(playerId);
-        if (playerQuests == null) {
+        if (playerId == null) {
+            return false;
+        }
+
+        PlayerQuestData data = playerData.get(playerId);
+        if (data == null || data.getQuestProgress().isEmpty()) {
             return false;
         }
 
         boolean anyAdvanced = false;
-
-        // Check all in-progress quests for stage advancement
-        for (Map.Entry<String, QuestProgress> entry : playerQuests.entrySet()) {
+        for (Map.Entry<String, QuestProgress> entry : data.getQuestProgress().entrySet()) {
             QuestProgress progress = entry.getValue();
             if (progress.getStatus() == QuestStatus.IN_PROGRESS) {
                 Quest quest = getQuest(entry.getKey());
-                if (quest != null) {
-                    if (quest.tryAdvanceStage(playerId, progress, eventType, eventData)) {
-                        anyAdvanced = true;
-                    }
+                if (quest != null && quest.tryAdvanceStage(playerId, progress, eventType, eventData)) {
+                    anyAdvanced = true;
                 }
             }
         }
 
-        // ✅ SAVE IMMEDIATELY if anything changed
-        if (anyAdvanced && repository != null) {
-            repository.save(savePlayerData(playerId));
+        if (anyAdvanced) {
+            persist(data);
         }
 
         return anyAdvanced;
@@ -160,38 +170,41 @@ public class QuestManager {
      * Adds quest points to a player.
      */
     public void addQuestPoints(UUID playerId, int points) {
-        questPoints.merge(playerId, points, Integer::sum);
-
-        // ✅ SAVE IMMEDIATELY
-        if (repository != null) {
-            repository.save(savePlayerData(playerId));
+        if (playerId == null || points <= 0) {
+            return;
         }
+        PlayerQuestData data = getOrCreatePlayerData(playerId);
+        data.setQuestPoints(data.getQuestPoints() + points);
+        persist(data);
     }
-    
+
     /**
      * Gets a player's total quest points.
      */
     public int getQuestPoints(UUID playerId) {
-        return questPoints.getOrDefault(playerId, 0);
+        if (playerId == null) {
+            return 0;
+        }
+        return getOrCreatePlayerData(playerId).getQuestPoints();
     }
 
-    
     /**
      * Filters and sorts quests based on filter type.
      */
     public List<Quest> getFilteredQuests(UUID playerId, QuestListFilter filter) {
+        if (filter == null) {
+            filter = QuestListFilter.ALPHABETICAL;
+        }
         List<Quest> quests = new ArrayList<>(getAllQuests());
-        
+
         switch (filter) {
             case ALPHABETICAL:
                 quests.sort(Comparator.comparing(Quest::getName));
                 break;
-                
             case BY_LENGTH:
                 quests.sort(Comparator.comparing((Quest q) -> q.getLength().getSortOrder())
                     .thenComparing(Quest::getName));
                 break;
-                
             case HIDE_COMPLETED:
                 quests.removeIf(q -> {
                     QuestProgress progress = getQuestProgress(playerId, q.getId());
@@ -199,7 +212,6 @@ public class QuestManager {
                 });
                 quests.sort(Comparator.comparing(Quest::getName));
                 break;
-                
             case HIDE_UNAVAILABLE:
                 quests.removeIf(q -> {
                     QuestProgress progress = getQuestProgress(playerId, q.getId());
@@ -209,74 +221,84 @@ public class QuestManager {
                 quests.sort(Comparator.comparing(Quest::getName));
                 break;
         }
-        
+
         return quests;
     }
-    
+
     /**
      * Gets the status of a quest for a player.
      */
     public QuestStatus getQuestStatus(UUID playerId, String questId) {
+        if (playerId == null || questId == null) {
+            return QuestStatus.NOT_STARTED;
+        }
         QuestProgress progress = getQuestProgress(playerId, questId);
         return progress != null ? progress.getStatus() : QuestStatus.NOT_STARTED;
     }
-    
-    /**
-     * Codec for saving/loading player quest data.
-     */
-    public static class PlayerQuestData {
-        private UUID uuid;  // ADD THIS
-        private Map<String, QuestProgress> questProgress = new HashMap<>();
-        private int questPoints = 0;
 
-        // ADD THIS
-        public UUID getUuid() {
-            return uuid;
-        }
-
-        public void setUuid(UUID uuid) {
-            this.uuid = uuid;
-        }
-    }
-    
     /**
      * Loads player quest data from storage.
      */
-    public void loadPlayerData(UUID playerId, PlayerQuestData data) {
-        if (data.questProgress != null) {
-            playerQuestData.put(playerId, new HashMap<>(data.questProgress));
-        }
-        if (data.questPoints > 0) {
-            questPoints.put(playerId, data.questPoints);
-        }
-    }
-
     public void load(UUID playerId) {
-        if (repository == null) {
+        if (playerId == null || repository == null) {
             return;
         }
         PlayerQuestData data = repository.load(playerId);
-        if (data != null) {
-            loadPlayerData(playerId, data);
+        if (data == null) {
+            data = new PlayerQuestData(playerId);
         }
-    }
-    
-    /**
-     * Saves player quest data to storage.
-     */
-    public PlayerQuestData savePlayerData(UUID playerId) {
-        PlayerQuestData data = new PlayerQuestData();
-        data.setUuid(playerId);  // ADD THIS
-        data.questProgress = new HashMap<>(getAllQuestProgress(playerId));
-        data.questPoints = getQuestPoints(playerId);
-        return data;
+        if (data.getUuid() == null) {
+            data.setUuid(playerId);
+        }
+        if (data.getQuestProgress() == null) {
+            data.setQuestProgress(new HashMap<>());
+        }
+        playerData.put(playerId, data);
     }
 
     public void unload(UUID playerId) {
-        if (repository != null) {
-            repository.save(savePlayerData(playerId));  // Remove UUID parameter
+        if (playerId == null) {
+            return;
         }
-        playerQuestData.remove(playerId);
-        questPoints.remove(playerId);
+        PlayerQuestData data = playerData.remove(playerId);
+        if (data != null) {
+            persist(data);
+        }
+    }
+
+    private PlayerQuestData getOrCreatePlayerData(UUID playerId) {
+        return playerData.computeIfAbsent(playerId, this::loadOrCreate);
+    }
+
+    private PlayerQuestData loadOrCreate(UUID playerId) {
+        if (repository != null) {
+            PlayerQuestData stored = repository.load(playerId);
+            if (stored != null) {
+                if (stored.getUuid() == null) {
+                    stored.setUuid(playerId);
+                }
+                if (stored.getQuestProgress() == null) {
+                    stored.setQuestProgress(new HashMap<>());
+                }
+                return stored;
+            }
+        }
+        return new PlayerQuestData(playerId);
+    }
+
+    private void persist(PlayerQuestData data) {
+        if (repository == null || data == null) {
+            return;
+        }
+        if (data.getUuid() == null) {
+            LOGGER.at(Level.WARNING).log("Skipping quest save for missing UUID.");
+            return;
+        }
+        try {
+            repository.save(data);
+        } catch (RuntimeException e) {
+            LOGGER.at(Level.WARNING)
+                .log("Failed to save quest data for " + data.getUuid() + ": " + e.getMessage());
+        }
     }
 }

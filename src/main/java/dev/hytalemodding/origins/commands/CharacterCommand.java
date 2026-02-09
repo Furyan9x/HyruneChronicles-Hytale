@@ -14,6 +14,9 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Command handler for character.
+ */
 public class CharacterCommand extends AbstractAsyncCommand {
 
     public CharacterCommand() {

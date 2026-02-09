@@ -28,6 +28,9 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * UI page for repair bench.
+ */
 public class RepairBenchPage extends InteractiveCustomUIPage<RepairBenchPage.RepairBenchData> {
 
     private static final String UI_PATH = "Pages/RepairBench.ui";

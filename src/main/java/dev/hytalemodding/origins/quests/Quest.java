@@ -1,5 +1,7 @@
 package dev.hytalemodding.origins.quests;
 
+import dev.hytalemodding.origins.playerdata.QuestProgress;
+
 import java.util.List;
 
 /**

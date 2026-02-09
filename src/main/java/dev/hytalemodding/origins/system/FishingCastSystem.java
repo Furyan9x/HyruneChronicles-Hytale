@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * ECS system for fishing cast.
+ */
 public class FishingCastSystem extends TickingSystem<EntityStore> {
     private static final Map<UUID, PendingCast> PENDING_CASTS = new ConcurrentHashMap<>();
     private static final int MAX_CAST_DISTANCE = 10;

@@ -2,6 +2,9 @@ package dev.hytalemodding.origins.npc;
 
 import java.util.Locale;
 
+/**
+ * Enumeration of combat style.
+ */
 public enum CombatStyle {
     MELEE,
     RANGED,

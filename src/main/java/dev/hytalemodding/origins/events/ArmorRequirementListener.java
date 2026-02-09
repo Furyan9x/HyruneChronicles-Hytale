@@ -21,6 +21,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Event listener for armor requirement.
+ */
 public class ArmorRequirementListener {
     private static final long ARMOR_WARNING_COOLDOWN_MS = 2000;
     private static final Map<UUID, Long> LAST_ARMOR_WARNING = new ConcurrentHashMap<>();

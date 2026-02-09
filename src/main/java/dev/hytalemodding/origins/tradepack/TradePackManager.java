@@ -16,6 +16,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Manager for trade pack.
+ */
 public final class TradePackManager {
     private static final Set<UUID> ACTIVE = ConcurrentHashMap.newKeySet();
 

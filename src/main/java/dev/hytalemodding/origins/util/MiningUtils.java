@@ -3,6 +3,9 @@ package dev.hytalemodding.origins.util;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 
+/**
+ * Utility helpers for mining.
+ */
 public final class MiningUtils {
     private MiningUtils() {
     }

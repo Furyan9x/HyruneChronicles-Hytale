@@ -9,6 +9,9 @@ import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+/**
+ * Utility helpers for trade pack.
+ */
 public final class TradePackUtils {
     public static final String TRADE_PACK_ITEM_ID = "TradePack_Basic";
     public static final String TRADE_PACK_MODEL = "Items/Back/BackpackBig.blockymodel";

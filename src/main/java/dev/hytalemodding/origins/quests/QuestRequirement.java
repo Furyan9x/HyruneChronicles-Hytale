@@ -28,12 +28,11 @@ public class QuestRequirement {
     }
 
     /**
-         * Item requirement (e.g., 5x Iron Ore).
-         */
-        public record ItemRequirement(String itemId, int count, String displayName) {
-
+     * Item requirement (e.g., 5x Iron Ore).
+     */
+    public record ItemRequirement(String itemId, int count, String displayName) {
         public String getDisplayText() {
-                return count + "x " + displayName;
-            }
+            return count + "x " + displayName;
         }
+    }
 }

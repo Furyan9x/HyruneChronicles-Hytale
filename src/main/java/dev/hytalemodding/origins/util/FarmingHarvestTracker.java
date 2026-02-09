@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Tracks farming harvest.
+ */
 public final class FarmingHarvestTracker {
     private static final Map<UUID, Long> LAST_BREAK_MS = new ConcurrentHashMap<>();
 

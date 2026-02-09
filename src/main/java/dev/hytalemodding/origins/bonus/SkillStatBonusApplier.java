@@ -17,6 +17,9 @@ import dev.hytalemodding.origins.tradepack.TradePackUtils;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+/**
+ * Applies skill stat bonuses.
+ */
 public final class SkillStatBonusApplier {
     public static final float HEALTH_PER_CONSTITUTION = 5.0f;
     public static final float MANA_MAX_PER_MAGIC = 7.0f;

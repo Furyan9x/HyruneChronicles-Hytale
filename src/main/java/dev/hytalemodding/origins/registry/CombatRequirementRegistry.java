@@ -5,6 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Registry for combat requirement.
+ */
 public final class CombatRequirementRegistry {
     private static final Map<String, Integer> LEVELS = new LinkedHashMap<>();
 

@@ -8,6 +8,9 @@ import dev.hytalemodding.origins.component.FishingBobberComponent;
 import dev.hytalemodding.origins.component.GameModeDataComponent;
 import dev.hytalemodding.origins.npc.NpcLevelComponent;
 
+/**
+ * 
+ */
 public class OriginsComponents {
 
     public static ComponentType<EntityStore, FishingBobberComponent> FISHING_BOBBER;

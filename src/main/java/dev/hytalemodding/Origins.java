@@ -10,9 +10,15 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
-import dev.hytalemodding.origins.commands.*;
+import dev.hytalemodding.origins.commands.CharacterCommand;
+import dev.hytalemodding.origins.commands.CheckTagsCommand;
+import dev.hytalemodding.origins.commands.ClearNpcHologramsCommand;
+import dev.hytalemodding.origins.commands.SetSkillCommand;
 import dev.hytalemodding.origins.component.GameModeDataComponent;
 import dev.hytalemodding.origins.database.JsonLevelRepository;
+import dev.hytalemodding.origins.database.JsonQuestRepository;
+import dev.hytalemodding.origins.database.JsonSlayerRepository;
+import dev.hytalemodding.origins.database.QuestRepository;
 import dev.hytalemodding.origins.bonus.SkillStatBonusListener;
 import dev.hytalemodding.origins.events.LevelingVisualsListener;
 import dev.hytalemodding.origins.events.FarmingHarvestListener;
@@ -27,16 +33,16 @@ import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.level.formulas.LevelFormula;
 import dev.hytalemodding.origins.events.ArmorRequirementListener;
 import dev.hytalemodding.origins.events.TradePackInventoryListener;
-import dev.hytalemodding.origins.slayer.*;
+import dev.hytalemodding.origins.slayer.SlayerDataInitializer;
+import dev.hytalemodding.origins.slayer.SlayerService;
+import dev.hytalemodding.origins.slayer.SlayerTaskRegistry;
 import dev.hytalemodding.origins.util.NameplateManager;
 import com.hypixel.hytale.server.core.event.events.player.PlayerInteractEvent;
 import dev.hytalemodding.origins.npc.NpcLevelComponent;
 import dev.hytalemodding.origins.npc.NpcLevelConfig;
 import dev.hytalemodding.origins.npc.NpcLevelConfigRepository;
 import dev.hytalemodding.origins.npc.NpcLevelService;
-import dev.hytalemodding.origins.quests.JsonQuestRepository;
 import dev.hytalemodding.origins.quests.QuestManager;
-import dev.hytalemodding.origins.quests.QuestRepository;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -107,14 +113,11 @@ public class Origins extends JavaPlugin {
         PlayerJoinListener joinListener = new PlayerJoinListener(this.service, this.slayerService, questManager);
 
         this.getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, joinListener::onPlayerJoin);
-        System.out.println("[DEBUG] Registered AddPlayerToWorldEvent listener");
 
         this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, joinListener::onPlayerDisconnect);
-        System.out.println("[DEBUG] Registered PlayerDisconnectEvent listener");
 
-// Keep DrainPlayerFromWorldEvent too - it might be useful for world teleports
+        // Keep DrainPlayerFromWorldEvent too - it might be useful for world teleports
         this.getEventRegistry().registerGlobal(DrainPlayerFromWorldEvent.class, joinListener::onPlayerLeave);
-        System.out.println("[DEBUG] Registered DrainPlayerFromWorldEvent listener");
         this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingHarvestListener()::onPlayerInteract);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ArmorRequirementListener()::onInventoryChange);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new TradePackInventoryListener()::onInventoryChange);
@@ -152,24 +155,49 @@ public class Origins extends JavaPlugin {
         return instance.service;
     }
 
+    /**
+     * Gets the SlayerService instance.
+     *
+     * @return the SlayerService singleton
+     */
     public static SlayerService getSlayerService() {
         return instance.slayerService;
     }
 
 
+    /**
+     * Gets the NPC level service instance.
+     *
+     * @return the NPC level service, if initialized
+     */
     public static NpcLevelService getNpcLevelService() {
         return instance != null ? instance.npcLevelService : null;
     }
 
 
+    /**
+     * Gets the component type for NPC level data.
+     *
+     * @return NPC level component type
+     */
     public static ComponentType<EntityStore, NpcLevelComponent> getNpcLevelComponentType() {
         return OriginsComponents.NPC_LEVEL;
     }
 
+    /**
+     * Gets the component type for fishing bobber data.
+     *
+     * @return fishing bobber component type
+     */
     public static ComponentType<EntityStore, FishingBobberComponent> getFishingBobberComponentType() {
         return OriginsComponents.FISHING_BOBBER;
     }
 
+    /**
+     * Gets the component type for game mode data.
+     *
+     * @return game mode data component type
+     */
     public static ComponentType<EntityStore, GameModeDataComponent> getGameModeDataComponentType() {
         return OriginsComponents.GAMEMODE_DATA;
     }

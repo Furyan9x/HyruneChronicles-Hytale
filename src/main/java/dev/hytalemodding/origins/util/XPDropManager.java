@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Manager for x p drop.
+ */
 public class XPDropManager {
     private static final XPDropManager instance = new XPDropManager();
 

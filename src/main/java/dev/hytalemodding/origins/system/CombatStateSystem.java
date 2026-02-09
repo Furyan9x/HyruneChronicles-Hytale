@@ -14,6 +14,9 @@ import dev.hytalemodding.origins.combat.CombatStateTracker;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for combat state.
+ */
 public class CombatStateSystem extends EntityEventSystem<EntityStore, Damage> {
     public CombatStateSystem() {
         super(Damage.class);

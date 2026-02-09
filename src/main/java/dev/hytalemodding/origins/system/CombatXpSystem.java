@@ -4,6 +4,7 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -23,10 +24,18 @@ import dev.hytalemodding.origins.skills.SkillType;
 import dev.hytalemodding.origins.slayer.SlayerService;
 
 import javax.annotation.Nonnull;
+import java.util.logging.Level;
 
+/**
+ * ECS system for combat xp.
+ */
 public class CombatXpSystem extends DeathSystems.OnDeathSystem {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final long DEFAULT_BASE_XP = 10L;
+    private static final long CONSTITUTION_XP_DIVISOR = 3L;
+    private static final String DEFAULT_WEAPON_ID = "bare_hands";
 
-    public final SlayerService slayerService;
+    private final SlayerService slayerService;
 
     public CombatXpSystem(SlayerService slayerService) {
         this.slayerService = slayerService;
@@ -62,7 +71,7 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
     }
 
     private void handlePlayerKill(Player player, Ref<EntityStore> victimRef, Store<EntityStore> store) {
-        long baseXp = 10;
+        long baseXp = DEFAULT_BASE_XP;
 
         EntityStatMap statMap = store.getComponent(victimRef, EntityStatMap.getComponentType());
         if (statMap != null) {
@@ -72,8 +81,8 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
                 if (healthStat != null) {
                     baseXp = (long) healthStat.getMax();
                 }
-            } catch (Exception e) {
-                // Ignore missing stats
+            } catch (RuntimeException e) {
+                LOGGER.at(Level.FINE).log("Failed to resolve health stat: " + e.getMessage());
             }
         }
 
@@ -85,7 +94,7 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
             StringBuilder msg = new StringBuilder();
             service.addSkillXp(player.getUuid(), targetSkill, baseXp);
 
-            long hpXp = Math.max(1, baseXp / 3);
+            long hpXp = Math.max(1, baseXp / CONSTITUTION_XP_DIVISOR);
             service.addSkillXp(player.getUuid(), SkillType.CONSTITUTION, hpXp);
 
             player.sendMessage(Message.raw("+" + baseXp + " " + targetSkill.getDisplayName() + " XP"));
@@ -100,80 +109,76 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
             player.sendMessage(Message.raw(msg.toString()));
         }
     }
+
     private String getVictimIdentifier(Ref<EntityStore> victimRef, Store<EntityStore> store) {
         try {
             NPCEntity npc = store.getComponent(victimRef, NPCEntity.getComponentType());
             if (npc != null) {
                 return npc.getRoleName();
             }
-        } catch (Exception ignored) {
-            // Log if necessary
+        } catch (RuntimeException e) {
+            LOGGER.at(Level.FINE).log("Failed to resolve NPC identifier: " + e.getMessage());
         }
         return null;
     }
 
+    /**
+     * Determines which skill to level based on the weapon identifier.
+     */
+    private SkillType determineSkillFromWeapon(String weaponId) {
+        String id = weaponId.toLowerCase();
 
-/**
- * Determines which skill to level based on the weapon identifier.
- */
-private SkillType determineSkillFromWeapon(String weaponId) {
-    String id = weaponId.toLowerCase();
+        if (id.contains("bow") || id.contains("crossbow") || id.contains("gun") || id.contains("sling")) {
+            return SkillType.RANGED;
+        }
 
-    if (id.contains("bow") || id.contains("crossbow") || id.contains("gun") || id.contains("sling")) {
-        return SkillType.RANGED;
-    }
+        if (id.contains("wand") || id.contains("staff") || id.contains("spellbook") || id.contains("scepter")) {
+            return SkillType.MAGIC;
+        }
 
-    if (id.contains("wand") || id.contains("staff") || id.contains("spellbook") || id.contains("scepter")) {
-        return SkillType.MAGIC;
-    }
+        if (id.contains("sword") || id.contains("dagger") || id.contains("scythe")) {
+            return SkillType.ATTACK;
+        }
 
-    // Melee Logic
-    if (id.contains("sword") || id.contains("dagger") || id.contains("scythe")) {
-        return SkillType.ATTACK;
-    }
+        if (id.contains("axe") || id.contains("mace") || id.contains("hammer") || id.contains("club")) {
+            return SkillType.STRENGTH;
+        }
 
-    if (id.contains("axe") || id.contains("mace") || id.contains("hammer") || id.contains("club")) {
+        if (id.contains("shield")) {
+            return SkillType.DEFENCE;
+        }
+
         return SkillType.STRENGTH;
     }
 
-    if (id.contains("shield")) {
-        return SkillType.DEFENCE;
-    }
+    /**
+     * Retrieves the held item ID directly from the Player object.
+     */
+    private String getHeldItemIdentifier(Player player) {
+        if (player == null) {
+            return DEFAULT_WEAPON_ID;
+        }
 
-    // Unarmed / Default
-    return SkillType.STRENGTH;
-}
-
-/**
- * Retrieves the held item ID directly from the Player object.
- * Adapted from RequirementChecker.java
- */
-private String getHeldItemIdentifier(Player player) {
-    if (player == null) {
-        return "bare_hands";
-    }
-
-    try {
-        Inventory inventory = player.getInventory();
-        if (inventory != null) {
-            // 1. Check Active Hotbar Slot (0-8)
-            byte activeSlot = inventory.getActiveHotbarSlot();
-            if (activeSlot >= 0 && activeSlot <= 8) {
-                ItemContainer hotbar = inventory.getHotbar();
-                if (hotbar != null) {
-                    ItemStack heldStack = hotbar.getItemStack(activeSlot);
-                    if (heldStack != null) {
-                        Item item = heldStack.getItem();
-                        if (item != null) {
-                            return item.getId(); // e.g. "sword_iron"
+        try {
+            Inventory inventory = player.getInventory();
+            if (inventory != null) {
+                byte activeSlot = inventory.getActiveHotbarSlot();
+                if (activeSlot >= 0 && activeSlot <= 8) {
+                    ItemContainer hotbar = inventory.getHotbar();
+                    if (hotbar != null) {
+                        ItemStack heldStack = hotbar.getItemStack(activeSlot);
+                        if (heldStack != null) {
+                            Item item = heldStack.getItem();
+                            if (item != null) {
+                                return item.getId();
+                            }
                         }
                     }
                 }
             }
+        } catch (RuntimeException e) {
+            LOGGER.at(Level.WARNING).log("Error getting held item: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.err.println("[Origins] Error getting held item: " + e.getMessage());
+        return DEFAULT_WEAPON_ID;
     }
-    return "bare_hands";
-}
 }

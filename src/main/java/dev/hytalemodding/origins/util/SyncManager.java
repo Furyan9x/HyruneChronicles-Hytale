@@ -1,9 +1,16 @@
 package dev.hytalemodding.origins.util;
 
+import com.hypixel.hytale.logger.HytaleLogger;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 
+/**
+ * Manager for sync.
+ */
 public class SyncManager {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     // A queue of simple Runnables (code blocks)
     private static final Queue<Runnable> pendingTasks = new ConcurrentLinkedQueue<>();
 
@@ -24,10 +31,10 @@ public class SyncManager {
         while ((task = pendingTasks.poll()) != null) {
             try {
                 task.run();
-            } catch (Exception e) {
-                System.err.println("[Origins] Error executing sync task: " + e.getMessage());
-                e.printStackTrace();
+            } catch (RuntimeException e) {
+                LOGGER.at(Level.WARNING).log("Error executing sync task: " + e.getMessage());
             }
         }
     }
 }
+

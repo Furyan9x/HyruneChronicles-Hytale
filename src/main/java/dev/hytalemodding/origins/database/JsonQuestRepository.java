@@ -1,8 +1,9 @@
-package dev.hytalemodding.origins.quests;
+package dev.hytalemodding.origins.database;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dev.hytalemodding.Origins;
+import com.hypixel.hytale.logger.HytaleLogger;
+import dev.hytalemodding.origins.playerdata.PlayerQuestData;
 
 import java.io.File;
 import java.io.FileReader;
@@ -11,7 +12,11 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
 
+/**
+ * JSON-backed repository for quest progress data.
+ */
 public class JsonQuestRepository implements QuestRepository {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private final Gson gson;
     private final File dataFolder;
@@ -24,35 +29,39 @@ public class JsonQuestRepository implements QuestRepository {
                 .create();
         this.dataFolder = new File(rootPath, "quests");
         if (!this.dataFolder.exists()) {
-            boolean created = this.dataFolder.mkdirs();
-            System.out.println("[DEBUG] Created quests folder: " + created + " at " + this.dataFolder.getAbsolutePath());
+            if (!this.dataFolder.mkdirs()) {
+                LOGGER.at(Level.WARNING).log("Failed to create quests folder at " + this.dataFolder.getAbsolutePath());
+            }
         }
     }
 
     @Override
-    public QuestManager.PlayerQuestData load(UUID uuid) {
+    public PlayerQuestData load(UUID uuid) {
         File playerFile = new File(this.dataFolder, uuid.toString() + ".json");
         if (!playerFile.exists()) {
             return null;
         }
 
         try (FileReader reader = new FileReader(playerFile)) {
-            return gson.fromJson(reader, QuestManager.PlayerQuestData.class);
+            return gson.fromJson(reader, PlayerQuestData.class);
         } catch (IOException e) {
-            Origins.LOGGER.at(Level.WARNING)
-                    .log("Failed to load quest data for " + uuid + ": " + e.getMessage());
+            LOGGER.at(Level.WARNING)
+                .log("Failed to load quest data for " + uuid + ": " + e.getMessage());
             return null;
         }
     }
 
     @Override
-    public void save(QuestManager.PlayerQuestData data) {
-        if (data == null || data.getUuid() == null) return;
+    public void save(PlayerQuestData data) {
+        if (data == null || data.getUuid() == null) {
+            return;
+        }
         File playerFile = new File(this.dataFolder, data.getUuid().toString() + ".json");
         try (FileWriter writer = new FileWriter(playerFile)) {
             gson.toJson(data, writer);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.at(Level.WARNING)
+                .log("Failed to save quest data for " + data.getUuid() + ": " + e.getMessage());
         }
     }
 }

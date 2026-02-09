@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+/**
+ * 
+ */
 public class NpcLevelConfigRepository {
     private static final String CONFIG_FILE = "npc_levels.json";
     private static final List<String> DEFAULT_EXCLUDES = List.of(

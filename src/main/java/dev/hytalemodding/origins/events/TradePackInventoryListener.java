@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Event listener for trade pack inventory.
+ */
 public class TradePackInventoryListener {
     private static final Set<UUID> ACTIVE = ConcurrentHashMap.newKeySet();
 

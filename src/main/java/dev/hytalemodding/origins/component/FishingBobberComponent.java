@@ -8,6 +8,9 @@ import dev.hytalemodding.origins.system.FishingBobberSystem;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * ECS component for fishing bobber.
+ */
 public class FishingBobberComponent implements Component<EntityStore> {
     private UUID ownerId;
     private FishingRegistry.BaitDefinition bait;

@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * ECS system for gathering xp.
+ */
 public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
 
     private static final Map<String, Reward> MINING_BLOCKS = new HashMap<>();

@@ -7,6 +7,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.Anchor;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
@@ -22,10 +23,10 @@ import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.quests.Quest;
 import dev.hytalemodding.origins.quests.QuestListFilter;
 import dev.hytalemodding.origins.quests.QuestManager;
-import dev.hytalemodding.origins.quests.QuestProgress;
+import dev.hytalemodding.origins.playerdata.QuestProgress;
 import dev.hytalemodding.origins.quests.QuestRequirement;
 import dev.hytalemodding.origins.quests.QuestReward;
-import dev.hytalemodding.origins.quests.QuestStatus;
+import dev.hytalemodding.origins.playerdata.QuestStatus;
 import dev.hytalemodding.origins.skills.SkillType;
 
 import javax.annotation.Nonnull;
@@ -36,8 +37,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
+/**
+ * UI page for the character menu.
+ */
 public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMenuData> {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private static final String MAIN_UI = "Pages/SkillEntry.ui";
     private static final String CELL_UI = "Pages/character_stats.ui";
@@ -228,7 +234,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                         this.buildSkillDetailsPanel(refreshCmd, this.selectedSkill);
                         this.sendUpdate(refreshCmd, refreshEvt, false);
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Invalid skill selected: " + data.skillId);
+                        LOGGER.at(Level.WARNING).log("Invalid skill selected: " + data.skillId);
                     }
                 }
                 break;
@@ -279,7 +285,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 }
                 break;
             case "TrackQuest":
-                System.out.println("Tracking quest: " + this.selectedQuestId);
+                LOGGER.at(Level.FINE).log("Tracking quest: " + this.selectedQuestId);
                 break;
             case "QuestFilterChanged":
                 if (data.selectedIndex != null) {
@@ -294,8 +300,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                         UIEventBuilder refreshEvt = new UIEventBuilder();
                         this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
                         this.sendUpdate(refreshCmd, refreshEvt, false);
-                    } catch (Exception e) {
-                        System.err.println("Invalid filter index: " + data.selectedIndex);
+                    } catch (NumberFormatException e) {
+                        LOGGER.at(Level.WARNING).log("Invalid filter index: " + data.selectedIndex);
                     }
                 }
                 break;
@@ -1013,3 +1019,4 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     }
 
 }
+

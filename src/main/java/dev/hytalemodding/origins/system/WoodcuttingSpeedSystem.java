@@ -19,6 +19,9 @@ import dev.hytalemodding.origins.util.MiningUtils;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for woodcutting speed.
+ */
 public class WoodcuttingSpeedSystem extends EntityEventSystem<EntityStore, DamageBlockEvent> {
     public static final float WOODCUTTING_DAMAGE_PER_LEVEL = 0.01f;
 

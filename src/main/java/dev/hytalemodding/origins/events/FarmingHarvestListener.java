@@ -21,6 +21,9 @@ import dev.hytalemodding.origins.system.GatheringXpSystem;
 import javax.annotation.Nullable;
 import java.util.Locale;
 
+/**
+ * Event listener for farming harvest.
+ */
 public class FarmingHarvestListener {
 
     public void onPlayerInteract(PlayerInteractEvent event) {

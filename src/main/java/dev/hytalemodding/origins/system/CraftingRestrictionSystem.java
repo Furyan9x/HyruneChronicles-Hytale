@@ -18,6 +18,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Locale;
 
+/**
+ * ECS system for crafting restriction.
+ */
 public class CraftingRestrictionSystem extends EntityEventSystem<EntityStore, CraftRecipeEvent.Pre> {
 
     public CraftingRestrictionSystem() {

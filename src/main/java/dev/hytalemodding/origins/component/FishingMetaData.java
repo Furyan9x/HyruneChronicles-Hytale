@@ -6,6 +6,9 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 
 import java.util.UUID;
 
+/**
+ * 
+ */
 public class FishingMetaData {
     public static final String KEY = "OriginsBoundBobber";
     public static final BuilderCodec<FishingMetaData> CODEC;

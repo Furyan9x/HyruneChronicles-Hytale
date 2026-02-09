@@ -18,6 +18,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * ECS system for fishing rod idle.
+ */
 public class FishingRodIdleSystem extends TickingSystem<EntityStore> {
     private static final String IDLE_ANIMATION_NAME = "Idle";
     private static final Set<UUID> IDLE_PLAYERS = ConcurrentHashMap.newKeySet();

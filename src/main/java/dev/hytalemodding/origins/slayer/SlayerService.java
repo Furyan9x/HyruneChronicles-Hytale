@@ -2,21 +2,37 @@ package dev.hytalemodding.origins.slayer;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.CombinedItemContainer;
 import com.hypixel.hytale.server.core.inventory.transaction.ItemStackTransaction;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.origins.database.SlayerRepository;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.npc.NpcLevelService;
+import dev.hytalemodding.origins.playerdata.SlayerPlayerData;
 import dev.hytalemodding.origins.skills.SkillType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
+/**
+ * Manages Slayer assignments, rewards, and persistence.
+ */
 public class SlayerService {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final int BASE_POINTS_AWARDED = 5;
+    private static final int POINTS_KILL_DIVISOR = 5;
+    private static final long XP_PER_KILL = 25L;
+    private static final double ITEM_REWARD_CHANCE = 0.1;
 
     private final SlayerRepository repository;
     private final SlayerTaskRegistry taskRegistry;
@@ -26,90 +42,79 @@ public class SlayerService {
     private final List<ShopItem> shopItems = new ArrayList<>();
 
     public SlayerService(SlayerRepository repository, SlayerTaskRegistry taskRegistry, NpcLevelService npcService) {
-        this.repository = repository;
-        this.taskRegistry = taskRegistry;
-        this.npcService = npcService;
-
+        this.repository = Objects.requireNonNull(repository, "repository");
+        this.taskRegistry = Objects.requireNonNull(taskRegistry, "taskRegistry");
+        this.npcService = Objects.requireNonNull(npcService, "npcService");
         initShop();
-    }
-    private void initShop() {
-        // ID, Display Name, Cost
-        shopItems.add(new ShopItem("Ingredient_Bar_Copper", "Copper Bar", 5));
-        shopItems.add(new ShopItem("Ingredient_Bar_Iron", "Iron Bar", 10));
-        shopItems.add(new ShopItem("Ingredient_Bar_Thorium", "Thorium Bar", 50));
     }
 
     public List<ShopItem> getShopItems() {
         return Collections.unmodifiableList(shopItems);
     }
 
+    public void load(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        cache.computeIfAbsent(uuid, this::loadOrCreate);
+    }
+
     /**
      * Attempts to purchase an item.
-     * 1. Checks Points.
-     * 2. Checks Inventory Space using Transaction.
-     * 3. Deducts Points only if item fits.
+     * 1. Checks points.
+     * 2. Checks inventory space using transaction.
+     * 3. Deducts points only if item fits.
      */
     public boolean attemptPurchase(Player player, String itemId, Ref<EntityStore> playerRef, Store<EntityStore> store) {
-        if (player == null) return false;
-
-        // 1. Validate Item
-        ShopItem shopItem = shopItems.stream()
-                .filter(i -> i.getId().equalsIgnoreCase(itemId))
-                .findFirst()
-                .orElse(null);
-
-        if (shopItem == null) return false;
-
-        // 2. Validate Points
-        SlayerPlayerData data = getPlayerData(player.getUuid());
-        if (data.getSlayerPoints() < shopItem.getCost()) {
-            return false; // Not enough points
+        if (player == null || itemId == null || playerRef == null || store == null) {
+            return false;
         }
 
-        // 3. Handle Inventory Logic
+        ShopItem shopItem = findShopItem(itemId);
+        if (shopItem == null) {
+            return false;
+        }
+
+        SlayerPlayerData data = getPlayerData(player.getUuid());
+        if (data.getSlayerPoints() < shopItem.cost()) {
+            return false;
+        }
+
         Inventory inventory = player.getInventory();
-        if (inventory == null) return false;
+        if (inventory == null) {
+            return false;
+        }
 
-        // Get the container that represents Hotbar + Main Inventory
         CombinedItemContainer container = inventory.getCombinedHotbarFirst();
+        ItemStack stackToAdd = new ItemStack(shopItem.id(), 1);
 
-        // Create the stack we want to give
-        ItemStack stackToAdd = new ItemStack(shopItem.getId(), 1);
-
-        // Try to add it. This calculates if it fits.
         ItemStackTransaction transaction = container.addItemStack(stackToAdd);
         ItemStack remainder = transaction.getRemainder();
-
-        // If there is a remainder, it means the item didn't fit.
-        // Since we are adding 1, any remainder means 0 were added.
         if (remainder != null && !remainder.isEmpty()) {
-            return false; // Inventory Full
+            return false;
         }
 
-        // 4. Success! Deduct Points & Save
-        data.removeSlayerPoints(shopItem.getCost());
-        repository.save(data);
+        data.removeSlayerPoints(shopItem.cost());
+        persist(data);
 
-        // 5. Visual Feedback (Item Pickup Notification)
-        // This makes the item pop up on the right side of the screen
         player.notifyPickupItem(playerRef, stackToAdd, null, store);
-
         return true;
     }
 
     public SlayerPlayerData getPlayerData(UUID uuid) {
-        return cache.computeIfAbsent(uuid, id -> {
-            SlayerPlayerData stored = repository.load(id);
-            return stored != null ? stored : new SlayerPlayerData(id);
-        });
+        Objects.requireNonNull(uuid, "uuid");
+        return cache.computeIfAbsent(uuid, this::loadOrCreate);
     }
 
     public SlayerTaskAssignment getAssignment(UUID uuid) {
-        SlayerTaskAssignment assignment = getPlayerData(uuid).getAssignment();
-        return normalizeAssignment(assignment);
+        SlayerPlayerData data = getPlayerData(uuid);
+        return normalizeAssignment(data);
     }
 
     public SlayerTaskAssignment assignTask(UUID uuid, int slayerLevel) {
+        if (uuid == null) {
+            return null;
+        }
         SlayerPlayerData data = getPlayerData(uuid);
         SlayerTaskAssignment current = data.getAssignment();
         if (current != null && current.getState() != SlayerTaskState.COMPLETED) {
@@ -124,13 +129,16 @@ public class SlayerService {
         int count = taskRegistry.rollKillCount(task);
         SlayerTaskAssignment assignment = new SlayerTaskAssignment(task.getId(), specificTarget, count);
         data.setAssignment(assignment);
-        repository.save(data);
+        persist(data);
         return assignment;
     }
 
     public boolean onKill(UUID killerUuid, String npcTypeId, long xpAmount) {
+        if (killerUuid == null || npcTypeId == null || xpAmount <= 0) {
+            return false;
+        }
         SlayerPlayerData data = getPlayerData(killerUuid);
-        SlayerTaskAssignment assignment = normalizeAssignment(data.getAssignment());
+        SlayerTaskAssignment assignment = normalizeAssignment(data);
         if (assignment == null) {
             return false;
         }
@@ -142,7 +150,7 @@ public class SlayerService {
         }
 
         assignment.decrement();
-        repository.save(data);
+        persist(data);
 
         LevelingService leveling = LevelingService.get();
         if (leveling != null) {
@@ -157,46 +165,88 @@ public class SlayerService {
         }
         UUID uuid = player.getUuid();
         SlayerPlayerData data = getPlayerData(uuid);
-        SlayerTaskAssignment assignment = normalizeAssignment(data.getAssignment());
+        SlayerTaskAssignment assignment = normalizeAssignment(data);
         if (assignment == null || assignment.getState() != SlayerTaskState.COMPLETED) {
             return null;
         }
 
-        int pointsAwarded = 5 + Math.max(1, assignment.getTotalKills() / 5);
-        long slayerXpAwarded = 25L * assignment.getTotalKills();
-        boolean itemRewarded = Math.random() < 0.1;
+        int pointsAwarded = BASE_POINTS_AWARDED + Math.max(1, assignment.getTotalKills() / POINTS_KILL_DIVISOR);
+        long slayerXpAwarded = XP_PER_KILL * assignment.getTotalKills();
+        boolean itemRewarded = Math.random() < ITEM_REWARD_CHANCE;
 
         data.addSlayerPoints(pointsAwarded);
         data.incrementCompletedTasks();
         data.setAssignment(null);
-        repository.save(data);
+        persist(data);
 
         LevelingService levelingService = LevelingService.get();
         if (levelingService != null) {
             levelingService.addSkillXp(uuid, SkillType.SLAYER, slayerXpAwarded);
         }
 
-        // TODO: Hook into item reward system when available.
         return new SlayerTurnInResult(pointsAwarded, slayerXpAwarded, itemRewarded);
     }
 
-    private SlayerTaskAssignment normalizeAssignment(SlayerTaskAssignment assignment) {
+    public void unload(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        SlayerPlayerData data = cache.remove(uuid);
+        if (data != null) {
+            persist(data);
+        }
+    }
+
+    private void initShop() {
+        shopItems.add(new ShopItem("Ingredient_Bar_Copper", "Copper Bar", 5));
+        shopItems.add(new ShopItem("Ingredient_Bar_Iron", "Iron Bar", 10));
+        shopItems.add(new ShopItem("Ingredient_Bar_Thorium", "Thorium Bar", 50));
+    }
+
+    private ShopItem findShopItem(String itemId) {
+        for (ShopItem item : shopItems) {
+            if (item.id().equalsIgnoreCase(itemId)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private SlayerTaskAssignment normalizeAssignment(SlayerPlayerData data) {
+        SlayerTaskAssignment assignment = data.getAssignment();
         if (assignment == null) {
             return null;
         }
+        boolean changed = false;
         if (assignment.getState() == null) {
             assignment.setState(SlayerTaskState.ACCEPTED);
+            changed = true;
         }
-        if (assignment.getRemainingKills() <= 0 && assignment.getTotalKills() > 0) {
+        if (assignment.getRemainingKills() <= 0 && assignment.getTotalKills() > 0
+            && assignment.getState() != SlayerTaskState.COMPLETED) {
             assignment.setState(SlayerTaskState.COMPLETED);
+            changed = true;
+        }
+        if (changed) {
+            persist(data);
         }
         return assignment;
     }
 
-    public void unload(UUID uuid) {
-        SlayerPlayerData data = cache.remove(uuid);
-        if (data != null) {
+    private SlayerPlayerData loadOrCreate(UUID uuid) {
+        SlayerPlayerData stored = repository.load(uuid);
+        return stored != null ? stored : new SlayerPlayerData(uuid);
+    }
+
+    private void persist(SlayerPlayerData data) {
+        if (data == null) {
+            return;
+        }
+        try {
             repository.save(data);
+        } catch (RuntimeException e) {
+            LOGGER.at(Level.WARNING)
+                .log("Failed to save Slayer data for " + (data != null ? data.getUuid() : "unknown") + ": " + e.getMessage());
         }
     }
 }

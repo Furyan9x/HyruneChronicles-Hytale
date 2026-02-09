@@ -25,6 +25,9 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * ECS system for npc combat scaling.
+ */
 public class NpcCombatScalingSystem extends EntityEventSystem<EntityStore, Damage> {
 
     private final NpcLevelService levelService;

@@ -7,6 +7,9 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Service for npc level.
+ */
 public class NpcLevelService {
 
     private final NpcLevelConfig config;

@@ -1,5 +1,8 @@
 package dev.hytalemodding.origins.slayer;
 
+/**
+ * Definition for slayer task.
+ */
 public class SlayerTaskDefinition {
     private final String id;
     private final String targetGroupId;

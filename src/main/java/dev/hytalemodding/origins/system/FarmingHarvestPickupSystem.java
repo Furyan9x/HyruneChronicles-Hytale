@@ -2,7 +2,6 @@ package dev.hytalemodding.origins.system;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
-import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
@@ -18,6 +17,9 @@ import dev.hytalemodding.origins.util.FarmingHarvestTracker;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 
+/**
+ * ECS system for farming harvest pickup.
+ */
     public class FarmingHarvestPickupSystem extends EntityEventSystem<EntityStore, InteractivelyPickupItemEvent> {
         private static final long BREAK_SUPPRESSION_WINDOW_MS = 5000;
         public static final double SICKLE_XP_BONUS = 1.25;
@@ -106,7 +108,7 @@ import java.util.Locale;
                 return false;
             }
             return GatheringXpSystem.isSickleItemId(held.getItemId());
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }
@@ -136,3 +138,4 @@ import java.util.Locale;
         return Math.max(baseQty, newQty);
     }
 }
+

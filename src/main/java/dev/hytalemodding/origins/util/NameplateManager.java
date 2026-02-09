@@ -1,5 +1,6 @@
 package dev.hytalemodding.origins.util;
 
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -7,12 +8,14 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import dev.hytalemodding.origins.level.LevelingService;
 
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * Utility class to manage player nameplate updates.
  * Updates are applied directly via the ECS.
  */
 public class NameplateManager {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private static LevelingService serviceInstance;
 
@@ -37,7 +40,7 @@ public class NameplateManager {
         if (serviceInstance == null) {
             serviceInstance = LevelingService.get();
             if (serviceInstance == null) {
-                System.err.println("[Origins] Cannot update nameplate: Service not initialized.");
+                LOGGER.at(Level.WARNING).log("Cannot update nameplate: LevelingService not initialized.");
                 return;
             }
         }

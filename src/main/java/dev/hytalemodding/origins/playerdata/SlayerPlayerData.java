@@ -1,8 +1,13 @@
-package dev.hytalemodding.origins.slayer;
+package dev.hytalemodding.origins.playerdata;
+
+import dev.hytalemodding.origins.slayer.SlayerTaskAssignment;
 
 import java.util.UUID;
 
-public class SlayerPlayerData {
+/**
+ * Stores persistent Slayer-related player progression.
+ */
+public class SlayerPlayerData implements PlayerData {
     private UUID uuid;
     private SlayerTaskAssignment assignment;
     private int slayerPoints;
@@ -17,8 +22,13 @@ public class SlayerPlayerData {
         this.assignment = null;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public SlayerTaskAssignment getAssignment() {
@@ -34,10 +44,16 @@ public class SlayerPlayerData {
     }
 
     public void addSlayerPoints(int points) {
-        this.slayerPoints += points;
+        if (points > 0) {
+            this.slayerPoints += points;
+        }
     }
 
-    public void removeSlayerPoints(int points) {this.slayerPoints -= points;}
+    public void removeSlayerPoints(int points) {
+        if (points > 0) {
+            this.slayerPoints = Math.max(0, this.slayerPoints - points);
+        }
+    }
 
     public int getCompletedTasks() {
         return completedTasks;

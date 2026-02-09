@@ -8,6 +8,9 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifie
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.bonus.SkillStatBonusApplier;
 
+/**
+ * Applies npc level stats.
+ */
 public final class NpcLevelStatsApplier {
     private static final String HEALTH_ID = "Health";
     private static final String HEALTH_MODIFIER_ID = "origins:npc_health_bonus";

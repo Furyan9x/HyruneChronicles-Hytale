@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Registry for crafting skill.
+ */
 public final class CraftingSkillRegistry {
 
     public static final class Reward {

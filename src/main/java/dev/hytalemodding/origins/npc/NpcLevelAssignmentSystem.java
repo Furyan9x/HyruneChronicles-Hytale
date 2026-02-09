@@ -16,6 +16,9 @@ import dev.hytalemodding.Origins;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for npc level assignment.
+ */
 public class NpcLevelAssignmentSystem extends EntityTickingSystem<EntityStore> implements QuerySystem<EntityStore> {
 
     private final NpcLevelService levelService;

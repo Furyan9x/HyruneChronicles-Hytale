@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Registry for tool requirement.
+ */
 public final class ToolRequirementRegistry {
     private static final Map<String, Integer> TOOL_LEVELS = new HashMap<>();
 

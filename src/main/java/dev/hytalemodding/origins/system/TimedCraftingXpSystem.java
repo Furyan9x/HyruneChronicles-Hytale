@@ -29,6 +29,7 @@ import dev.hytalemodding.origins.registry.CraftingSkillRegistry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * ECS system for timed crafting xp.
+ */
 public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
     public static final float DOUBLE_PROC_CHANCE_PER_LEVEL = 0.20f / 99.0f;
     public static final float DOUBLE_PROC_CHANCE_CAP = 0.20f;
@@ -124,7 +128,7 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
                 int completed;
                 try {
                     completed = jobQuantityCompletedField.getInt(job);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     iterator.remove();
                     continue;
                 }
@@ -141,8 +145,10 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
                     iterator.remove();
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // Ignore reflection failures once initialized.
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -286,8 +292,12 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
             jobQuantityCompletedField.setAccessible(true);
 
             reflectionInitialized = true;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             reflectionInitialized = false;
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -312,8 +322,10 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
                 benchTierMethod = BenchWindow.class.getDeclaredMethod("getBenchTierLevel");
                 benchTierMethod.setAccessible(true);
                 benchTierReady = true;
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 benchTierReady = false;
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -326,10 +338,15 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
             if (result instanceof Integer) {
                 return (Integer) result;
             }
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             // Fallback below.
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return 1;
     }
 }
+

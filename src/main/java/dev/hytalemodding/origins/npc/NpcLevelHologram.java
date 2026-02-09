@@ -1,5 +1,8 @@
 package dev.hytalemodding.origins.npc;
 
+/**
+ * 
+ */
 public final class NpcLevelHologram {
     private NpcLevelHologram() {
     }

@@ -21,6 +21,9 @@ import dev.hytalemodding.origins.util.MiningUtils;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for mining durability.
+ */
 public class MiningDurabilitySystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
     public static final float MINING_DURABILITY_REDUCTION_PER_LEVEL = 0.30f / 99.0f;
     public static final float MINING_DURABILITY_REDUCTION_CAP = 0.30f;

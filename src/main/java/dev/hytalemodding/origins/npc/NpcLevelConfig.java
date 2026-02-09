@@ -3,6 +3,9 @@ package dev.hytalemodding.origins.npc;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Configuration for npc level.
+ */
 public class NpcLevelConfig {
     private int defaultLevel = 1;
     private int defaultVariance = 3;

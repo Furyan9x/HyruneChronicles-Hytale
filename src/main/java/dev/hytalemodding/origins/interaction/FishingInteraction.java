@@ -59,6 +59,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 // Handles casting and reeling for the fishing rod interaction.
+/**
+ * 
+ */
 public class FishingInteraction extends SimpleInstantInteraction {
     public static final BuilderCodec<FishingInteraction> CODEC = BuilderCodec.builder(
             FishingInteraction.class,

@@ -1,5 +1,8 @@
 package dev.hytalemodding.origins.slayer;
 
+/**
+ * 
+ */
 public class SlayerTaskAssignment {
     private String taskId;
     private String targetNpcTypeId;

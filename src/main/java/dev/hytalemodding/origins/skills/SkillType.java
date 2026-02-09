@@ -1,5 +1,8 @@
 package dev.hytalemodding.origins.skills;
 
+/**
+ * Enumeration of skill types.
+ */
 public enum SkillType {
     // Combat
     ATTACK("Attack", "Determines weapon accuracy and tier."),

@@ -1,6 +1,8 @@
 package dev.hytalemodding.origins.quests;
 
 import dev.hytalemodding.origins.level.LevelingService;
+import dev.hytalemodding.origins.playerdata.QuestProgress;
+import dev.hytalemodding.origins.playerdata.QuestStatus;
 import dev.hytalemodding.origins.skills.SkillType;
 
 import java.util.ArrayList;

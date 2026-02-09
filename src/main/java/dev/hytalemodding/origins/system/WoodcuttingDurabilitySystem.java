@@ -21,6 +21,9 @@ import dev.hytalemodding.origins.util.MiningUtils;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for woodcutting durability.
+ */
 public class WoodcuttingDurabilitySystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
     public static final float WOODCUTTING_DURABILITY_REDUCTION_PER_LEVEL = 0.30f / 99.0f;
     public static final float WOODCUTTING_DURABILITY_REDUCTION_CAP = 0.30f;

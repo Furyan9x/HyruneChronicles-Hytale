@@ -6,7 +6,10 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PlayerLvlData {
+/**
+ * Stores persistent skill levels and experience per player.
+ */
+public class PlayerLvlData implements PlayerData {
     private final UUID uuid;
 
     // Unified storage for ALL skills (Combat, Gathering, Artisan)
@@ -22,6 +25,7 @@ public class PlayerLvlData {
 
     // --- CORE ACCESSORS ---
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }

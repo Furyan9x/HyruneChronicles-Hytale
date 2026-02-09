@@ -16,6 +16,9 @@ import dev.hytalemodding.Origins;
 
 import javax.annotation.Nonnull;
 
+/**
+ * ECS system for npc level display.
+ */
 public class NpcLevelDisplaySystem extends EntityTickingSystem<EntityStore> implements QuerySystem<EntityStore> {
     private static final int TICK_INTERVAL = 5;
     private int tickCounter = 0;

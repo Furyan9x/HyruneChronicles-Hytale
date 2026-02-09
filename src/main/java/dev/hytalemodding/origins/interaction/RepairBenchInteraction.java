@@ -13,6 +13,9 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.ui.RepairBenchPage;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+/**
+ * 
+ */
 public class RepairBenchInteraction extends SimpleInstantInteraction {
     public static final BuilderCodec<RepairBenchInteraction> CODEC = BuilderCodec.builder(
             RepairBenchInteraction.class,

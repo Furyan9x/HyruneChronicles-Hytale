@@ -6,6 +6,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -159,7 +160,7 @@ public class SimpleDialogue {
             }
             
             return dialogue;
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException e) {
             throw new RuntimeException("Failed to load dialogue: " + resourcePath, e);
         }
     }
@@ -349,3 +350,4 @@ public class SimpleDialogue {
         void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store);
     }
 }
+

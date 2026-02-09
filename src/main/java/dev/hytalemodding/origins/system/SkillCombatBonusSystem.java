@@ -37,6 +37,9 @@ import java.util.logging.Level;
 
 import static dev.hytalemodding.Origins.LOGGER;
 
+/**
+ * ECS system for skill combat bonus.
+ */
 public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damage> {
     public static final float ATTACK_DAMAGE_PER_LEVEL = 0.01f;
     public static final float DEFENCE_DAMAGE_REDUCTION_PER_LEVEL = 0.30f / 99.0f;
@@ -348,7 +351,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return null;
         }
 
@@ -415,3 +418,4 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         return normalized.contains("projectile") || normalized.contains("arrow");
     }
 }
+
