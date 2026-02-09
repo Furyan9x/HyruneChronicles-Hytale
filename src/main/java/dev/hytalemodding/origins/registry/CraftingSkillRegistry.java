@@ -62,12 +62,7 @@ public final class CraftingSkillRegistry {
         rules.add(new SkillRuleSet(
                 SkillType.ARCANE_ENGINEERING,
                 new HashMap<>(),
-                keywordRule("staff", 1, 20, "wand", "book", "grimoire", "totem", "robe", "focus", "enchantment", "portalkey", "teleporter", "portal", "cloth")
-        ));
-        rules.add(new SkillRuleSet(
-                SkillType.WEAPONSMITHING,
-                new HashMap<>(),
-                keywordRule("weapon", 1, 20, "sword", "mace", "battleaxe", "dagger", "shortbow", "longbow", "crossbow")
+                keywordRule("staff", 1, 20, "wand", "grimoire", "totem", "robe", "focus", "enchantment", "portalkey", "teleporter", "portal", "cloth")
         ));
         rules.add(new SkillRuleSet(
                 SkillType.COOKING,
@@ -82,12 +77,17 @@ public final class CraftingSkillRegistry {
         rules.add(new SkillRuleSet(
                 SkillType.ARCHITECT,
                 new HashMap<>(),
-                keywordRule("furniture", 1, 20, "deco", "smooth", "bolt", "wool", "petals", "wall", "cauldron", "wood", "brick", "roof", "beam", "half", "stairs", "bench", "tool", "trap")
+                keywordRule("furniture", 1, 20, "deco", "bookshelf", "smooth", "bolt", "wool", "petals", "wall", "cauldron", "wood", "brick", "roof", "beam", "half", "stairs", "bench", "tool", "trap")
         ));
         rules.add(new SkillRuleSet(
                 SkillType.ALCHEMY,
                 new HashMap<>(),
                 keywordRule("potion", 1, 20, "bomb", "bandage")
+        ));
+        rules.add(new SkillRuleSet(
+                SkillType.WEAPONSMITHING,
+                new HashMap<>(),
+                keywordRule("weapon", 1, 20, "sword", "mace", "battleaxe", "dagger", "shortbow", "longbow", "crossbow")
         ));
         rules.add(new SkillRuleSet(
                 SkillType.FARMING,

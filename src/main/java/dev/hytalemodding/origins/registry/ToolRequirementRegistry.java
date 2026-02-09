@@ -15,6 +15,11 @@ public final class ToolRequirementRegistry {
         TOOL_LEVELS.put("crude", 1);
         TOOL_LEVELS.put("copper", 10);
         TOOL_LEVELS.put("iron", 15);
+        TOOL_LEVELS.put("cobalt", 30);
+        TOOL_LEVELS.put("adamantite", 40);
+        TOOL_LEVELS.put("thorium", 50);
+        TOOL_LEVELS.put("mithril", 60);
+        TOOL_LEVELS.put("onyxium", 70);
     }
 
     private ToolRequirementRegistry() {

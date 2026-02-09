@@ -1,4 +1,4 @@
-# Origins Mod - Current Skill Progress
+# Origins Mod - Current Progress
 
 Status scale:
 - Implemented = core gameplay loop and bonuses are live.
@@ -35,9 +35,11 @@ Status scale:
 - Crafting overrides: base Hytale assets audited with a generator to add/fix recipes, normalize recipe arrays, and enforce bench categories while excluding non-craftable items.
 - Basic trade pack crafting implemented. Craft Trade packs at a trade pack bench, they slow you down and display a model on the players back when in inventory (unintended functionality: makes the character naked. Seek fix.)
 - Repair bench added for safer repairing but not easy on the go. Repair kits for quick repair - lose max durability. Repair bench for repairing with base materials - maintain max durability.
-- Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode is selected; starter kit needs to be improved. 
+- Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode is selected; starter kit needs to be improved - provides a lot of invalid items currently. 
 - Universal Dialogue system(DialogueRegistry/OriginsDialogue, SimpleDialoguePage for every dialogue we want to create going forward.)
 - Custom XP notifications with our custom XpDropOverlay, Runescape Style circular XP notifications and tracker. 
+- Custom Quest system, basic functionality implemented, persistance of quest data, quest menu in /Character (CharacterMenu). Not tested quest stage progression or persistance of stages. 
+
 
 
 

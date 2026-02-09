@@ -13,13 +13,14 @@ public enum SkillType {
     RESTORATION("Restoration", "Increases healing potency and mana regen."), // Your "Healer" equivalent
     CONSTITUTION("Constitution", "Determines maximum health points."),
     SLAYER("Slayer", "Temporary Description."),
+    //NECROMANCY - necromancy from Rs3 duh
 
     // Gathering (Examples for the grid)
     MINING("Mining", "Extract ores from rocks."),
     WOODCUTTING("Woodcutting", "Chop trees for logs."),
     FISHING("Fishing", "Catch fish from water sources."),
     FARMING("Farming", "Plant and harvest crops for food."),
-
+    //ARCHAEOLOGY - source of gems for RNG crafting, other artifacts.
     // Artisan / Crafting
     SMELTING("Smelting", "Process materials in furnaces and salvage stations."),
     ARCANE_ENGINEERING("Arcane Engineering", "Craft magical devices at the Arcanist's Workbench."),
@@ -29,10 +30,13 @@ public enum SkillType {
     LEATHERWORKING("Leatherworking", "Cure hides at the Tanning Rack."),
     ARCHITECT("Architect", "Build structures at the Builder and Furniture workbenches."),
     ALCHEMY("Alchemy", "Brew potions and transmutations at the Alchemist's Workbench."),
+    //FLETCHING - bows/crossbows/arrows/ranged weapon crafting.
+    //HANDICRAFTING - Jewelry and accessories
 
     //Misc
     AGILITY("Agility", "Increased movement speed and jump height.");
-
+    //INVENTION - Salvaging gear, adding sockets to gear, building and using contraptions(from some technology mod eventually)
+    //COMMERCE - trading, buying/selling items, trade pack value, etc.
 
     private final String displayName;
     private final String description;

@@ -41,11 +41,11 @@ import static dev.hytalemodding.Origins.LOGGER;
  * ECS system for skill combat bonus.
  */
 public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damage> {
-    public static final float ATTACK_DAMAGE_PER_LEVEL = 0.01f;
+    public static final float ATTACK_DAMAGE_PER_LEVEL = 0.02f;
     public static final float DEFENCE_DAMAGE_REDUCTION_PER_LEVEL = 0.30f / 99.0f;
     public static final float DEFENCE_DAMAGE_REDUCTION_CAP = 0.30f;
-    public static final float RANGED_DAMAGE_PER_LEVEL = 0.01f;
-    public static final float MAGIC_DAMAGE_PER_LEVEL = 0.01f;
+    public static final float RANGED_DAMAGE_PER_LEVEL = 0.03f;
+    public static final float MAGIC_DAMAGE_PER_LEVEL = 0.03f;
     public static final float STRENGTH_CRIT_CHANCE_PER_LEVEL = 0.35f / 99.0f;
     public static final float STRENGTH_CRIT_CHANCE_CAP = 0.35f;
     public static final float STRENGTH_CRIT_DAMAGE_BONUS_PER_LEVEL = 1.0f / 99.0f;

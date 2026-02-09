@@ -12,7 +12,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
-import dev.hytalemodding.origins.util.FarmingHarvestTracker;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
@@ -21,9 +20,8 @@ import java.util.Locale;
  * ECS system for farming harvest pickup.
  */
     public class FarmingHarvestPickupSystem extends EntityEventSystem<EntityStore, InteractivelyPickupItemEvent> {
-        private static final long BREAK_SUPPRESSION_WINDOW_MS = 5000;
         public static final double SICKLE_XP_BONUS = 1.25;
-        public static final double MAX_YIELD_BONUS = 0.50;
+        public static final double MAX_YIELD_BONUS = 3.0;
 
     public FarmingHarvestPickupSystem() {
         super(InteractivelyPickupItemEvent.class);
@@ -58,7 +56,7 @@ import java.util.Locale;
         }
 
         String itemId = itemStack.getItemId().toLowerCase(Locale.ROOT);
-        if (!itemId.contains("crop") && !itemId.contains("wheat")) {
+        if (!itemId.contains("crop")) {
             return;
         }
 
@@ -71,10 +69,6 @@ import java.util.Locale;
         int boostedQty = applyYieldBonus(baseQty, playerRef.getUuid());
         if (boostedQty > baseQty) {
             event.setItemStack(itemStack.withQuantity(boostedQty));
-        }
-
-        if (FarmingHarvestTracker.wasRecentBreak(playerRef.getUuid(), BREAK_SUPPRESSION_WINDOW_MS)) {
-            return;
         }
 
         LevelingService service = LevelingService.get();

@@ -23,7 +23,6 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
 import dev.hytalemodding.origins.registry.ToolRequirementRegistry;
-import dev.hytalemodding.origins.util.FarmingHarvestTracker;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -72,16 +71,17 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
     };
     static {
         // Mining examples.
-        MINING_KEYWORDS.put("copper", new Reward(1, 5));
-        MINING_KEYWORDS.put("iron", new Reward(1, 8));
-        MINING_KEYWORDS.put("gold", new Reward(10, 20));
-        MINING_KEYWORDS.put("diamond", new Reward(30, 60));
-        MINING_KEYWORDS.put("adamantite", new Reward(20, 30));
-        MINING_KEYWORDS.put("cobalt", new Reward(20, 30));
-        MINING_KEYWORDS.put("mithril", new Reward(30, 40));
-        MINING_KEYWORDS.put("onyxium", new Reward(40, 50));
-        MINING_KEYWORDS.put("silver", new Reward(10, 18));
-        MINING_KEYWORDS.put("thorium", new Reward(35, 45));
+        MINING_KEYWORDS.put("copper", new Reward(1, 8));
+        MINING_KEYWORDS.put("iron", new Reward(10, 17));
+        MINING_KEYWORDS.put("silver", new Reward(10, 24));
+        MINING_KEYWORDS.put("coal", new Reward(15, 35));
+        MINING_KEYWORDS.put("gold", new Reward(25, 54));
+        MINING_KEYWORDS.put("cobalt", new Reward(30, 62));
+        MINING_KEYWORDS.put("adamantite", new Reward(40, 90));
+        MINING_KEYWORDS.put("thorium", new Reward(50, 165));
+        MINING_KEYWORDS.put("mithril", new Reward(60, 315));
+        MINING_KEYWORDS.put("onyxium", new Reward(70, 620));
+
         MINING_KEYWORDS.put("rock", new Reward(1, 2));
 
         // Woodcutting examples.
@@ -205,7 +205,6 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
             if (isSickleItemId(itemId)) {
                 xp = Math.round(xp * 1.25);
             }
-            FarmingHarvestTracker.recordBreak(playerRef.getUuid());
             LevelingService.get().addSkillXp(playerRef.getUuid(), SkillType.FARMING, xp);
         }
     }

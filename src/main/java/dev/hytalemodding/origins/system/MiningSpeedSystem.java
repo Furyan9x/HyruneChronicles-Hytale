@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
  * ECS system for mining speed.
  */
 public class MiningSpeedSystem extends EntityEventSystem<EntityStore, DamageBlockEvent> {
-    public static final float MINING_DAMAGE_PER_LEVEL = 0.01f;
+    public static final float MINING_DAMAGE_PER_LEVEL = 0.02f;
 
     public MiningSpeedSystem() {
         super(DamageBlockEvent.class);
