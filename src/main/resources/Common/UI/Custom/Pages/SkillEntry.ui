@@ -32,19 +32,19 @@ $C = "../Common.ui";
 
 $C.@PageOverlay {
   $C.@DecoratedContainer {
-    Anchor: (Width: 720, Height: 600); // Wider to fit skill details
+    Anchor: (Width: 720, Height: 600);
 
     // --- TITLE ---
     #Title {
       Group {
         Label #PageTitle {
-            Text: "Skills";
-            Anchor: (Left: 0, Right: 0, Height: 30);
-            Style: @PageTitleStyle;
+          Text: "Skills";
+          Anchor: (Left: 0, Right: 0, Height: 30);
+          Style: @PageTitleStyle;
         }
         TextButton #BtnClose {
-            Anchor: (Right: 0, Top: 3, Width: 30, Height: 25);
-            Text: "X";
+          Anchor: (Right: 0, Top: 3, Width: 30, Height: 25);
+          Text: "X";
         }
       }
     }
@@ -52,7 +52,7 @@ $C.@PageOverlay {
     // --- BODY (Tabs + Content) ---
     #Content {
       LayoutMode: Top;
-      Padding: (Top: 10, Left: 20, Right: 20, Bottom: 80); // Space for Header/Footer
+      Padding: (Top: 10, Left: 20, Right: 20, Bottom: 80);
 
       TabNavigation #TabBar {
         Anchor: (Height: 36, Left: 4, Right: 4);
@@ -98,57 +98,347 @@ $C.@PageOverlay {
           Style: (FontSize: 12, TextColor: #AAAAAA, RenderBold: true, RenderUppercase: true, LetterSpacing: 2);
         }
         Group { Anchor: (Height: 8); }
-
+        // ... (Server Info Content kept concise for brevity, assuming it was correct) ...
         Group {
           LayoutMode: Left;
           Anchor: (Height: 18);
-
           Label { Text: "Players Online"; Style: (FontSize: 12, TextColor: #AAAAAA); }
           Group { FlexWeight: 1; }
           Label #ServerInfoPlayersOnline { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
         }
         Group { Anchor: (Height: 6); }
-
         Group {
           LayoutMode: Left;
           Anchor: (Height: 18);
-
           Label { Text: "Server Time"; Style: (FontSize: 12, TextColor: #AAAAAA); }
           Group { FlexWeight: 1; }
           Label #ServerInfoServerTime { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
         }
         Group { Anchor: (Height: 6); }
-
         Group {
           LayoutMode: Left;
           Anchor: (Height: 18);
-
           Label { Text: "Local Time"; Style: (FontSize: 12, TextColor: #AAAAAA); }
           Group { FlexWeight: 1; }
           Label #ServerInfoLocalTime { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
         }
         Group { Anchor: (Height: 6); }
-
         Group {
           LayoutMode: Left;
           Anchor: (Height: 18);
-
           Label { Text: "Server Date"; Style: (FontSize: 12, TextColor: #AAAAAA); }
           Group { FlexWeight: 1; }
           Label #ServerInfoServerDate { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
         }
         Group { Anchor: (Height: 6); }
-
         Group {
           LayoutMode: Left;
           Anchor: (Height: 18);
-
           Label { Text: "Server Zone"; Style: (FontSize: 12, TextColor: #AAAAAA); }
           Group { FlexWeight: 1; }
           Label #ServerInfoServerZone { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
         }
       }
-      Group #TabQuests { LayoutMode: Top; Visible: false; }
+
+      // --- QUESTS TAB ---
+      Group #TabQuests {
+        LayoutMode: Left;
+        Visible: false;
+
+        // LEFT COLUMN: Quest List
+        Group #QuestListColumn {
+          LayoutMode: Top;
+          Anchor: (Width: 230);
+          Padding: (Left: 6, Right: 6, Top: 6, Bottom: 6);
+          Background: #000000(0.35);
+
+          // 1. Filters Row (Dropdown + Checkboxes)
+          Group #QuestFilterBar {
+            LayoutMode: Left;
+            Anchor: (Left: 0, Right: 0, Top: 0);
+            Padding: (Bottom: 6);
+
+            Group #QuestFilterRow {
+              LayoutMode: Left;
+              Anchor: (Height: 28, Top: 0, Left: 0);
+
+              Label {
+                Text: "Order:";
+                Anchor: (Width: 34);
+                Style: (FontSize: 10, TextColor: #d9c6a5, VerticalAlignment: Center);
+              }
+              Group { Anchor: (Width: 1); }
+
+              $C.@DropdownBox #Input {
+                Anchor: (Width: 140, Height: 26);
+              }
+            }
+
+            Group { FlexWeight: 1; }
+
+            Group #FilterOptionsRow {
+              LayoutMode: Top;
+              Anchor: (Width: 150);
+
+              $C.@CheckBoxWithLabel #HideCompletedToggle {
+                @Text = "";
+                Anchor: (Width: 100, Height: 22);
+                TooltipText: "Hide Completed";
+                TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+              }
+
+              Group { Anchor: (Height: 4); }
+
+              $C.@CheckBoxWithLabel #HideUnavailableToggle {
+                @Text = "";
+                Anchor: (Width: 100, Height: 22);
+                TooltipText: "Hide Unavailable";
+                TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+              }
+            }
+          }
+
+          // 3. Quest List Scrollable Container
+          Group #QuestListScroll {
+            LayoutMode: TopScrolling;
+            Anchor: (Left: 0, Right: 0, Height: 330); // Reduced height to fit Footer
+            Background: #000000(0.15);
+            Padding: (Top: 4, Bottom: 4, Right: 6);
+            FlexWeight: 1;
+
+            Group #QuestList {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+            }
+          }
+
+          // 4. QUEST POINTS FOOTER (Pinned to bottom of Left Column)
+          Group #QuestPointsFooter {
+            LayoutMode: Right;
+            Background: #000000(0.30);
+
+            Label #QuestPointsLabel {
+              Text: "Quest Points: 0 / 0";
+              Style: (
+                FontSize: 12,
+                TextColor: #55FF55,
+                RenderBold: true,
+                HorizontalAlignment: Center);
+              Padding: (Right: 4);
+            }
+          }
+        }
+        // --- END QUEST LIST COLUMN ---
+
+        Group { Anchor: (Width: 12); }
+
+        // RIGHT COLUMN: Quest Details
+        Group #QuestDetailPanel {
+          LayoutMode: Top;
+          FlexWeight: 1;
+          Padding: (Top: 0, Left: 8, Right: 8, Bottom: 8);
+          Background: #000000(0.25);
+
+          // Quest Title
+          Label #QuestDetailTitle {
+            Text: "Select a quest";
+            Style: (FontSize: 16, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+            Anchor: (Height: 32, Left: 0, Right: 0);
+            Padding: (Top: 8);
+          }
+
+          Group { Anchor: (Height: 4); }
+
+          // Description / Journal
+          Group #QuestTextArea {
+            LayoutMode: Top;
+            Anchor: (Height: 120, Left: 0, Right: 0);
+
+            // Quest Description
+            Group #QuestDescScroll {
+              LayoutMode: TopScrolling;
+              Anchor: (Height: 120, Left: 0, Right: 0);
+              Padding: (Right: 6);
+
+              Label #QuestDetailDesc {
+                Text: "Click a quest to see its details.";
+                Style: (FontSize: 11, TextColor: #e6d9c3, HorizontalAlignment: Center, Wrap: true);
+                Anchor: (Left: 2, Right: 2);
+              }
+            }
+
+            // Journal (Quest Stages)
+            Group #QuestJournalSection {
+              LayoutMode: Top;
+              Anchor: (Height: 120, Left: 0, Right: 0);
+              Visible: false;
+
+              Label {
+                Text: "JOURNAL";
+                Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+                Anchor: (Height: 16);
+              }
+              Group { Anchor: (Height: 4); }
+
+              Group #QuestJournalScroll {
+                LayoutMode: TopScrolling;
+                Anchor: (Height: 96, Left: 0, Right: 0);
+                Background: #000000(0.15);
+                Padding: (Top: 4, Bottom: 4, Left: 4, Right: 10);
+
+                Group #QuestJournalList {
+                  LayoutMode: Top;
+                }
+              }
+            }
+          }
+
+          Group { Anchor: (Height: 8); }
+
+          // Requirements Section
+          Group #QuestRequirementsSection {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0);
+
+            // Level Requirements Header + Toggle
+            Group #LevelReqHeader {
+              LayoutMode: Left;
+              Anchor: (Height: 20, Left: 0, Right: 0);
+              Background: #000000(0.2);
+              Padding: (Left: 4, Right: 2);
+
+              Label {
+                Text: "LEVEL REQUIREMENTS";
+                Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, VerticalAlignment: Center);
+              }
+              Group { FlexWeight: 1; }
+              TextButton #LevelReqToggle {
+                Anchor: (Width: 18, Height: 16);
+                Text: "-";
+              }
+            }
+
+            Group #LevelReqContent {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+              Padding: (Top: 4, Bottom: 4);
+              Visible: true;
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            // Item Requirements Header + Toggle
+            Group #ItemReqHeader {
+              LayoutMode: Left;
+              Anchor: (Height: 20, Left: 0, Right: 0);
+              Background: #000000(0.2);
+              Padding: (Left: 4, Right: 2);
+
+              Label {
+                Text: "ITEM REQUIREMENTS";
+                Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, VerticalAlignment: Center);
+              }
+              Group { FlexWeight: 1; }
+              TextButton #ItemReqToggle {
+                Anchor: (Width: 18, Height: 16);
+                Text: "-";
+              }
+            }
+
+            Group #ItemReqContent {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+              Padding: (Top: 4, Bottom: 4);
+              Visible: true;
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            // Quest Prerequisites Header + Toggle
+            Group #QuestReqHeader {
+              LayoutMode: Left;
+              Anchor: (Height: 20, Left: 0, Right: 0);
+              Background: #000000(0.2);
+              Padding: (Left: 4, Right: 2);
+
+              Label {
+                Text: "QUEST REQUIREMENTS";
+                Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, VerticalAlignment: Center);
+              }
+              Group { FlexWeight: 1; }
+              TextButton #QuestReqToggle {
+                Anchor: (Width: 18, Height: 16);
+                Text: "-";
+              }
+            }
+
+            Group #QuestReqContent {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+              Padding: (Top: 4, Bottom: 4);
+              Visible: true;
+            }
+          }
+
+          Group { Anchor: (Height: 8); }
+
+          // Rewards Section
+          Group #QuestRewardsSection {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0);
+            Visible: false;
+
+            Label {
+              Text: "REWARDS";
+              Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+              Anchor: (Height: 16);
+            }
+            Group { Anchor: (Height: 4); }
+
+            Group #RewardsContent {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+            }
+          }
+
+          Group { FlexWeight: 1; }
+
+          // Action Buttons
+          Group #QuestActionButtons {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 0);
+            Visible: false;
+
+            Group #QuestAcceptRow {
+              LayoutMode: Left;
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Group { FlexWeight: 1; }
+              TextButton #BtnAcceptQuest {
+                Anchor: (Width: 150, Height: 28, Right: 4, Bottom: 4);
+                Text: "Accept Quest";
+                Style: $C.@DefaultTextButtonStyle;
+                Visible: false;
+              }
+            }
+            Group #QuestTrackRow {
+              LayoutMode: Left;
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Group { FlexWeight: 1; }
+              TextButton #BtnTrackQuest {
+                Anchor: (Width: 150, Height: 28, Right: 4, Bottom: 4);
+                Text: "Track Quest";
+                Style: $C.@DefaultTextButtonStyle;
+                Visible: false;
+              }
+            }
+          }
+        }
+        // --- END QUEST DETAIL PANEL ---
+
+      }
+      // --- END TAB QUESTS ---
+
+      // --- ATTRIBUTES TAB ---
       Group #TabAttributes {
         LayoutMode: Top;
         Visible: false;
@@ -179,7 +469,6 @@ $C.@PageOverlay {
               Padding: (Top: 6, Bottom: 6);
             }
           }
-
           Group { Anchor: (Height: 8); }
 
           Group #AttrGatheringCategory {
@@ -203,7 +492,6 @@ $C.@PageOverlay {
               Padding: (Top: 6, Bottom: 6);
             }
           }
-
           Group { Anchor: (Height: 8); }
 
           Group #AttrMiscCategory {
@@ -230,6 +518,7 @@ $C.@PageOverlay {
         }
       }
 
+      // --- SKILLS TAB ---
       Group #TabSkills {
         LayoutMode: Left;
         Visible: true;
@@ -240,20 +529,20 @@ $C.@PageOverlay {
 
           // COLUMN 1
           Group #Col1 {
-              LayoutMode: Top;
-              FlexWeight: 1;
+            LayoutMode: Top;
+            FlexWeight: 1;
           }
           Group { Anchor: (Width: 5); }
           // COLUMN 2
           Group #Col2 {
-              LayoutMode: Top;
-              FlexWeight: 1;
+            LayoutMode: Top;
+            FlexWeight: 1;
           }
           Group { Anchor: (Width: 5); }
           // COLUMN 3
           Group #Col3 {
-              LayoutMode: Top;
-              FlexWeight: 1;
+            LayoutMode: Top;
+            FlexWeight: 1;
           }
         }
 

@@ -2,8 +2,10 @@ package dev.hytalemodding;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent;
 import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
 import com.hypixel.hytale.server.core.event.events.player.DrainPlayerFromWorldEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -32,6 +34,9 @@ import dev.hytalemodding.origins.npc.NpcLevelComponent;
 import dev.hytalemodding.origins.npc.NpcLevelConfig;
 import dev.hytalemodding.origins.npc.NpcLevelConfigRepository;
 import dev.hytalemodding.origins.npc.NpcLevelService;
+import dev.hytalemodding.origins.quests.JsonQuestRepository;
+import dev.hytalemodding.origins.quests.QuestManager;
+import dev.hytalemodding.origins.quests.QuestRepository;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -87,6 +92,10 @@ public class Origins extends JavaPlugin {
         JsonSlayerRepository slayerRepository = new JsonSlayerRepository("./origins_data");
         this.slayerService = new SlayerService(slayerRepository, slayerTaskRegistry, npcLevelService);
 
+        QuestRepository questRepository = new JsonQuestRepository("./origins_data");
+        QuestManager questManager = QuestManager.get();
+        questManager.setRepository(questRepository);
+
         // Initialize nameplate manager
         NameplateManager.init(this.service);
         // Initialize Components
@@ -95,18 +104,21 @@ public class Origins extends JavaPlugin {
         OriginsDialogue.init(this.service, this.slayerService);
 
         // Register event listeners
-        PlayerJoinListener joinListener = new PlayerJoinListener(this.service, this.slayerService);
+        PlayerJoinListener joinListener = new PlayerJoinListener(this.service, this.slayerService, questManager);
+
         this.getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, joinListener::onPlayerJoin);
+        System.out.println("[DEBUG] Registered AddPlayerToWorldEvent listener");
+
+        this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, joinListener::onPlayerDisconnect);
+        System.out.println("[DEBUG] Registered PlayerDisconnectEvent listener");
+
+// Keep DrainPlayerFromWorldEvent too - it might be useful for world teleports
         this.getEventRegistry().registerGlobal(DrainPlayerFromWorldEvent.class, joinListener::onPlayerLeave);
+        System.out.println("[DEBUG] Registered DrainPlayerFromWorldEvent listener");
         this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingHarvestListener()::onPlayerInteract);
-        this.getEventRegistry().registerGlobal(
-                com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent.class,
-                new ArmorRequirementListener()::onInventoryChange
-        );
-        this.getEventRegistry().registerGlobal(
-                com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent.class,
-                new TradePackInventoryListener()::onInventoryChange
-        );
+        this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ArmorRequirementListener()::onInventoryChange);
+        this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new TradePackInventoryListener()::onInventoryChange);
+
         this.getCodecRegistry(Interaction.CODEC).register(
                 "OriginsFishing",
                 FishingInteraction.class,

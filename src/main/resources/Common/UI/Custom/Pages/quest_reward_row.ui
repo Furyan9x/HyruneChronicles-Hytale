@@ -1,0 +1,20 @@
+// Template for a reward row (XP, items, unlocks)
+@RewardTextStyle = LabelStyle(FontSize: 11, TextColor: #FFD700);
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 16, Left: 0, Right: 0);
+  Padding: (Left: 8);
+
+  Label #RewardIcon {
+    Text: "-";
+    Anchor: (Width: 16);
+    Style: (FontSize: 11, TextColor: #FFD700, HorizontalAlignment: Center);
+  }
+
+  Label #RewardText {
+    Text: "Reward text";
+    FlexWeight: 1;
+    Style: @RewardTextStyle;
+  }
+}

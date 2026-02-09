@@ -23,7 +23,6 @@ public class XPDropManager {
 
     public void handleXpGain(UUID playerUuid, String skillName, long amount, float currentLevelProgress) {
         // 1. Get PlayerRef from Universe
-
         if ("Constitution".equalsIgnoreCase(skillName)) {
             return;
         }

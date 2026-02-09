@@ -1,0 +1,15 @@
+// Template for a quest stage/objective in the journal
+@QuestStageActiveStyle = LabelStyle(FontSize: 11, TextColor: #f7e9cd, Wrap: true, HorizontalAlignment: Center);
+@QuestStageCompleteStyle = LabelStyle(FontSize: 11, TextColor: #808080, Wrap: true, HorizontalAlignment: Center);
+
+Group {
+  LayoutMode: Top;
+  Anchor: (Left: 0, Right: 0);
+  Padding: (Bottom: 4);
+  
+  Label #StageText {
+    Text: "Quest stage description goes here";
+    Style: @QuestStageActiveStyle;
+    Anchor: (Left: 0, Right: 0);
+  }
+}

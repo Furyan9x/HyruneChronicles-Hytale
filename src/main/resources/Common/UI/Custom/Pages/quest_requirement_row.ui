@@ -1,0 +1,21 @@
+// Template for a requirement row (level, item, or quest prerequisite)
+@RequirementMetStyle = LabelStyle(FontSize: 11, TextColor: #00FF00);
+@RequirementUnmetStyle = LabelStyle(FontSize: 11, TextColor: #FF6666);
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 16, Left: 0, Right: 0);
+  Padding: (Left: 8);
+
+  Label #RequirementIcon {
+    Text: "-";
+    Anchor: (Width: 16);
+    Style: (FontSize: 11, TextColor: #00FF00, HorizontalAlignment: Center);
+  }
+
+  Label #RequirementText {
+    Text: "Requirement text";
+    FlexWeight: 1;
+    Style: @RequirementMetStyle;
+  }
+}

@@ -1,0 +1,23 @@
+// Template for a single quest list item
+@QuestItemStyle = LabelStyle(FontSize: 12, TextColor: #e6d9c3, VerticalAlignment: Center);
+@QuestItemSelectedStyle = LabelStyle(FontSize: 12, TextColor: #ff981f, VerticalAlignment: Center, RenderBold: true);
+
+
+Button #QuestButton {
+LayoutMode: Left;
+  Anchor: (Height: 24, Left: 0, Right: 0);
+  Padding: (Left: 8, Right: 8, Top: 4, Bottom: 4);
+  
+  Label #QuestName {
+    Text: "Quest Name";
+    FlexWeight: 1;
+    Style: @QuestItemStyle;
+  }
+  
+  Label #QuestStatus {
+    Text: "✓";
+    Anchor: (Width: 16);
+    Style: (FontSize: 12, TextColor: #00FF00, HorizontalAlignment: Center);
+    Visible: false;
+  }
+}

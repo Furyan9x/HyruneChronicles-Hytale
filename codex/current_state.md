@@ -37,7 +37,8 @@ Status scale:
 - Repair bench added for safer repairing but not easy on the go. Repair kits for quick repair - lose max durability. Repair bench for repairing with base materials - maintain max durability.
 - Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode is selected; starter kit needs to be improved. 
 - Universal Dialogue system(DialogueRegistry/OriginsDialogue, SimpleDialoguePage for every dialogue we want to create going forward.)
-- Custom XP notifications using notificationsUtil. 
+- Custom XP notifications with our custom XpDropOverlay, Runescape Style circular XP notifications and tracker. 
+
 
 
 ## Crafting Overrides
@@ -49,10 +50,10 @@ Status scale:
 ## Gear Requirement Maintenance
 - Central registry: `src/main/java/dev/hytalemodding/origins/registry/CombatRequirementRegistry.java`
 - To add new gear requirements:
-  - Add a keyword or exact match in `CombatRequirementRegistry` (material/ID tokens).
-  - Map it to the required level.
-  - For armor, requirements are checked against Defence level on equip.
-  - For weapons, requirements are checked against Attack/Ranged/Magic when dealing damage.
+- Add a keyword or exact match in `CombatRequirementRegistry` (material/ID tokens).
+- Map it to the required level.
+- For armor, requirements are checked against Defence level on equip.
+- For weapons, requirements are checked against Attack/Ranged/Magic when dealing damage.
 
 ## Project Structure Notes
 - Registries now live in `src/main/java/dev/hytalemodding/origins/registry`.
@@ -60,4 +61,10 @@ Status scale:
 - Event listeners live in `src/main/java/dev/hytalemodding/origins/events`.
 - Utility helpers live in `src/main/java/dev/hytalemodding/origins/util`.
 - Interaction handlers live in `src/main/java/dev/hytalemodding/origins/interaction`.
+
+
+## Current Focus
+-Implementing Quest GUI within CharacterMenu. Runescape style quest journal/tracker with support for requirements, rewards, persistant states of quests (not started, in-progress, completed)
+
+
 

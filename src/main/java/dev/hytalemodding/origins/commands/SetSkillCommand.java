@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Origins;
 import dev.hytalemodding.origins.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.origins.level.LevelingService;
+import dev.hytalemodding.origins.quests.QuestManager;
 import dev.hytalemodding.origins.skills.SkillType;
 import dev.hytalemodding.origins.util.NameplateManager;
 
@@ -55,7 +56,7 @@ public class SetSkillCommand extends AbstractPlayerCommand {
         NameplateManager.update(uuid);
         SkillStatBonusApplier.apply(playerRef);
         SkillStatBonusApplier.applyMovementSpeed(playerRef);
-
+        this.testQuestSave(uuid);
         ctx.sendMessage(Message.raw("Set " + skill.getDisplayName() + " to level " + level + "."));
     }
 
@@ -78,5 +79,17 @@ public class SetSkillCommand extends AbstractPlayerCommand {
 
     private static String normalize(String value) {
         return value.toLowerCase(Locale.ROOT).replace("_", "").replace(" ", "");
+    }
+    public void testQuestSave(UUID playerUuid) {
+        System.out.println("===== MANUAL QUEST SAVE TEST =====");
+        System.out.println("Player UUID: " + playerUuid);
+
+        QuestManager qm = QuestManager.get();
+        System.out.println("QuestManager instance: " + qm);
+        System.out.println("Repository: " + qm.getRepository());
+
+        System.out.println("Calling unload...");
+        qm.unload(playerUuid);
+        System.out.println("Unload complete");
     }
 }

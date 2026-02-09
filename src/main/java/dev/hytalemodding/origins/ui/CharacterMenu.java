@@ -9,6 +9,8 @@ import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.Anchor;
+import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
+import com.hypixel.hytale.server.core.ui.LocalizableString;
 import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -17,13 +19,22 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.origins.level.LevelingService;
+import dev.hytalemodding.origins.quests.Quest;
+import dev.hytalemodding.origins.quests.QuestListFilter;
+import dev.hytalemodding.origins.quests.QuestManager;
+import dev.hytalemodding.origins.quests.QuestProgress;
+import dev.hytalemodding.origins.quests.QuestRequirement;
+import dev.hytalemodding.origins.quests.QuestReward;
+import dev.hytalemodding.origins.quests.QuestStatus;
 import dev.hytalemodding.origins.skills.SkillType;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMenuData> {
@@ -32,9 +43,17 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final String CELL_UI = "Pages/character_stats.ui";
     private static final String ATTR_ROW_UI = "Pages/attribute_row.ui";
     private static final String UNLOCK_ROW_UI = "Pages/skill_unlock_row.ui";
+    private static final String QUEST_ITEM_UI = "Pages/quest_list_item.ui";
+    private static final String QUEST_STAGE_UI = "Pages/quest_stage_row.ui";
+    private static final String QUEST_REQ_UI = "Pages/quest_requirement_row.ui";
+    private static final String QUEST_REWARD_UI = "Pages/quest_reward_row.ui";
 
     private static final String COLOR_YELLOW = "#ffff00";
     private static final String COLOR_ORANGE = "#ff981f"; // For selected skills.
+    private static final String COLOR_WHITE = "#ffffff";
+    private static final String COLOR_GRAY = "#808080";
+    private static final String COLOR_GREEN = "#00ff00";
+    private static final String COLOR_RED = "#ff6666";
     private static final int PROGRESS_BAR_WIDTH = 112;
     private static final int PROGRESS_BAR_HEIGHT = 4;
     private static final String TAB_SERVER_INFO = "ServerInfo";
@@ -45,9 +64,13 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd-yyyy");
     private static final String ATTR_TOGGLE_ACTION = "ToggleAttributeCategory";
+    private static final String QUEST_REQ_TOGGLE_ACTION = "ToggleQuestRequirement";
     private static final String ATTR_CATEGORY_COMBAT = "Combat";
     private static final String ATTR_CATEGORY_GATHERING = "Gathering";
     private static final String ATTR_CATEGORY_MISC = "Misc";
+    private static final String REQ_CATEGORY_LEVEL = "Level";
+    private static final String REQ_CATEGORY_ITEM = "Item";
+    private static final String REQ_CATEGORY_QUEST = "Quest";
     private static final String DEFAULT_DETAIL_TITLE = "Select a skill";
     private static final String DEFAULT_DETAIL_DESC = "Click a skill to see its bonuses.";
 
@@ -56,6 +79,14 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private boolean combatExpanded = true;
     private boolean gatheringExpanded = true;
     private boolean miscExpanded = true;
+    private String selectedQuestId = null;
+    private QuestListFilter currentQuestFilter = QuestListFilter.ALPHABETICAL;
+    private boolean levelReqExpanded = true;
+    private boolean itemReqExpanded = true;
+    private boolean questReqExpanded = true;
+    // Filter State
+    private boolean hideCompleted = false;
+    private boolean hideUnavailable = false;
 
     public CharacterMenu(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss, SkillMenuData.CODEC);
@@ -68,7 +99,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         UUID uuid = this.playerRef.getUuid();
         LevelingService levelingService = LevelingService.get();
 
-        this.applyTabState(commandBuilder);
+        this.applyTabState(commandBuilder, eventBuilder);
         this.populateServerInfo(commandBuilder);
         this.buildSkillGrid(commandBuilder, eventBuilder, uuid, levelingService);
         this.buildAttributes(commandBuilder, eventBuilder, uuid, levelingService);
@@ -88,6 +119,17 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_GATHERING), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrMiscToggle",
             EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_MISC), false);
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnAcceptQuest",
+            EventData.of("Button", "AcceptQuest"), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnTrackQuest",
+            EventData.of("Button", "TrackQuest"), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#LevelReqToggle",
+            EventData.of("Button", QUEST_REQ_TOGGLE_ACTION).append("Category", REQ_CATEGORY_LEVEL), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ItemReqToggle",
+            EventData.of("Button", QUEST_REQ_TOGGLE_ACTION).append("Category", REQ_CATEGORY_ITEM), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#QuestReqToggle",
+            EventData.of("Button", QUEST_REQ_TOGGLE_ACTION).append("Category", REQ_CATEGORY_QUEST), false);
     }
 
     /**
@@ -196,22 +238,92 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                     this.selectedTab = data.tabId;
 
                     UICommandBuilder refreshCmd = new UICommandBuilder();
-                    this.applyTabState(refreshCmd);
+                    UIEventBuilder refreshEvt = new UIEventBuilder();
+                    this.applyTabState(refreshCmd, refreshEvt);
                     if (TAB_SERVER_INFO.equals(this.selectedTab)) {
                         this.populateServerInfo(refreshCmd);
                     }
                     if (TAB_ATTRIBUTES.equals(this.selectedTab)) {
-                        this.buildAttributes(refreshCmd, new UIEventBuilder(), this.playerRef.getUuid(), LevelingService.get());
+                        this.buildAttributes(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
                     }
-                    this.sendUpdate(refreshCmd, new UIEventBuilder(), false);
+                    this.sendUpdate(refreshCmd, refreshEvt, false);
                 }
                 break;
             case ATTR_TOGGLE_ACTION:
                 if (data.category != null) {
                     toggleAttributeCategory(data.category);
                     UICommandBuilder refreshCmd = new UICommandBuilder();
-                    this.buildAttributes(refreshCmd, new UIEventBuilder(), this.playerRef.getUuid(), LevelingService.get());
-                    this.sendUpdate(refreshCmd, new UIEventBuilder(), false);
+                    UIEventBuilder refreshEvt = new UIEventBuilder();
+                    this.buildAttributes(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
+                    this.sendUpdate(refreshCmd, refreshEvt, false);
+                }
+                break;
+            case "SelectQuest":
+                if (data.questId != null) {
+                    this.selectedQuestId = data.questId;
+                    UICommandBuilder refreshCmd = new UICommandBuilder();
+                    UIEventBuilder refreshEvt = new UIEventBuilder();
+                    this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
+                    this.sendUpdate(refreshCmd, refreshEvt, false);
+                }
+                break;
+            case "AcceptQuest":
+                if (this.selectedQuestId != null) {
+                    QuestManager manager = QuestManager.get();
+                    if (manager.startQuest(this.playerRef.getUuid(), this.selectedQuestId)) {
+                        UICommandBuilder refreshCmd = new UICommandBuilder();
+                        UIEventBuilder refreshEvt = new UIEventBuilder();
+                        this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
+                        this.sendUpdate(refreshCmd, refreshEvt, false);
+                    }
+                }
+                break;
+            case "TrackQuest":
+                System.out.println("Tracking quest: " + this.selectedQuestId);
+                break;
+            case "QuestFilterChanged":
+                if (data.selectedIndex != null) {
+                    try {
+                        int index = Integer.parseInt(data.selectedIndex);
+                        List<QuestListFilter> filters = getQuestFilterOptions();
+                        if (index >= 0 && index < filters.size()) {
+                            this.currentQuestFilter = filters.get(index);
+                        }
+
+                        UICommandBuilder refreshCmd = new UICommandBuilder();
+                        UIEventBuilder refreshEvt = new UIEventBuilder();
+                        this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
+                        this.sendUpdate(refreshCmd, refreshEvt, false);
+                    } catch (Exception e) {
+                        System.err.println("Invalid filter index: " + data.selectedIndex);
+                    }
+                }
+                break;
+            case "ToggleHideCompleted":
+                this.hideCompleted = !this.hideCompleted; // Toggle boolean
+
+                // Rebuild the tab to update list and checkbox visual
+                UICommandBuilder refreshCmd1 = new UICommandBuilder();
+                UIEventBuilder refreshEvt1 = new UIEventBuilder();
+                this.buildQuestTab(refreshCmd1, refreshEvt1, this.playerRef.getUuid());
+                this.sendUpdate(refreshCmd1, refreshEvt1, false);
+                break;
+
+            case "ToggleHideUnavailable":
+                this.hideUnavailable = !this.hideUnavailable; // Toggle boolean
+
+                UICommandBuilder refreshCmd2 = new UICommandBuilder();
+                UIEventBuilder refreshEvt2 = new UIEventBuilder();
+                this.buildQuestTab(refreshCmd2, refreshEvt2, this.playerRef.getUuid());
+                this.sendUpdate(refreshCmd2, refreshEvt2, false);
+                break;
+            case QUEST_REQ_TOGGLE_ACTION:
+                if (data.category != null) {
+                    toggleQuestRequirement(data.category);
+                    UICommandBuilder refreshCmd = new UICommandBuilder();
+                    UIEventBuilder refreshEvt = new UIEventBuilder();
+                    this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
+                    this.sendUpdate(refreshCmd, refreshEvt, false);
                 }
                 break;
         }
@@ -242,7 +354,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         return (int) (base + maxOffense);
     }
 
-    private void applyTabState(UICommandBuilder cmd) {
+    private void applyTabState(UICommandBuilder cmd, UIEventBuilder evt) {
         boolean showServerInfo = TAB_SERVER_INFO.equals(this.selectedTab);
         boolean showQuests = TAB_QUESTS.equals(this.selectedTab);
         boolean showAttributes = TAB_ATTRIBUTES.equals(this.selectedTab);
@@ -257,7 +369,268 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         cmd.set("#TabFriends.Visible", showFriends);
         cmd.set("#Footer.Visible", showSkills);
         cmd.set("#TabBar.SelectedTab", this.selectedTab);
+        if (showQuests) {
+            this.buildQuestTab(cmd, evt, this.playerRef.getUuid());
+        }
+    }
 
+    private void buildQuestTab(UICommandBuilder cmd, UIEventBuilder evt, UUID uuid) {
+        QuestManager questManager = QuestManager.get();
+
+        buildQuestFilterDropdown(cmd, evt);
+        cmd.set("#HideCompletedToggle #CheckBox.Value", this.hideCompleted);
+        cmd.set("#HideUnavailableToggle #CheckBox.Value", this.hideUnavailable);
+
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#HideCompletedToggle #CheckBox",
+                EventData.of("Button", "ToggleHideCompleted"), false);
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#HideUnavailableToggle #CheckBox",
+                EventData.of("Button", "ToggleHideUnavailable"), false);
+
+        buildQuestList(cmd, evt, uuid, questManager);
+        if (this.selectedQuestId != null) {
+            Quest quest = questManager.getQuest(this.selectedQuestId);
+            if (quest != null) {
+                buildQuestDetailPanel(cmd, evt, uuid, quest, questManager);
+            }
+        } else {
+            cmd.set("#QuestDetailTitle.Text", "Select a quest");
+            cmd.set("#QuestDetailDesc.Text", "Click a quest to see its details.");
+            cmd.set("#QuestJournalSection.Visible", false);
+            cmd.set("#QuestRequirementsSection.Visible", false);
+            cmd.set("#QuestRewardsSection.Visible", false);
+            cmd.set("#QuestActionButtons.Visible", false);
+        }
+        int currentPoints = questManager.getQuestPoints(uuid);
+        int totalPoints = questManager.getAllQuests().stream().mapToInt(Quest::getQuestPoints).sum();
+        cmd.set("#QuestPointsLabel.Text", "Quest Points: " + currentPoints + " / " + totalPoints);
+        cmd.set("#QuestPointsVal.Text", String.valueOf(questManager.getQuestPoints(uuid)));
+    }
+
+    private void buildQuestFilterDropdown(UICommandBuilder cmd, UIEventBuilder evt) {
+        List<QuestListFilter> filters = getQuestFilterOptions();
+        List<DropdownEntryInfo> filterOptions = new ArrayList<>();
+        for (QuestListFilter filter : filters) {
+            filterOptions.add(new DropdownEntryInfo(
+                LocalizableString.fromString(filter.getDisplayName()),
+                filter.name()
+            ));
+        }
+
+        if (!filters.contains(this.currentQuestFilter)) {
+            this.currentQuestFilter = filters.get(0);
+        }
+        cmd.set("#QuestFilterRow #Input.Entries", filterOptions);
+        cmd.set("#QuestFilterRow #Input.Value", this.currentQuestFilter.name());
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#QuestFilterRow #Input",
+            EventData.of("Dropdown", "QuestFilterChanged"), false);
+    }
+
+    private List<QuestListFilter> getQuestFilterOptions() {
+        List<QuestListFilter> filters = new ArrayList<>();
+        filters.add(QuestListFilter.ALPHABETICAL);
+        filters.add(QuestListFilter.BY_LENGTH);
+        return filters;
+    }
+
+    private void buildQuestList(UICommandBuilder cmd, UIEventBuilder evt, UUID uuid, QuestManager manager) {
+        cmd.clear("#QuestList");
+
+        List<Quest> quests = manager.getFilteredQuests(uuid, this.currentQuestFilter);
+        int index = 0;
+        for (Quest quest : quests) {
+            QuestStatus status = manager.getQuestStatus(uuid, quest.getId());
+            if (this.hideCompleted && status == QuestStatus.COMPLETED) {
+                continue;
+            }
+            if (this.hideUnavailable && status == QuestStatus.NOT_STARTED && !quest.meetsRequirements(uuid)) {
+                continue;
+            }
+            cmd.append("#QuestList", QUEST_ITEM_UI);
+
+            String itemRoot = "#QuestList[" + index + "]";
+            cmd.set(itemRoot + " #QuestName.Text", quest.getName());
+
+            String statusColor;
+            switch (status) {
+                case NOT_STARTED:
+                    statusColor = COLOR_RED;
+                    break;
+                case IN_PROGRESS:
+                    statusColor = COLOR_YELLOW;
+                    break;
+                case COMPLETED:
+                    statusColor = COLOR_GREEN;
+                    break;
+                default:
+                    statusColor = COLOR_YELLOW;
+                    break;
+            }
+
+            boolean isSelected = quest.getId().equals(this.selectedQuestId);
+            String textColor = isSelected ? COLOR_WHITE : statusColor;
+            cmd.set(itemRoot + " #QuestName.Style.TextColor", textColor);
+            cmd.set(itemRoot + " #QuestName.Style.RenderBold", isSelected);
+            cmd.set(itemRoot + " #QuestStatus.Visible", status == QuestStatus.COMPLETED);
+
+            evt.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                itemRoot,
+                EventData.of("Button", "SelectQuest").append("QuestID", quest.getId()),
+                false
+            );
+
+            index++;
+        }
+    }
+
+    private void buildQuestDetailPanel(UICommandBuilder cmd, UIEventBuilder evt,
+                                       UUID uuid, Quest quest, QuestManager manager) {
+        QuestProgress progress = manager.getQuestProgress(uuid, quest.getId());
+        QuestStatus status = progress != null ? progress.getStatus() : QuestStatus.NOT_STARTED;
+
+        cmd.set("#QuestDetailTitle.Text", quest.getName());
+        if (status == QuestStatus.NOT_STARTED) {
+            cmd.set("#QuestDetailDesc.Text", quest.getDescription());
+            cmd.set("#QuestDescScroll.Visible", true);
+            cmd.set("#QuestJournalSection.Visible", false);
+        } else {
+            cmd.set("#QuestDetailDesc.Text", "");
+            cmd.set("#QuestDescScroll.Visible", false);
+            cmd.set("#QuestJournalSection.Visible", true);
+            buildQuestJournal(cmd, quest, progress, status);
+        }
+
+        cmd.set("#QuestRequirementsSection.Visible", true);
+        buildQuestRequirements(cmd, evt, uuid, quest);
+
+        cmd.set("#QuestRewardsSection.Visible", true);
+        buildQuestRewards(cmd, quest);
+
+        buildQuestActionButtons(cmd, uuid, quest, status);
+    }
+
+    private void buildQuestJournal(UICommandBuilder cmd, Quest quest, QuestProgress progress, QuestStatus status) {
+        cmd.clear("#QuestJournalList");
+
+        List<Quest.StageInfo> stages = quest.getStageList(progress);
+        int index = 0;
+        boolean shownCurrent = false;
+
+        for (Quest.StageInfo stage : stages) {
+            if (status == QuestStatus.IN_PROGRESS && !stage.isCompleted() && shownCurrent) {
+                break;
+            }
+
+            cmd.append("#QuestJournalList", QUEST_STAGE_UI);
+            String stageRoot = "#QuestJournalList[" + index + "]";
+            cmd.set(stageRoot + " #StageText.Text", stage.getText());
+
+            if (status == QuestStatus.COMPLETED || stage.isCompleted()) {
+                cmd.set(stageRoot + " #StageText.Style.TextColor", COLOR_GRAY);
+            }
+
+            if (!stage.isCompleted()) {
+                shownCurrent = true;
+            }
+
+            index++;
+        }
+    }
+
+    private void buildQuestRequirements(UICommandBuilder cmd, UIEventBuilder evt,
+                                        UUID uuid, Quest quest) {
+        LevelingService service = LevelingService.get();
+
+        cmd.set("#LevelReqToggle.Text", levelReqExpanded ? "-" : "+");
+        cmd.set("#ItemReqToggle.Text", itemReqExpanded ? "-" : "+");
+        cmd.set("#QuestReqToggle.Text", questReqExpanded ? "-" : "+");
+
+        cmd.set("#LevelReqContent.Visible", levelReqExpanded);
+        cmd.set("#ItemReqContent.Visible", itemReqExpanded);
+        cmd.set("#QuestReqContent.Visible", questReqExpanded);
+
+        cmd.clear("#LevelReqContent");
+        cmd.clear("#ItemReqContent");
+        cmd.clear("#QuestReqContent");
+
+        if (levelReqExpanded) {
+            int row = 0;
+            for (QuestRequirement.LevelRequirement req : quest.getLevelRequirements()) {
+                boolean met = service.getSkillLevel(uuid, req.getSkill()) >= req.getLevel();
+                appendRequirementRow(cmd, "#LevelReqContent", row++, req.getDisplayText(), met);
+            }
+        }
+
+        if (itemReqExpanded) {
+            int row = 0;
+            for (QuestRequirement.ItemRequirement req : quest.getItemRequirements()) {
+                appendRequirementRow(cmd, "#ItemReqContent", row++, req.getDisplayText(), false);
+            }
+        }
+
+        if (questReqExpanded) {
+            int row = 0;
+            QuestManager manager = QuestManager.get();
+            for (String questId : quest.getPrerequisiteQuests()) {
+                Quest prereq = manager.getQuest(questId);
+                String label = prereq != null ? prereq.getName() : questId;
+                QuestProgress progress = manager.getQuestProgress(uuid, questId);
+                boolean met = progress != null && progress.getStatus() == QuestStatus.COMPLETED;
+                appendRequirementRow(cmd, "#QuestReqContent", row++, label, met);
+            }
+        }
+    }
+
+    private void appendRequirementRow(UICommandBuilder cmd, String container, int index, String text, boolean met) {
+        cmd.append(container, QUEST_REQ_UI);
+        String rowRoot = container + "[" + index + "]";
+        cmd.set(rowRoot + " #RequirementText.Text", text);
+        cmd.set(rowRoot + " #RequirementText.Style.TextColor", met ? COLOR_GREEN : COLOR_RED);
+        cmd.set(rowRoot + " #RequirementIcon.Text", met ? "v" : "-");
+        cmd.set(rowRoot + " #RequirementIcon.Style.TextColor", met ? COLOR_GREEN : COLOR_RED);
+    }
+
+    private void buildQuestRewards(UICommandBuilder cmd, Quest quest) {
+        cmd.clear("#RewardsContent");
+
+        int row = 0;
+        cmd.append("#RewardsContent", QUEST_REWARD_UI);
+        cmd.set("#RewardsContent[" + row + "] #RewardText.Text",
+            quest.getQuestPoints() + " Quest Point" + (quest.getQuestPoints() != 1 ? "s" : ""));
+        row++;
+
+        for (QuestReward reward : quest.getRewards()) {
+            cmd.append("#RewardsContent", QUEST_REWARD_UI);
+            cmd.set("#RewardsContent[" + row + "] #RewardText.Text", reward.getDisplayText());
+            row++;
+        }
+    }
+
+    private void buildQuestActionButtons(UICommandBuilder cmd, UUID uuid, Quest quest, QuestStatus status) {
+        boolean canStart = status == QuestStatus.NOT_STARTED && quest.meetsRequirements(uuid);
+        boolean inProgress = status == QuestStatus.IN_PROGRESS;
+
+        cmd.set("#QuestActionButtons.Visible", canStart || inProgress);
+        cmd.set("#QuestAcceptRow.Visible", canStart);
+        cmd.set("#QuestTrackRow.Visible", inProgress);
+        cmd.set("#BtnAcceptQuest.Visible", canStart);
+        cmd.set("#BtnTrackQuest.Visible", inProgress);
+    }
+
+    private void toggleQuestRequirement(String category) {
+        switch (category) {
+            case REQ_CATEGORY_LEVEL:
+                levelReqExpanded = !levelReqExpanded;
+                break;
+            case REQ_CATEGORY_ITEM:
+                itemReqExpanded = !itemReqExpanded;
+                break;
+            case REQ_CATEGORY_QUEST:
+                questReqExpanded = !questReqExpanded;
+                break;
+            default:
+                break;
+        }
     }
 
     private void buildAttributes(UICommandBuilder cmd,
@@ -609,18 +982,24 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         static final String KEY_SKILL_ID = "SkillID";
         static final String KEY_TAB_ID = "TabID";
         static final String KEY_CATEGORY = "Category";
+        static final String KEY_QUEST_ID = "QuestID";
+        static final String KEY_SELECTED_INDEX = "SelectedIndex";
 
         public static final BuilderCodec<SkillMenuData> CODEC = BuilderCodec.builder(SkillMenuData.class, SkillMenuData::new)
                 .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
                 .addField(new KeyedCodec<>(KEY_SKILL_ID, Codec.STRING), (d, s) -> d.skillId = s, d -> d.skillId)
                 .addField(new KeyedCodec<>(KEY_TAB_ID, Codec.STRING), (d, s) -> d.tabId = s, d -> d.tabId)
                 .addField(new KeyedCodec<>(KEY_CATEGORY, Codec.STRING), (d, s) -> d.category = s, d -> d.category)
+                .addField(new KeyedCodec<>(KEY_QUEST_ID, Codec.STRING), (d, s) -> d.questId = s, d -> d.questId)
+                .addField(new KeyedCodec<>(KEY_SELECTED_INDEX, Codec.STRING), (d, s) -> d.selectedIndex = s, d -> d.selectedIndex)
                 .build();
 
         private String button;
         private String skillId;
         private String tabId;
         private String category;
+        private String questId;
+        private String selectedIndex;
     }
 
     private static final class AttributeEntry {

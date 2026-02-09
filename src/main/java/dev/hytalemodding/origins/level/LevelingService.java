@@ -173,6 +173,7 @@ public class LevelingService {
      * Call this on player disconnect.
      */
     public void unload(UUID id) {
+        System.err.println("========== LevelingService.unload CALLED for: " + id + " ==========");
         PlayerLvlData data = this.cache.remove(id);
         if (data != null) {
             this.repository.save(data);
