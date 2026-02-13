@@ -37,3 +37,13 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignore specific directories
+/hytaleserver/
+/libs/
+/codex/
+/tools/
+
+# Ignore specific file types (optional)
+*.jar
+*.md

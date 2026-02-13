@@ -59,6 +59,11 @@ $C.@PageOverlay {
         Style: @CharacterTabsStyle;
         SelectedTab: "Skills";
 
+        TabButton #TabCombatSettingsBtn {
+          Id: "CombatSettings";
+          Icon: "attack.png";
+          IconSelected: "attack.png";
+        }
         TabButton #TabServerInfoBtn {
           Id: "ServerInfo";
           Icon: "server_info.png";
@@ -87,6 +92,75 @@ $C.@PageOverlay {
       }
 
       Group { Anchor: (Height: 16); }
+
+      Group #TabCombatSettings {
+        LayoutMode: Top;
+        Visible: false;
+
+        Label {
+          Text: "COMBAT SETTINGS";
+          Anchor: (Height: 20);
+          Style: (FontSize: 12, TextColor: #AAAAAA, RenderBold: true, RenderUppercase: true, LetterSpacing: 2);
+        }
+        Group { Anchor: (Height: 8); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          Label { Text: "Melee XP"; Style: (FontSize: 12, TextColor: #AAAAAA, VerticalAlignment: Center); }
+          Group { FlexWeight: 1; }
+          DropdownBox #MeleeCombatStyle {
+            Anchor: (Width: 150, Height: 24);
+            Style: (...$C.@DefaultDropdownBoxStyle);
+            MaxSelection: 1;
+            ShowLabel: true;
+            Value: "ATTACK";
+
+            DropdownEntry { Text: "Attack"; Value: "ATTACK"; Selected: true; }
+            DropdownEntry { Text: "Strength"; Value: "STRENGTH"; }
+            DropdownEntry { Text: "Defence"; Value: "DEFENCE"; }
+            DropdownEntry { Text: "Shared"; Value: "SHARED"; }
+          }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          Label { Text: "Ranged XP"; Style: (FontSize: 12, TextColor: #AAAAAA, VerticalAlignment: Center); }
+          Group { FlexWeight: 1; }
+          DropdownBox #RangedCombatStyle {
+            Anchor: (Width: 150, Height: 24);
+            Style: (...$C.@DefaultDropdownBoxStyle);
+            MaxSelection: 1;
+            ShowLabel: true;
+            Value: "RANGED";
+
+            DropdownEntry { Text: "Ranged"; Value: "RANGED"; Selected: true; }
+            DropdownEntry { Text: "Defence"; Value: "DEFENCE"; }
+            DropdownEntry { Text: "Shared"; Value: "SHARED"; }
+          }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          Label { Text: "Magic XP"; Style: (FontSize: 12, TextColor: #AAAAAA, VerticalAlignment: Center); }
+          Group { FlexWeight: 1; }
+          DropdownBox #MagicCombatStyle {
+            Anchor: (Width: 150, Height: 24);
+            Style: (...$C.@DefaultDropdownBoxStyle);
+            MaxSelection: 1;
+            ShowLabel: true;
+            Value: "MAGIC";
+
+            DropdownEntry { Text: "Magic"; Value: "MAGIC"; Selected: true; }
+            DropdownEntry { Text: "Defence"; Value: "DEFENCE"; }
+            DropdownEntry { Text: "Shared"; Value: "SHARED"; }
+          }
+        }
+      }
 
       Group #TabServerInfo {
         LayoutMode: Top;
@@ -164,14 +238,20 @@ $C.@PageOverlay {
 
               Label {
                 Text: "Order:";
-                Anchor: (Width: 34);
+                Anchor: (Width: 40);
                 Style: (FontSize: 10, TextColor: #d9c6a5, VerticalAlignment: Center);
               }
-              Group { Anchor: (Width: 1); }
+              Group { Anchor: (Width: 4); }
+              DropdownBox #QuestFilterInput {
+                Anchor: (Width: 120, Height: 24);
+                Style: (...$C.@DefaultDropdownBoxStyle);
+                MaxSelection: 1;
+                ShowLabel: true;
+                Value: "ALPHABETICAL";
 
-              $C.@DropdownBox #Input {
-                Anchor: (Width: 140, Height: 26);
-              }
+                DropdownEntry { Text: "A-Z"; Value: "ALPHABETICAL"; Selected: true; }
+                DropdownEntry { Text: "Length"; Value: "BY_LENGTH"; }
+            }
             }
 
             Group { FlexWeight: 1; }
@@ -239,12 +319,23 @@ $C.@PageOverlay {
           Padding: (Top: 0, Left: 8, Right: 8, Bottom: 8);
           Background: #000000(0.25);
 
-          // Quest Title
-          Label #QuestDetailTitle {
-            Text: "Select a quest";
-            Style: (FontSize: 16, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
-            Anchor: (Height: 32, Left: 0, Right: 0);
-            Padding: (Top: 8);
+          // Quest Title Header
+          Group #QuestDetailTitleHeader {
+            LayoutMode: Top;
+            Anchor: (Height: 40, Left: 0, Right: 0);
+            Padding: (Top: 6, Left: 6, Right: 6, Bottom: 4);
+            Background: #1f3554(0.55);
+
+            Label #QuestDetailTitle {
+              Text: "Select a Quest";
+              Style: (FontSize: 16, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+              Anchor: (Height: 26, Left: 0, Right: 0);
+            }
+
+            Group #QuestDetailTitleBorder {
+              Anchor: (Height: 1, Left: 0, Right: 0);
+              Background: #f2d38a;
+            }
           }
 
           Group { Anchor: (Height: 4); }
@@ -409,6 +500,14 @@ $C.@PageOverlay {
             Anchor: (Left: 0, Right: 0);
             Visible: false;
 
+            Label #QuestActionHint {
+              Text: "";
+              Style: (FontSize: 11, TextColor: #d9c6a5, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+              Anchor: (Height: 16, Left: 0, Right: 0);
+              Visible: false;
+            }
+            Group { Anchor: (Height: 4); }
+
             Group #QuestAcceptRow {
               LayoutMode: Left;
               Anchor: (Left: 0, Right: 0, Height: 28);
@@ -521,11 +620,12 @@ $C.@PageOverlay {
       // --- SKILLS TAB ---
       Group #TabSkills {
         LayoutMode: Left;
+        Anchor: (Width: 470);
         Visible: true;
 
         Group #SkillsGrid {
           LayoutMode: Left;
-          FlexWeight: 1;
+          Anchor: (Width: 470);
 
           // COLUMN 1
           Group #Col1 {
@@ -545,45 +645,6 @@ $C.@PageOverlay {
             FlexWeight: 1;
           }
         }
-
-        Group { Anchor: (Width: 10); }
-
-        Group #SkillDetailPanel {
-          LayoutMode: Top;
-          Anchor: (Width: 210, Height: 420);
-          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
-          Background: #000000(0.25);
-
-          Label #SkillDetailTitle {
-            Text: "Select a skill";
-            Style: @DetailTitleStyle;
-            Anchor: (Height: 18);
-          }
-          Group { Anchor: (Height: 6); }
-          Label #SkillDetailDesc {
-            Text: "Click a skill to see its bonuses.";
-            Style: @DetailBodyStyle;
-            Anchor: (Height: 110, Left: 2);
-          }
-
-          Group { Anchor: (Height: 8); }
-          Label #SkillUnlockHeader {
-            Text: "Unlocks";
-            Style: (...@DetailHeaderStyle, HorizontalAlignment: Center);
-            Anchor: (Height: 16, Left: 0, Right: 0);
-          }
-          Group { Anchor: (Height: 4); }
-
-          Group #SkillUnlockScroll {
-            LayoutMode: TopScrolling;
-            Anchor: (Height: 200, Left: 0, Right: 0);
-            Padding: (Right: 6);
-
-            Group #SkillUnlockList {
-              LayoutMode: Top;
-            }
-          }
-        }
       }
 
       Group #TabFriends { LayoutMode: Top; Visible: false; }
@@ -592,31 +653,43 @@ $C.@PageOverlay {
     // --- FOOTER (Global Stats) ---
     Group #Footer {
       LayoutMode: Left;
-      Anchor: (Bottom: 15, Left: 20, Right: 20, Height: 50);
+      Anchor: (Bottom: 15, Left: 20, Right: 20, Height: 54);
       Background: #000000(0.3); // Slight dark background
 
       // Total Level
       Group {
         LayoutMode: Top;
         FlexWeight: 1;
-        Label { Text: "Total Level"; Style: (FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center); }
-        Label #TotalLevelVal { Text: "---"; Style: @SkillTextStyle; }
+        Group { Anchor: (Height: 5); }
+        Label { Text: "Total Level"; Style: (FontSize: 12, TextColor: #FFFFFF, HorizontalAlignment: Center); }
+        Group { Anchor: (Height: 3); }
+        Group { Anchor: (Height: 1, Left: 34, Right: 34); Background: #FFFFFF(0.75); }
+        Group { Anchor: (Height: 4); }
+        Label #TotalLevelVal { Text: "---"; Style: (FontSize: 16, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center); }
       }
 
       // Combat Level (Global)
       Group {
         LayoutMode: Top;
         FlexWeight: 1;
-        Label { Text: "Combat Level"; Style: (FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center); }
-        Label #CombatLevelVal { Text: "---"; Style: (FontSize: 18, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center); }
+        Group { Anchor: (Height: 0); }
+        Label { Text: "Combat Level"; Style: (FontSize: 12, TextColor: #f2d38a, HorizontalAlignment: Center, RenderBold: true); }
+        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 2, Left: 26, Right: 26); Background: #f2d38a; }
+        Group { Anchor: (Height: 3); }
+        Label #CombatLevelVal { Text: "---"; Style: (FontSize: 20, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center); }
       }
 
       // Quest Points (Currency)
       Group {
         LayoutMode: Top;
         FlexWeight: 1;
-        Label { Text: "Quest Pts"; Style: (FontSize: 12, TextColor: #AAAAAA, HorizontalAlignment: Center); }
-        Label #QuestPointsVal { Text: "0"; Style: @SkillTextStyle; }
+        Group { Anchor: (Height: 5); }
+        Label { Text: "Quest Pts"; Style: (FontSize: 12, TextColor: #FFFFFF, HorizontalAlignment: Center); }
+        Group { Anchor: (Height: 3); }
+        Group { Anchor: (Height: 1, Left: 34, Right: 34); Background: #FFFFFF(0.75); }
+        Group { Anchor: (Height: 4); }
+        Label #QuestPointsVal { Text: "0"; Style: (FontSize: 16, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center); }
       }
     }
   }

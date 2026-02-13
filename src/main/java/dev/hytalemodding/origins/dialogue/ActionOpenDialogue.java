@@ -17,6 +17,9 @@ import dev.hytalemodding.origins.registry.DialogueRegistry;
 import dev.hytalemodding.origins.ui.SimpleDialoguePage;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -95,48 +98,106 @@ public class ActionOpenDialogue extends ActionBase {
         // Try nameplate first
         Nameplate nameplate = store.getComponent(npcRef, Nameplate.getComponentType());
         if (nameplate != null) {
-            String text = nameplate.getText();
-            if (text != null && !text.isBlank()) {
-                return text.trim().toLowerCase();
+            String resolved = firstMatchingDialogueKey(nameplate.getText());
+            if (resolved != null) {
+                return resolved;
             }
         }
 
         // Try display name
         DisplayNameComponent displayName = store.getComponent(npcRef, DisplayNameComponent.getComponentType());
         if (displayName != null && displayName.getDisplayName() != null) {
-            String raw = displayName.getDisplayName().getRawText();
-            if (raw != null && !raw.isBlank()) {
-                return raw.trim().toLowerCase();
+            String resolved = firstMatchingDialogueKey(displayName.getDisplayName().getRawText());
+            if (resolved != null) {
+                return resolved;
             }
         }
 
         // Try role name
         String roleName = role.getRoleName();
-        if (roleName != null && !roleName.isBlank()) {
-            return roleName.trim().toLowerCase();
+        String resolvedRole = firstMatchingDialogueKey(roleName);
+        if (resolvedRole != null) {
+            return resolvedRole;
         }
 
         // Try appearance name
         String appearance = role.getAppearanceName();
-        if (appearance != null && !appearance.isBlank()) {
-            return appearance.trim().toLowerCase();
+        String resolvedAppearance = firstMatchingDialogueKey(appearance);
+        if (resolvedAppearance != null) {
+            return resolvedAppearance;
         }
 
         // Try NPC type ID
         NPCEntity npc = store.getComponent(npcRef, NPCEntity.getComponentType());
         if (npc != null) {
-            String typeId = npc.getNPCTypeId();
-            if (typeId != null && !typeId.isBlank()) {
-                return typeId.trim().toLowerCase();
+            String resolvedType = firstMatchingDialogueKey(npc.getNPCTypeId());
+            if (resolvedType != null) {
+                return resolvedType;
             }
         }
 
         // Try translation key as last resort
         String translationKey = role.getNameTranslationKey();
-        if (translationKey != null && !translationKey.isBlank()) {
-            return translationKey.trim().toLowerCase();
+        String resolvedTranslation = firstMatchingDialogueKey(translationKey);
+        if (resolvedTranslation != null) {
+            return resolvedTranslation;
         }
 
         return null;
+    }
+
+    @Nullable
+    private static String firstMatchingDialogueKey(@Nullable String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+
+        for (String candidate : toCandidates(raw)) {
+            if (DialogueRegistry.has(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private static Set<String> toCandidates(String raw) {
+        Set<String> candidates = new LinkedHashSet<>();
+
+        String base = raw.trim().toLowerCase();
+        if (base.isEmpty()) {
+            return candidates;
+        }
+
+        candidates.add(base);
+
+        int closeBracket = base.indexOf(']');
+        if (closeBracket >= 0 && closeBracket + 1 < base.length()) {
+            String withoutPrefix = base.substring(closeBracket + 1).trim();
+            if (!withoutPrefix.isEmpty()) {
+                candidates.add(withoutPrefix);
+            }
+        }
+
+        Set<String> extra = new LinkedHashSet<>();
+        for (String value : candidates) {
+            extra.add(value.replace(' ', '_'));
+            extra.add(value.replace('-', '_'));
+            extra.add(value.replace(' ', '_').replace('-', '_'));
+            extra.add(value.replace("_", " "));
+        }
+        candidates.addAll(extra);
+
+        Set<String> normalized = new LinkedHashSet<>();
+        for (String value : candidates) {
+            String cleaned = value.replaceAll("[^a-z0-9_ ]", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+            if (!cleaned.isEmpty()) {
+                normalized.add(cleaned);
+                normalized.add(cleaned.replace(' ', '_'));
+            }
+        }
+
+        return normalized;
     }
 }

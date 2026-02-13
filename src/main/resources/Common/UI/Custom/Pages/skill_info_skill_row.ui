@@ -1,0 +1,40 @@
+@SkillRowButtonStyle = ButtonStyle(
+  Default: (Background: (Color: #00000033)),
+  Hovered: (Background: (Color: #FFFFFF10)),
+  Pressed: (Background: (Color: #FFFFFF16)),
+  Disabled: ()
+);
+
+Group {
+  LayoutMode: Top;
+  Anchor: (Left: 0, Right: 0);
+
+  Button #SkillSelect {
+    LayoutMode: Left;
+    Anchor: (Height: 34, Left: 0, Right: 0);
+    Padding: (Left: 4, Right: 4, Top: 4, Bottom: 4);
+    Style: @SkillRowButtonStyle;
+
+    Group #SkillIcon {
+      Anchor: (Width: 20, Height: 20);
+      Background: "Pages/skills.png";
+    }
+
+    Group { Anchor: (Width: 6); }
+
+    Label #SkillName {
+      Text: "Attack";
+      Anchor: (Height: 20, Left: 0, Right: 0);
+      Style: (FontSize: 11, TextColor: #d9c6a5, VerticalAlignment: Center, Wrap: true);
+      FlexWeight: 1;
+    }
+  }
+
+  Group #SelectedUnderline {
+    Anchor: (Height: 1, Left: 8, Right: 8);
+    Background: #f2d38a;
+    Visible: false;
+  }
+
+  Group { Anchor: (Height: 3); }
+}

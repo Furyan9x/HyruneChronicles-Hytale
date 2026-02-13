@@ -45,6 +45,7 @@ public class TheWoodsmansRequest extends Quest {
             "The Woodsman's Request",
             "A weary woodsman needs a replacement axe. Perhaps I can help him?",
             QuestLength.SHORT,
+            QuestDifficulty.TUTORIAL,
             1 // Quest points
         );
     }

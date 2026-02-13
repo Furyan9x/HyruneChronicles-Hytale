@@ -1,0 +1,126 @@
+$C = "../Common.ui";
+
+@PageTitleStyle = LabelStyle(FontSize: 20, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+@SkillHeaderStyle = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@BodyStyle = LabelStyle(FontSize: 12, TextColor: #f7e9cd, Wrap: true);
+
+$C.@PageOverlay {
+  $C.@DecoratedContainer {
+    Anchor: (Width: 760, Height: 600);
+
+    #Title {
+      Group {
+        Label #PageTitle {
+          Text: "Skills Info";
+          Anchor: (Left: 82, Right: 44, Height: 30);
+          Style: @PageTitleStyle;
+        }
+        TextButton #BtnBack {
+          Anchor: (Left: 10, Top: 3, Width: 64, Height: 25);
+          Text: "< Back";
+        }
+        TextButton #BtnClose {
+          Anchor: (Right: 0, Top: 3, Width: 30, Height: 25);
+          Text: "X";
+        }
+      }
+    }
+
+    #Content {
+      LayoutMode: Left;
+      Padding: (Top: 10, Left: 20, Right: 20, Bottom: 20);
+
+      Group #LeftPanel {
+        LayoutMode: Top;
+        Anchor: (Width: 180);
+        Background: #000000(0.30);
+        Padding: (Top: 8, Bottom: 8, Left: 8, Right: 8);
+
+        Label {
+          Text: "Skills";
+          Anchor: (Height: 20);
+          Style: (FontSize: 11, TextColor: #d9c6a5, RenderBold: true, HorizontalAlignment: Center, RenderUppercase: true, LetterSpacing: 1);
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group #SkillListScroll {
+          LayoutMode: Top;
+          Anchor: (Left: 0, Right: 0, Height: 500);
+          Padding: (Right: 0, Left: 0);
+          FlexWeight: 1;
+
+          Group #SkillGrid {
+            LayoutMode: Left;
+
+            Group #IconCol1 {
+              LayoutMode: Top;
+              Anchor: (Width: 52);
+            }
+            Group { Anchor: (Width: 4); }
+            Group #IconCol2 {
+              LayoutMode: Top;
+              Anchor: (Width: 52);
+            }
+            Group { Anchor: (Width: 4); }
+            Group #IconCol3 {
+              LayoutMode: Top;
+              Anchor: (Width: 52);
+            }
+          }
+        }
+      }
+
+      Group { Anchor: (Width: 12); }
+
+      Group #RightPanel {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Background: #000000(0.28);
+        Padding: (Top: 12, Left: 14, Right: 14, Bottom: 12);
+
+        Label #SkillTitle {
+          Text: "Attack";
+          Anchor: (Height: 28, Left: 0, Right: 0);
+          Style: @SkillHeaderStyle;
+        }
+        Group #SkillHeaderBorder {
+          Anchor: (Height: 1, Left: 0, Right: 0);
+          Background: #f2d38a;
+        }
+        Group { Anchor: (Height: 10); }
+
+        Label #SkillDescription {
+          Text: "Skill description.";
+          Anchor: (Height: 64, Left: 0, Right: 0);
+          Style: @BodyStyle;
+        }
+        Group { Anchor: (Height: 10); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 18, Left: 0, Right: 0);
+          Label {
+            Text: "Unlocks";
+            Style: (FontSize: 12, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+          }
+        }
+        Group #UnlockHeaderBorder {
+          Anchor: (Height: 1, Left: 0, Right: 0);
+          Background: #d9c6a5(0.7);
+        }
+        Group { Anchor: (Height: 22); }
+
+        Group #UnlockListScroll {
+          LayoutMode: TopScrolling;
+          Anchor: (Left: 0, Right: 0, Height: 382);
+          Padding: (Right: 6);
+          FlexWeight: 1;
+
+          Group #UnlockList {
+            LayoutMode: Top;
+          }
+        }
+      }
+    }
+  }
+}

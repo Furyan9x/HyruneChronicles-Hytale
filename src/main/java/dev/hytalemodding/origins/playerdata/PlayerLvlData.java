@@ -1,5 +1,6 @@
 package dev.hytalemodding.origins.playerdata;
 
+import dev.hytalemodding.origins.level.CombatXpStyle;
 import dev.hytalemodding.origins.skills.SkillType;
 
 import java.util.EnumMap;
@@ -15,6 +16,10 @@ public class PlayerLvlData implements PlayerData {
     // Unified storage for ALL skills (Combat, Gathering, Artisan)
     // EnumMap is faster and more memory-efficient than HashMap for Enum keys.
     private final Map<SkillType, ExperienceTrack> skillTracks;
+
+    private CombatXpStyle meleeXpStyle;
+    private CombatXpStyle rangedXpStyle;
+    private CombatXpStyle magicXpStyle;
 
     // --- CONSTRUCTORS ---
 
@@ -58,6 +63,39 @@ public class PlayerLvlData implements PlayerData {
 
     public void addSkillXp(SkillType skill, long amount) {
         getTrack(skill).addXp(amount);
+    }
+
+    public CombatXpStyle getMeleeXpStyle() {
+        if (meleeXpStyle == null) {
+            meleeXpStyle = CombatXpStyle.ATTACK;
+        }
+        return meleeXpStyle;
+    }
+
+    public void setMeleeXpStyle(CombatXpStyle style) {
+        this.meleeXpStyle = style;
+    }
+
+    public CombatXpStyle getRangedXpStyle() {
+        if (rangedXpStyle == null) {
+            rangedXpStyle = CombatXpStyle.RANGED;
+        }
+        return rangedXpStyle;
+    }
+
+    public void setRangedXpStyle(CombatXpStyle style) {
+        this.rangedXpStyle = style;
+    }
+
+    public CombatXpStyle getMagicXpStyle() {
+        if (magicXpStyle == null) {
+            magicXpStyle = CombatXpStyle.MAGIC;
+        }
+        return magicXpStyle;
+    }
+
+    public void setMagicXpStyle(CombatXpStyle style) {
+        this.magicXpStyle = style;
     }
 
     // --- PERSISTENCE HELPER ---

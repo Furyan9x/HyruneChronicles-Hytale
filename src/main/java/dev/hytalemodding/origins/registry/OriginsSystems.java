@@ -31,7 +31,9 @@ public class OriginsSystems {
         registry.registerSystem(new CraftingRestrictionSystem());
         registry.registerSystem(new CraftingXpSystem());
         registry.registerSystem(new TimedCraftingXpSystem());
+        registry.registerSystem(new FarmingPlantingRestrictionSystem());
         registry.registerSystem(new FarmingHarvestPickupSystem());
+        registry.registerSystem(new ToolTypeEnforcementSystem());
         registry.registerSystem(new MiningSpeedSystem());
         registry.registerSystem(new MiningDurabilitySystem());
         registry.registerSystem(new WoodcuttingSpeedSystem());

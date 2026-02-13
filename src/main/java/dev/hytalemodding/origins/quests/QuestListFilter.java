@@ -6,8 +6,7 @@ package dev.hytalemodding.origins.quests;
 public enum QuestListFilter {
     ALPHABETICAL("Alphabetical"),
     BY_LENGTH("By Length"),
-    HIDE_COMPLETED("Hide Completed"),
-    HIDE_UNAVAILABLE("Hide Unavailable");
+    BY_DIFFICULTY("By Difficulty");
     
     private final String displayName;
     
@@ -17,5 +16,24 @@ public enum QuestListFilter {
     
     public String getDisplayName() {
         return displayName;
+    }
+
+    public static QuestListFilter fromString(String value, QuestListFilter fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        String normalized = value.trim();
+        for (QuestListFilter filter : values()) {
+            if (filter.name().equalsIgnoreCase(normalized)) {
+                return filter;
+            }
+            if (filter.displayName.equalsIgnoreCase(normalized)) {
+                return filter;
+            }
+        }
+        if ("HIDE_COMPLETED".equalsIgnoreCase(normalized) || "HIDE_UNAVAILABLE".equalsIgnoreCase(normalized)) {
+            return fallback;
+        }
+        return fallback;
     }
 }

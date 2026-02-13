@@ -1,72 +1,113 @@
-# Origins Mod - Current Progress
+# Origins Mod - Current State (2026-02-13)
 
 Status scale:
-- Implemented = core gameplay loop and bonuses are live.
-- Partial = XP/progression exists, but bonuses or extra mechanics are still missing.
-- Planned = placeholder only or not started yet.
+- Implemented = live and working in active gameplay.
+- Partial = core exists but expansion/polish still pending.
+- Planned = not started or placeholder only.
 
-## Skill Order Progress (per codex/skill-order.md)
-1) Attack: Implemented (damage bonus per level). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
-2) Defence: Implemented (damage reduction per level with cap). Armor level requirements are enforced (invalid armor equip is denied).
+## Skill/Systems Progress
+1) Attack: Implemented (damage scaling + weapon level gating).
+2) Defence: Implemented (damage reduction + armor level gating).
 3) Strength: Implemented (crit chance + crit damage scaling).
-4) Ranged: Implemented (damage + crit scaling for ranged weapons). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
-5) Magic: Implemented (damage + crit scaling for magic weapons; mana bonuses/regeneration). Weapon level requirements enforced (invalid weapons deal 0 damage with warning).
-6) Architect: Partial (crafting XP rules via keyword matching; no extra output/refund bonuses yet). No level requirements for architect tools or benches yet. Keyword matching now includes tools/benches/traps for XP.
-7) Cooking: Partial (crafting XP + double-proc chance; no buff duration scaling yet). No level requirements for cooking recipes yet.
-8) Alchemy: Partial (crafting XP + double-proc chance; no buff duration scaling yet). No level requirements for alchemy recipes yet. Keyword matching now includes bandages for XP.
-9) Mining: Implemented (XP, tool level gating, speed bonus, durability savings). 
-10) Woodcutting: Implemented (XP, tool level gating, speed bonus, durability savings).
-11) Farming: Partial (XP on mature harvest + item pickup, sickle bonus, yield bonus; planting/growth gating not yet).
-12) Smelting: Partial (crafting XP rules; no advanced processing pipeline yet).
-13) Leatherworking: Partial (crafting XP rules; no advanced processing pipeline yet).
-14) Arcane Engineering: Partial (crafting XP rules; RNG crafting system not yet).
-15) Armorsmithing: Partial (crafting XP rules; RNG crafting system not yet).
-16) Weaponsmithing: Partial (crafting XP rules; RNG crafting system not yet).
-17) Fishing: Implemented (custom bobber/cast/idle systems + XP hooks, fish gated by level). No level requirements for rods yet, no higher tier rods. 
-18) Slayer: Partial (tiered tasks, kill tracking and XP awarded per kill based on maxHP, persistence, turn-in rewards, vendor UI second pass done, buy tab working (placeholder items) learn and task tabs empty for now).
+4) Ranged: Implemented (damage scaling + weapon level gating).
+5) Magic: Implemented (damage scaling + mana bonuses + weapon level gating).
+6) Architect: Partial (crafting XP keyword mapping; no deeper progression hooks yet).
+7) Cooking: Partial (crafting XP + double-proc; additional bonuses pending).
+8) Alchemy: Partial (crafting XP + double-proc; additional bonuses pending).
+9) Mining: Implemented (XP, ore gating, tool gating, durability savings logic).
+10) Woodcutting: Implemented (XP, tree gating, tool gating, durability savings logic with fallback path).
+11) Farming: Implemented for current scope (planting level-gated; yield bonus removed by design).
+12) Smelting: Partial (crafting-side XP rules exist; processing bench hook still pending).
+13) Leatherworking: Partial (crafting-side XP rules exist; processing bench hook still pending).
+14) Arcane Engineering: Partial (crafting XP rules; RNG crafting phase pending).
+15) Armorsmithing: Partial (crafting XP rules; RNG crafting phase pending).
+16) Weaponsmithing: Partial (crafting XP rules; RNG crafting phase pending).
+17) Fishing: Implemented base loop (custom catch/XP hooks + level-based fish gating).
+18) Slayer: Partial (tasking/persistence/vendor in progress).
 19) Constitution: Implemented (max health bonuses).
-20) Agility: Implemented (stamina regen + movement speed bonuses).
+20) Agility: Implemented (movement speed + stamina regen bonuses).
 
+## Recently Completed (Bugfix/Polish + UI Batch)
+- Farming yield bonus behavior removed intentionally; farming level now gates planting content instead of harvest output.
+- Farming seed level requirements are config-driven (`farmingSeedLevelRequirements`) and enforced on planting interaction.
+- Animal husbandry gating scaffold exists and is config-driven (`enableAnimalHusbandryGating` + `farmingAnimalLevelRequirements`) for future expansion.
+- Tool-type enforcement added:
+  - Pickaxes blocked from wood targets.
+  - Hatchets blocked from ore/stone targets.
+- Ore damage gating is active (prevents damaging higher-tier ore when requirements are not met).
+- Durability debug logging toggle is config-driven (`durabilityDebugLogging`) and hot-reload aware.
+- Woodcutting durability now includes fallback handling for `durabilityUse <= 0` edge case.
+- NPC exclusion behavior fixed so excluded NPCs keep their own role/display naming.
+- NPC dialogue key resolution normalized (handles spaced/underscored/prefixed variants more robustly).
+- NPC nameplate normalization improved globally (underscore/hyphen cleanup + generic token normalization rules).
+- NPC name overrides added via config (`npcNameOverrides`) for edge-case names not handled by generic normalization.
+- Arcane Engineering icon resolution fixed in XP drops (`Arcane Engineering` display name now maps to `arcane_engineering.png`).
+- Character Menu attributes now show fishing bonus visibility:
+  - Fishing bite speed bonus.
+  - Fishing rare fish chance.
+- Quest tab polish pass completed:
+  - Group headers by sort mode (A-Z with "The" normalization, Length, Difficulty).
+  - Brighter/gold detail title header with underline.
+  - Length + Difficulty indicator line in detail panel.
+- Skills tab refactor completed:
+  - Removed embedded skill detail panel from Character Menu.
+  - Skills grid restored as primary focus layout.
+  - Skill cell texture system added (normal/hover/pressed).
+  - Progress bar width/track alignment corrected for max-level gold bar parity.
+  - Footer emphasis pass applied (Combat Level highlighted).
+- New dedicated Skill Info flow implemented:
+  - `SkillInfoPage` added as separate GUI.
+  - Skill cells in Character Menu open Skill Info page.
+  - Back path from Skill Info returns to Character Menu.
+  - Unlock rows now dim/gray when player level is below unlock requirement.
+  - Debug command `/skillinfo` added to open SkillInfoPage directly.
 
-## Extra Systems
-- Character UI: Implemented (skills menu with tabs + attributes tab with collapsible categories + skill detail panel).
-- Nameplates: Implemented (level/class display). *Need to investigate how to completely exclude NPCs from this, so that they retain their "Display Name" property from json. 
-- Data persistence: Implemented (JSON repositories in ./origins_data).
-- Crafting overrides: base Hytale assets audited with a generator to add/fix recipes, normalize recipe arrays, and enforce bench categories while excluding non-craftable items.
-- Basic trade pack crafting implemented. Craft Trade packs at a trade pack bench, they slow you down and display a model on the players back when in inventory (unintended functionality: makes the character naked. Seek fix.)
-- Repair bench added for safer repairing but not easy on the go. Repair kits for quick repair - lose max durability. Repair bench for repairing with base materials - maintain max durability.
-- Hans implemented - game mode selection page in and working, just needs icons for each game mode. Sound played when game mode is selected; starter kit needs to be improved - provides a lot of invalid items currently. 
-- Universal Dialogue system(DialogueRegistry/OriginsDialogue, SimpleDialoguePage for every dialogue we want to create going forward.)
-- Custom XP notifications with our custom XpDropOverlay, Runescape Style circular XP notifications and tracker. 
-- Custom Quest system, basic functionality implemented, persistance of quest data, quest menu in /Character (CharacterMenu). Not tested quest stage progression or persistance of stages. 
+## Config Surface (gameplay_config.json)
+- `durabilityDebugLogging`: enables durability debug logs in mining/woodcutting flows.
+- `enableAnimalHusbandryGating`: stub toggle for future animal interaction enforcement.
+- `farmingSeedLevelRequirements`: per-seed farming level gates (planting).
+- `farmingAnimalLevelRequirements`: future-facing animal interaction level gates.
+- `npcNameOverrides`: per-NPC display-name overrides for difficult naming edge cases.
 
+## Current Open Action Items
+1) Smelting/Leatherworking bench processing hooks (event integration path still needed).
+2) NPC nameplate/dialogue persistence hardening pass (verify long-session/restart edge cases).
+3) UI polish follow-up:
+   - SkillInfoPage visual pass to more closely match RS3 reference.
+   - Decide if left SkillInfo icon area stays non-scroll (current stable behavior) or reintroduce scrolling with safe hitboxes.
+   - Repair UI polish pass.
+4) Future UX enhancement:
+   - Add dedicated "Skills Info" button inside Character Menu Skills tab (currently skill-cell click opens SkillInfoPage directly).
 
-
-
-## Crafting Overrides
-- Generator: `tools/generate_crafting_recipes.ps1` (audits base assets, applies exclusion rules, normalizes recipe arrays, and writes overrides).
-- Exclusions include debug/test/materials/blocks and specified keywords (bench exclusions list lives in the generator script).
-- first pass on fixing most recipes completed. Need to further refine in future. 
-- re-ordered craftingskillregistry rules so that armor crafted with "leather" or "cloth" in the name gives XP to its respective skill, leatherworking or arcane engineering. 
-
-## Gear Requirement Maintenance
-- Central registry: `src/main/java/dev/hytalemodding/origins/registry/CombatRequirementRegistry.java`
-- To add new gear requirements:
-- Add a keyword or exact match in `CombatRequirementRegistry` (material/ID tokens).
-- Map it to the required level.
-- For armor, requirements are checked against Defence level on equip.
-- For weapons, requirements are checked against Attack/Ranged/Magic when dealing damage.
+## Maintained Files (UI Focus)
+- `src/main/resources/Common/UI/Custom/Pages/SkillEntry.ui`
+  - Character Menu layout (tabs, quests, attributes, skills, footer).
+- `src/main/resources/Common/UI/Custom/Pages/character_stats.ui`
+  - Individual skill cell visuals + hover/pressed texture behavior.
+- `src/main/java/dev/hytalemodding/origins/ui/CharacterMenu.java`
+  - Character Menu runtime binding/data population, skill cell click routing to SkillInfoPage.
+- `src/main/resources/Common/UI/Custom/Pages/SkillInfoPage.ui`
+  - Dedicated SkillInfo layout (left icon selector, right detail panel, back/close controls).
+- `src/main/resources/Common/UI/Custom/Pages/skill_info_icon_cell.ui`
+  - Skill icon selector cell template.
+- `src/main/resources/Common/UI/Custom/Pages/skill_info_unlock_row.ui`
+  - Unlock row template for right panel list.
+- `src/main/java/dev/hytalemodding/origins/ui/SkillInfoPage.java`
+  - SkillInfo page event handling, dynamic population, unlock dimming logic.
+- `src/main/java/dev/hytalemodding/origins/ui/SkillDetailRegistry.java`
+  - Content source for skill descriptions/unlock entries.
+- `src/main/java/dev/hytalemodding/origins/ui/XPDropOverlay.java`
+  - XP icon filename normalization (multi-word skills).
+- `src/main/java/dev/hytalemodding/origins/commands/SkillInfoCommand.java`
+  - Debug command to open SkillInfoPage directly.
+- `src/main/java/dev/hytalemodding/Origins.java`
+  - Command registration includes `/skillinfo`.
 
 ## Project Structure Notes
-- Registries now live in `src/main/java/dev/hytalemodding/origins/registry`.
-- Components live in `src/main/java/dev/hytalemodding/origins/component`.
-- Event listeners live in `src/main/java/dev/hytalemodding/origins/events`.
-- Utility helpers live in `src/main/java/dev/hytalemodding/origins/util`.
-- Interaction handlers live in `src/main/java/dev/hytalemodding/origins/interaction`.
-
-
-## Current Focus
--Implementing Quest GUI within CharacterMenu. Runescape style quest journal/tracker with support for requirements, rewards, persistant states of quests (not started, in-progress, completed)
-
-
-
+- Registries: `src/main/java/dev/hytalemodding/origins/registry`
+- Components: `src/main/java/dev/hytalemodding/origins/component`
+- Event listeners: `src/main/java/dev/hytalemodding/origins/events`
+- Systems: `src/main/java/dev/hytalemodding/origins/system`
+- NPC systems: `src/main/java/dev/hytalemodding/origins/npc`
+- Runtime config: `src/main/java/dev/hytalemodding/origins/config`
+- Runtime data: `origins_data`

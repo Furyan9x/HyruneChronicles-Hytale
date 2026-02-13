@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.HytaleServer;
 import dev.hytalemodding.origins.util.XPDropManager;
 
+import java.util.Locale;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -49,11 +50,22 @@ public class XPDropOverlay extends CustomUIHud {
         builder.set("#ProgressBarFill.Value", currentProgress );
 
         // 2. Update the skill icon background texture
-        String iconPath = "Pages/" + skillName.toLowerCase() + ".png";
+        String iconPath = "Pages/" + toIconFileName(skillName) + ".png";
         builder.set("#SkillIcon.Background",  iconPath);
 
         // 3. Update XP text
         builder.set("#XPAmount.Text", "+" + totalXpGained + " XP");
+    }
+
+    private static String toIconFileName(String skillDisplayName) {
+        if (skillDisplayName == null || skillDisplayName.isBlank()) {
+            return "skills";
+        }
+        return skillDisplayName
+            .trim()
+            .toLowerCase(Locale.ROOT)
+            .replaceAll("[^a-z0-9]+", "_")
+            .replaceAll("^_+|_+$", "");
     }
 
     public String getSkillName() {

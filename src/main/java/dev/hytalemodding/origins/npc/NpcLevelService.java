@@ -67,6 +67,22 @@ public class NpcLevelService {
         return npc != null && npc.getNPCTypeId() != null;
     }
 
+    public boolean isNpcInGroup(String npcTypeId, String groupId) {
+        if (npcTypeId == null || groupId == null) {
+            return false;
+        }
+        String normalized = npcTypeId.toLowerCase(Locale.ROOT);
+        for (NpcLevelConfig.NpcLevelGroup group : config.getGroups()) {
+            if (group == null || group.getId() == null || group.getMatch() == null) {
+                continue;
+            }
+            if (group.getId().equalsIgnoreCase(groupId) && matches(group.getMatch(), normalized)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private NpcLevelComponent buildFromGroup(NpcLevelConfig.NpcLevelGroup group, String baseName) {
         int level = rollLevel(group.getBaseLevel(), group.getVariance());
         CombatStyle weakness = CombatStyle.fromString(group.getWeakness(), CombatStyle.MELEE);

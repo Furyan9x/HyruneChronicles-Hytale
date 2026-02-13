@@ -27,7 +27,8 @@ final class SkillDetailRegistry {
                 new SkillUnlock(30, "Cobalt weapons"),
                 new SkillUnlock(40, "Thorium weapons"),
                 new SkillUnlock(50, "Adamantite, Doomed weapons"),
-                new SkillUnlock(60, "Mithril, Onyxium weapons")
+                new SkillUnlock(60, "Mithril weapons"),
+                new SkillUnlock(70, "Onyxium weapons")
             }
         ));
 
@@ -123,9 +124,9 @@ final class SkillDetailRegistry {
 
         details.put(SkillType.FARMING, new SkillDetail(
             "Farming",
-            "Increases crop yields and sickle harvest XP.",
+            "Unlocks higher-tier seeds and future husbandry interactions.",
             new SkillUnlock[]{
-                new SkillUnlock(1, "Yield bonus scaling (up to 50%)"),
+                new SkillUnlock(1, "Seed and husbandry requirements"),
                 new SkillUnlock(1, "Sickle XP bonus (+25%)")
             }
         ));
@@ -148,9 +149,10 @@ final class SkillDetailRegistry {
 
         details.put(SkillType.FISHING, new SkillDetail(
             "Fishing",
-            "Improves bite speed and rare fish chance.",
+            "Improves bite speed and increases rare fish chance as level rises.",
             new SkillUnlock[]{
-                new SkillUnlock(1, "Faster bites and rare fish chance")
+                new SkillUnlock(1, "Bite speed bonus up to +30%"),
+                new SkillUnlock(1, "Rare fish chance scales from 2% to 12%")
             }
         ));
 

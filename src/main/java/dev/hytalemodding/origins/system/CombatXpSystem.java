@@ -19,6 +19,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
+import dev.hytalemodding.origins.level.CombatXpStyle;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.skills.SkillType;
 import dev.hytalemodding.origins.slayer.SlayerService;
@@ -87,17 +88,15 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
         }
 
         String weaponId = getHeldItemIdentifier(player);
-        SkillType targetSkill = determineSkillFromWeapon(weaponId);
+        CombatCategory combatCategory = determineCombatCategory(weaponId);
 
         LevelingService service = LevelingService.get();
         if (service != null) {
             StringBuilder msg = new StringBuilder();
-            service.addSkillXp(player.getUuid(), targetSkill, baseXp);
+            awardCombatXp(service, player.getUuid(), combatCategory, baseXp, msg);
 
             long hpXp = Math.max(1, baseXp / CONSTITUTION_XP_DIVISOR);
             service.addSkillXp(player.getUuid(), SkillType.CONSTITUTION, hpXp);
-
-            player.sendMessage(Message.raw("+" + baseXp + " " + targetSkill.getDisplayName() + " XP"));
 
             String victimId = getVictimIdentifier(victimRef, store);
             if (victimId != null) {
@@ -110,6 +109,24 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
         }
     }
 
+    /**
+     * Determines which combat category to use based on the weapon identifier.
+     */
+    private CombatCategory determineCombatCategory(String weaponId) {
+        String id = weaponId.toLowerCase();
+
+        if (id.contains("bow") || id.contains("crossbow") || id.contains("gun") || id.contains("sling")) {
+            return CombatCategory.RANGED;
+        }
+
+        if (id.contains("wand") || id.contains("staff") || id.contains("spellbook") || id.contains("scepter")) {
+            return CombatCategory.MAGIC;
+        }
+
+        return CombatCategory.MELEE;
+    }
+
+
     private String getVictimIdentifier(Ref<EntityStore> victimRef, Store<EntityStore> store) {
         try {
             NPCEntity npc = store.getComponent(victimRef, NPCEntity.getComponentType());
@@ -120,35 +137,6 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
             LOGGER.at(Level.FINE).log("Failed to resolve NPC identifier: " + e.getMessage());
         }
         return null;
-    }
-
-    /**
-     * Determines which skill to level based on the weapon identifier.
-     */
-    private SkillType determineSkillFromWeapon(String weaponId) {
-        String id = weaponId.toLowerCase();
-
-        if (id.contains("bow") || id.contains("crossbow") || id.contains("gun") || id.contains("sling")) {
-            return SkillType.RANGED;
-        }
-
-        if (id.contains("wand") || id.contains("staff") || id.contains("spellbook") || id.contains("scepter")) {
-            return SkillType.MAGIC;
-        }
-
-        if (id.contains("sword") || id.contains("dagger") || id.contains("scythe")) {
-            return SkillType.ATTACK;
-        }
-
-        if (id.contains("axe") || id.contains("mace") || id.contains("hammer") || id.contains("club")) {
-            return SkillType.STRENGTH;
-        }
-
-        if (id.contains("shield")) {
-            return SkillType.DEFENCE;
-        }
-
-        return SkillType.STRENGTH;
     }
 
     /**
@@ -180,5 +168,108 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
             LOGGER.at(Level.WARNING).log("Error getting held item: " + e.getMessage());
         }
         return DEFAULT_WEAPON_ID;
+    }
+
+    private void awardCombatXp(LevelingService service, java.util.UUID uuid, CombatCategory category, long baseXp, StringBuilder msg) {
+        if (service == null || uuid == null || msg == null || baseXp <= 0) {
+            return;
+        }
+
+        switch (category) {
+            case RANGED -> {
+                CombatXpStyle style = service.getRangedXpStyle(uuid);
+                switch (style) {
+                    case DEFENCE -> {
+                        service.addSkillXp(uuid, SkillType.DEFENCE, baseXp);
+                        msg.append("+").append(baseXp).append(" Defence XP");
+                    }
+                    case SHARED -> {
+                        long rangedXp = baseXp / 2;
+                        long defenceXp = baseXp - rangedXp;
+                        service.addSkillXp(uuid, SkillType.RANGED, rangedXp);
+                        service.addSkillXp(uuid, SkillType.DEFENCE, defenceXp);
+                        msg.append("+").append(rangedXp).append(" Ranged XP")
+                            .append(" | +").append(defenceXp).append(" Defence XP");
+                    }
+                    case RANGED -> {
+                        service.addSkillXp(uuid, SkillType.RANGED, baseXp);
+                        msg.append("+").append(baseXp).append(" Ranged XP");
+                    }
+                    default -> {
+                        service.addSkillXp(uuid, SkillType.RANGED, baseXp);
+                        msg.append("+").append(baseXp).append(" Ranged XP");
+                    }
+                }
+            }
+            case MAGIC -> {
+                CombatXpStyle style = service.getMagicXpStyle(uuid);
+                switch (style) {
+                    case DEFENCE -> {
+                        service.addSkillXp(uuid, SkillType.DEFENCE, baseXp);
+                        msg.append("+").append(baseXp).append(" Defence XP");
+                    }
+                    case SHARED -> {
+                        long magicXp = baseXp / 2;
+                        long defenceXp = baseXp - magicXp;
+                        service.addSkillXp(uuid, SkillType.MAGIC, magicXp);
+                        service.addSkillXp(uuid, SkillType.DEFENCE, defenceXp);
+                        msg.append("+").append(magicXp).append(" Magic XP")
+                            .append(" | +").append(defenceXp).append(" Defence XP");
+                    }
+                    case MAGIC -> {
+                        service.addSkillXp(uuid, SkillType.MAGIC, baseXp);
+                        msg.append("+").append(baseXp).append(" Magic XP");
+                    }
+                    default -> {
+                        service.addSkillXp(uuid, SkillType.MAGIC, baseXp);
+                        msg.append("+").append(baseXp).append(" Magic XP");
+                    }
+                }
+            }
+            case MELEE -> {
+                CombatXpStyle style = service.getMeleeXpStyle(uuid);
+                switch (style) {
+                    case ATTACK -> {
+                        service.addSkillXp(uuid, SkillType.ATTACK, baseXp);
+                        msg.append("+").append(baseXp).append(" Attack XP");
+                    }
+                    case STRENGTH -> {
+                        service.addSkillXp(uuid, SkillType.STRENGTH, baseXp);
+                        msg.append("+").append(baseXp).append(" Strength XP");
+                    }
+                    case DEFENCE -> {
+                        service.addSkillXp(uuid, SkillType.DEFENCE, baseXp);
+                        msg.append("+").append(baseXp).append(" Defence XP");
+                    }
+                    case SHARED -> {
+                        long per = baseXp / 3;
+                        long remainder = baseXp - (per * 3);
+                        long attackXp = per + remainder;
+                        long strengthXp = per;
+                        long defenceXp = per;
+                        service.addSkillXp(uuid, SkillType.ATTACK, attackXp);
+                        service.addSkillXp(uuid, SkillType.STRENGTH, strengthXp);
+                        service.addSkillXp(uuid, SkillType.DEFENCE, defenceXp);
+                        msg.append("+").append(attackXp).append(" Attack XP")
+                            .append(" | +").append(strengthXp).append(" Strength XP")
+                            .append(" | +").append(defenceXp).append(" Defence XP");
+                    }
+                    default -> {
+                        service.addSkillXp(uuid, SkillType.STRENGTH, baseXp);
+                        msg.append("+").append(baseXp).append(" Strength XP");
+                    }
+                }
+            }
+            default -> {
+                service.addSkillXp(uuid, SkillType.STRENGTH, baseXp);
+                msg.append("+").append(baseXp).append(" Strength XP");
+            }
+        }
+    }
+
+    private enum CombatCategory {
+        MELEE,
+        RANGED,
+        MAGIC
     }
 }

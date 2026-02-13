@@ -1,7 +1,7 @@
 # HytaleServer Decompiled Index (Curated)
 
 Source: libs/HytaleServer/com (IntelliJ decompiler output; class files only)
-Scope: RPG overhaul modding focus (entities/combat, stats, items, NPC/AI, world, spawning, worldgen)
+Scope: RPG overhaul modding focus (entities/combat, stats, items, NPC/AI, world, spawning, worldgen, CustomUI with .ui files)
 
 ## Top-Level Package Map (com.hypixel.hytale.*)
 - com.hypixel.hytale.assetstore: asset store integration and asset pack handling

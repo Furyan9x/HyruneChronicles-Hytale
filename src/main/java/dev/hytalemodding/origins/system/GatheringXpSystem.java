@@ -366,6 +366,13 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
         return findReward(blockId, FARMING_BLOCKS, FARMING_KEYWORDS);
     }
 
+    public static Reward findMiningReward(String blockId) {
+        if (blockId == null) {
+            return null;
+        }
+        return findReward(blockId.toLowerCase(Locale.ROOT), MINING_BLOCKS, MINING_KEYWORDS);
+    }
+
     static Reward findFarmingHarvestReward(String itemId) {
         if (itemId == null) {
             return null;

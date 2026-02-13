@@ -8,6 +8,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.Anchor;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
@@ -18,11 +19,14 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.origins.level.CombatXpStyle;
 import dev.hytalemodding.origins.level.LevelingService;
 import dev.hytalemodding.origins.quests.Quest;
 import dev.hytalemodding.origins.quests.QuestListFilter;
 import dev.hytalemodding.origins.quests.QuestManager;
+import dev.hytalemodding.origins.registry.FishingRegistry;
 import dev.hytalemodding.origins.playerdata.QuestProgress;
 import dev.hytalemodding.origins.quests.QuestRequirement;
 import dev.hytalemodding.origins.quests.QuestReward;
@@ -36,7 +40,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 /**
@@ -48,21 +54,22 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final String MAIN_UI = "Pages/SkillEntry.ui";
     private static final String CELL_UI = "Pages/character_stats.ui";
     private static final String ATTR_ROW_UI = "Pages/attribute_row.ui";
-    private static final String UNLOCK_ROW_UI = "Pages/skill_unlock_row.ui";
     private static final String QUEST_ITEM_UI = "Pages/quest_list_item.ui";
+    private static final String QUEST_HEADER_UI = "Pages/quest_list_header.ui";
     private static final String QUEST_STAGE_UI = "Pages/quest_stage_row.ui";
     private static final String QUEST_REQ_UI = "Pages/quest_requirement_row.ui";
     private static final String QUEST_REWARD_UI = "Pages/quest_reward_row.ui";
 
     private static final String COLOR_YELLOW = "#ffff00";
-    private static final String COLOR_ORANGE = "#ff981f"; // For selected skills.
+    private static final String COLOR_ORANGE = "#ff981f";
     private static final String COLOR_WHITE = "#ffffff";
     private static final String COLOR_GRAY = "#808080";
     private static final String COLOR_GREEN = "#00ff00";
     private static final String COLOR_RED = "#ff6666";
-    private static final int PROGRESS_BAR_WIDTH = 112;
+    private static final int PROGRESS_BAR_WIDTH = 98;
     private static final int PROGRESS_BAR_HEIGHT = 4;
     private static final String TAB_SERVER_INFO = "ServerInfo";
+    private static final String TAB_COMBAT_SETTINGS = "CombatSettings";
     private static final String TAB_QUESTS = "Quests";
     private static final String TAB_ATTRIBUTES = "Attributes";
     private static final String TAB_SKILLS = "Skills";
@@ -77,10 +84,10 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final String REQ_CATEGORY_LEVEL = "Level";
     private static final String REQ_CATEGORY_ITEM = "Item";
     private static final String REQ_CATEGORY_QUEST = "Quest";
-    private static final String DEFAULT_DETAIL_TITLE = "Select a skill";
-    private static final String DEFAULT_DETAIL_DESC = "Click a skill to see its bonuses.";
+    private static final String COMBAT_STYLE_CHANGED_ACTION = "CombatStyleChanged";
+    private static final String QUEST_FILTER_CHANGED_ACTION = "QuestFilterChanged";
+    private static final String OPEN_SKILL_INFO_ACTION = "OpenSkillInfo";
 
-    private SkillType selectedSkill = null;
     private String selectedTab = TAB_SKILLS;
     private boolean combatExpanded = true;
     private boolean gatheringExpanded = true;
@@ -109,10 +116,10 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         this.populateServerInfo(commandBuilder);
         this.buildSkillGrid(commandBuilder, eventBuilder, uuid, levelingService);
         this.buildAttributes(commandBuilder, eventBuilder, uuid, levelingService);
-        this.buildSkillDetailsPanel(commandBuilder, this.selectedSkill);
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnClose", EventData.of("Button", "Close"), false);
 
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabCombatSettingsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_COMBAT_SETTINGS), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabServerInfoBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_SERVER_INFO), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabQuestsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_QUESTS), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabAttributesBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_ATTRIBUTES), false);
@@ -195,14 +202,12 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             } else {
                 cmd.set(cellRoot + " #ProgressFill.Background", "#00FF00");
             }
-            boolean isSelected = skill == this.selectedSkill;
-            cmd.set(cellRoot + " #SkillName.Style.TextColor", isSelected ? COLOR_ORANGE : COLOR_YELLOW);
-
+            cmd.set(cellRoot + " #SkillName.Style.TextColor", COLOR_YELLOW);
             evt.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    cellRoot,
-                    EventData.of("Button", "SelectSkill").append("SkillID", skill.name()),
-                    false
+                CustomUIEventBindingType.Activating,
+                cellRoot,
+                EventData.of("Button", OPEN_SKILL_INFO_ACTION).append("SkillID", skill.name()),
+                false
             );
 
             index++;
@@ -215,39 +220,31 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     @Override
     public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, @Nonnull SkillMenuData data) {
         super.handleDataEvent(ref, store, data);
-        if (data.button == null) {
+
+        LOGGER.at(Level.INFO).log("Event Data: " + data.toString());
+
+        // Now check for button events
+        if (data.Button == null) {
             return;
         }
 
-        switch (data.button) {
+        switch (data.Button) {
             case "Close":
                 this.close();
                 break;
 
-            case "SelectSkill":
-                if (data.skillId != null) {
-                    try {
-                        this.selectedSkill = SkillType.valueOf(data.skillId);
-                        UICommandBuilder refreshCmd = new UICommandBuilder();
-                        UIEventBuilder refreshEvt = new UIEventBuilder();
-                        this.buildSkillGrid(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
-                        this.buildSkillDetailsPanel(refreshCmd, this.selectedSkill);
-                        this.sendUpdate(refreshCmd, refreshEvt, false);
-                    } catch (IllegalArgumentException e) {
-                        LOGGER.at(Level.WARNING).log("Invalid skill selected: " + data.skillId);
-                    }
-                }
-                break;
-
             case "SelectTab":
-                if (data.tabId != null) {
-                    this.selectedTab = data.tabId;
+                if (data.TabID != null) {
+                    this.selectedTab = data.TabID;
 
                     UICommandBuilder refreshCmd = new UICommandBuilder();
                     UIEventBuilder refreshEvt = new UIEventBuilder();
                     this.applyTabState(refreshCmd, refreshEvt);
                     if (TAB_SERVER_INFO.equals(this.selectedTab)) {
                         this.populateServerInfo(refreshCmd);
+                    }
+                    if (TAB_COMBAT_SETTINGS.equals(this.selectedTab)) {
+                        this.buildCombatSettings(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
                     }
                     if (TAB_ATTRIBUTES.equals(this.selectedTab)) {
                         this.buildAttributes(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
@@ -256,8 +253,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 }
                 break;
             case ATTR_TOGGLE_ACTION:
-                if (data.category != null) {
-                    toggleAttributeCategory(data.category);
+                if (data.Category != null) {
+                    toggleAttributeCategory(data.Category);
                     UICommandBuilder refreshCmd = new UICommandBuilder();
                     UIEventBuilder refreshEvt = new UIEventBuilder();
                     this.buildAttributes(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
@@ -265,8 +262,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 }
                 break;
             case "SelectQuest":
-                if (data.questId != null) {
-                    this.selectedQuestId = data.questId;
+                if (data.QuestID != null) {
+                    this.selectedQuestId = data.QuestID;
                     UICommandBuilder refreshCmd = new UICommandBuilder();
                     UIEventBuilder refreshEvt = new UIEventBuilder();
                     this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
@@ -287,26 +284,9 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             case "TrackQuest":
                 LOGGER.at(Level.FINE).log("Tracking quest: " + this.selectedQuestId);
                 break;
-            case "QuestFilterChanged":
-                if (data.selectedIndex != null) {
-                    try {
-                        int index = Integer.parseInt(data.selectedIndex);
-                        List<QuestListFilter> filters = getQuestFilterOptions();
-                        if (index >= 0 && index < filters.size()) {
-                            this.currentQuestFilter = filters.get(index);
-                        }
-
-                        UICommandBuilder refreshCmd = new UICommandBuilder();
-                        UIEventBuilder refreshEvt = new UIEventBuilder();
-                        this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
-                        this.sendUpdate(refreshCmd, refreshEvt, false);
-                    } catch (NumberFormatException e) {
-                        LOGGER.at(Level.WARNING).log("Invalid filter index: " + data.selectedIndex);
-                    }
-                }
-                break;
             case "ToggleHideCompleted":
                 this.hideCompleted = !this.hideCompleted; // Toggle boolean
+                QuestManager.get().setHideCompleted(this.playerRef.getUuid(), this.hideCompleted);
 
                 // Rebuild the tab to update list and checkbox visual
                 UICommandBuilder refreshCmd1 = new UICommandBuilder();
@@ -317,6 +297,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
 
             case "ToggleHideUnavailable":
                 this.hideUnavailable = !this.hideUnavailable; // Toggle boolean
+                QuestManager.get().setHideUnavailable(this.playerRef.getUuid(), this.hideUnavailable);
 
                 UICommandBuilder refreshCmd2 = new UICommandBuilder();
                 UIEventBuilder refreshEvt2 = new UIEventBuilder();
@@ -324,15 +305,49 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 this.sendUpdate(refreshCmd2, refreshEvt2, false);
                 break;
             case QUEST_REQ_TOGGLE_ACTION:
-                if (data.category != null) {
-                    toggleQuestRequirement(data.category);
+                if (data.Category != null) {
+                    toggleQuestRequirement(data.Category);
                     UICommandBuilder refreshCmd = new UICommandBuilder();
                     UIEventBuilder refreshEvt = new UIEventBuilder();
                     this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
                     this.sendUpdate(refreshCmd, refreshEvt, false);
                 }
                 break;
+            case COMBAT_STYLE_CHANGED_ACTION:
+                handleCombatStyleChange(data);
+                break;
+            case QUEST_FILTER_CHANGED_ACTION:
+                handleQuestFilterChange(data);
+                break;
+            case OPEN_SKILL_INFO_ACTION:
+                openSkillInfoPage(ref, store, data.SkillID);
+                break;
         }
+    }
+
+    private void openSkillInfoPage(@Nonnull Ref<EntityStore> ref,
+                                   @Nonnull Store<EntityStore> store,
+                                   String skillId) {
+        SkillType selected = SkillType.ATTACK;
+        if (skillId != null) {
+            try {
+                selected = SkillType.valueOf(skillId);
+            } catch (IllegalArgumentException ignored) {
+                selected = SkillType.ATTACK;
+            }
+        }
+
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) {
+            return;
+        }
+
+        World world = store.getExternalData().getWorld();
+        final SkillType targetSkill = selected;
+        CompletableFuture.runAsync(() ->
+            player.getPageManager().openCustomPage(ref, store, new SkillInfoPage(this.playerRef, targetSkill)),
+            world
+        );
     }
 
     /**
@@ -362,12 +377,14 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
 
     private void applyTabState(UICommandBuilder cmd, UIEventBuilder evt) {
         boolean showServerInfo = TAB_SERVER_INFO.equals(this.selectedTab);
+        boolean showCombatSettings = TAB_COMBAT_SETTINGS.equals(this.selectedTab);
         boolean showQuests = TAB_QUESTS.equals(this.selectedTab);
         boolean showAttributes = TAB_ATTRIBUTES.equals(this.selectedTab);
         boolean showSkills = TAB_SKILLS.equals(this.selectedTab);
         boolean showFriends = TAB_FRIENDS.equals(this.selectedTab);
 
         cmd.set("#PageTitle.Text", getTabTitle());
+        cmd.set("#TabCombatSettings.Visible", showCombatSettings);
         cmd.set("#TabServerInfo.Visible", showServerInfo);
         cmd.set("#TabQuests.Visible", showQuests);
         cmd.set("#TabAttributes.Visible", showAttributes);
@@ -375,6 +392,9 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         cmd.set("#TabFriends.Visible", showFriends);
         cmd.set("#Footer.Visible", showSkills);
         cmd.set("#TabBar.SelectedTab", this.selectedTab);
+        if (showCombatSettings) {
+            this.buildCombatSettings(cmd, evt, this.playerRef.getUuid(), LevelingService.get());
+        }
         if (showQuests) {
             this.buildQuestTab(cmd, evt, this.playerRef.getUuid());
         }
@@ -382,11 +402,21 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
 
     private void buildQuestTab(UICommandBuilder cmd, UIEventBuilder evt, UUID uuid) {
         QuestManager questManager = QuestManager.get();
+        syncQuestUiState(uuid, questManager);
 
-        buildQuestFilterDropdown(cmd, evt);
+        List<DropdownEntryInfo> filterEntries = new ArrayList<>();
+        filterEntries.add(new DropdownEntryInfo(LocalizableString.fromString("A-Z"), QuestListFilter.ALPHABETICAL.name()));
+        filterEntries.add(new DropdownEntryInfo(LocalizableString.fromString("Length"), QuestListFilter.BY_LENGTH.name()));
+        filterEntries.add(new DropdownEntryInfo(LocalizableString.fromString("Difficulty"), QuestListFilter.BY_DIFFICULTY.name()));
+        cmd.set("#QuestFilterInput.Entries", filterEntries);
+        cmd.set("#QuestFilterInput.Value", this.currentQuestFilter.name());
+
         cmd.set("#HideCompletedToggle #CheckBox.Value", this.hideCompleted);
         cmd.set("#HideUnavailableToggle #CheckBox.Value", this.hideUnavailable);
 
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#QuestFilterInput",
+                EventData.of("Button", QUEST_FILTER_CHANGED_ACTION)
+                        .append(SkillMenuData.KEY_QUEST_FILTER, "#QuestFilterInput.Value"), false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#HideCompletedToggle #CheckBox",
                 EventData.of("Button", "ToggleHideCompleted"), false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#HideUnavailableToggle #CheckBox",
@@ -399,12 +429,13 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 buildQuestDetailPanel(cmd, evt, uuid, quest, questManager);
             }
         } else {
-            cmd.set("#QuestDetailTitle.Text", "Select a quest");
+            cmd.set("#QuestDetailTitle.Text", "Select a Quest");
             cmd.set("#QuestDetailDesc.Text", "Click a quest to see its details.");
             cmd.set("#QuestJournalSection.Visible", false);
             cmd.set("#QuestRequirementsSection.Visible", false);
             cmd.set("#QuestRewardsSection.Visible", false);
             cmd.set("#QuestActionButtons.Visible", false);
+            cmd.set("#QuestActionHint.Visible", false);
         }
         int currentPoints = questManager.getQuestPoints(uuid);
         int totalPoints = questManager.getAllQuests().stream().mapToInt(Quest::getQuestPoints).sum();
@@ -412,37 +443,126 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         cmd.set("#QuestPointsVal.Text", String.valueOf(questManager.getQuestPoints(uuid)));
     }
 
-    private void buildQuestFilterDropdown(UICommandBuilder cmd, UIEventBuilder evt) {
-        List<QuestListFilter> filters = getQuestFilterOptions();
-        List<DropdownEntryInfo> filterOptions = new ArrayList<>();
-        for (QuestListFilter filter : filters) {
-            filterOptions.add(new DropdownEntryInfo(
-                LocalizableString.fromString(filter.getDisplayName()),
-                filter.name()
-            ));
+    private void buildCombatSettings(UICommandBuilder cmd,
+                                     UIEventBuilder evt,
+                                     UUID uuid,
+                                     LevelingService service) {
+        if (service == null) {
+            return;
         }
+        List<DropdownEntryInfo> meleeEntries = new ArrayList<>();
+        meleeEntries.add(createCombatEntry(CombatXpStyle.ATTACK));
+        meleeEntries.add(createCombatEntry(CombatXpStyle.STRENGTH));
+        meleeEntries.add(createCombatEntry(CombatXpStyle.DEFENCE));
+        meleeEntries.add(createCombatEntry(CombatXpStyle.SHARED));
+        cmd.set("#MeleeCombatStyle.Entries", meleeEntries);
+        cmd.set("#MeleeCombatStyle.Value", service.getMeleeXpStyle(uuid).name());
 
-        if (!filters.contains(this.currentQuestFilter)) {
-            this.currentQuestFilter = filters.get(0);
-        }
-        cmd.set("#QuestFilterRow #Input.Entries", filterOptions);
-        cmd.set("#QuestFilterRow #Input.Value", this.currentQuestFilter.name());
-        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#QuestFilterRow #Input",
-            EventData.of("Dropdown", "QuestFilterChanged"), false);
+        List<DropdownEntryInfo> rangedEntries = new ArrayList<>();
+        rangedEntries.add(createCombatEntry(CombatXpStyle.RANGED));
+        rangedEntries.add(createCombatEntry(CombatXpStyle.DEFENCE));
+        rangedEntries.add(createCombatEntry(CombatXpStyle.SHARED));
+        cmd.set("#RangedCombatStyle.Entries", rangedEntries);
+        cmd.set("#RangedCombatStyle.Value", service.getRangedXpStyle(uuid).name());
+
+        List<DropdownEntryInfo> magicEntries = new ArrayList<>();
+        magicEntries.add(createCombatEntry(CombatXpStyle.MAGIC));
+        magicEntries.add(createCombatEntry(CombatXpStyle.DEFENCE));
+        magicEntries.add(createCombatEntry(CombatXpStyle.SHARED));
+        cmd.set("#MagicCombatStyle.Entries", magicEntries);
+        cmd.set("#MagicCombatStyle.Value", service.getMagicXpStyle(uuid).name());
+
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#MeleeCombatStyle",
+            EventData.of("Button", COMBAT_STYLE_CHANGED_ACTION)
+                .append(SkillMenuData.KEY_MELEE_COMBAT_STYLE, "#MeleeCombatStyle.Value"),
+            false);
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#RangedCombatStyle",
+            EventData.of("Button", COMBAT_STYLE_CHANGED_ACTION)
+                .append(SkillMenuData.KEY_RANGED_COMBAT_STYLE, "#RangedCombatStyle.Value"),
+            false);
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#MagicCombatStyle",
+            EventData.of("Button", COMBAT_STYLE_CHANGED_ACTION)
+                .append(SkillMenuData.KEY_MAGIC_COMBAT_STYLE, "#MagicCombatStyle.Value"),
+            false);
     }
 
-    private List<QuestListFilter> getQuestFilterOptions() {
-        List<QuestListFilter> filters = new ArrayList<>();
-        filters.add(QuestListFilter.ALPHABETICAL);
-        filters.add(QuestListFilter.BY_LENGTH);
-        return filters;
+    private DropdownEntryInfo createCombatEntry(CombatXpStyle style) {
+        return new DropdownEntryInfo(LocalizableString.fromString(style.getDisplayName()), style.name());
     }
+
+    private void handleCombatStyleChange(SkillMenuData data) {
+        LevelingService service = LevelingService.get();
+        if (service == null) {
+            return;
+        }
+
+        UUID uuid = this.playerRef.getUuid();
+        boolean changed = false;
+
+        if (data.MeleeCombatStyle != null) {
+            CombatXpStyle style = CombatXpStyle.fromString(data.MeleeCombatStyle);
+            if (style != null) {
+                service.setMeleeXpStyle(uuid, style);
+                changed = true;
+            }
+        }
+
+        if (data.RangedCombatStyle != null) {
+            CombatXpStyle style = CombatXpStyle.fromString(data.RangedCombatStyle);
+            if (style != null) {
+                service.setRangedXpStyle(uuid, style);
+                changed = true;
+            }
+        }
+
+        if (data.MagicCombatStyle != null) {
+            CombatXpStyle style = CombatXpStyle.fromString(data.MagicCombatStyle);
+            if (style != null) {
+                service.setMagicXpStyle(uuid, style);
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            UICommandBuilder refreshCmd = new UICommandBuilder();
+            UIEventBuilder refreshEvt = new UIEventBuilder();
+            this.buildCombatSettings(refreshCmd, refreshEvt, uuid, service);
+            this.sendUpdate(refreshCmd, refreshEvt, false);
+        }
+    }
+
+    private void handleQuestFilterChange(SkillMenuData data) {
+        if (data.QuestFilter == null) {
+            return;
+        }
+        QuestManager manager = QuestManager.get();
+        QuestListFilter filter = QuestListFilter.fromString(data.QuestFilter, QuestListFilter.ALPHABETICAL);
+        this.currentQuestFilter = filter;
+        manager.setQuestListFilter(this.playerRef.getUuid(), filter);
+
+        UICommandBuilder refreshCmd = new UICommandBuilder();
+        UIEventBuilder refreshEvt = new UIEventBuilder();
+        this.buildQuestTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
+        this.sendUpdate(refreshCmd, refreshEvt, false);
+    }
+
+    private void syncQuestUiState(UUID uuid, QuestManager questManager) {
+        if (uuid == null || questManager == null) {
+            return;
+        }
+        this.hideCompleted = questManager.isHideCompleted(uuid);
+        this.hideUnavailable = questManager.isHideUnavailable(uuid);
+        this.currentQuestFilter = questManager.getQuestListFilter(uuid);
+    }
+
+
 
     private void buildQuestList(UICommandBuilder cmd, UIEventBuilder evt, UUID uuid, QuestManager manager) {
         cmd.clear("#QuestList");
 
         List<Quest> quests = manager.getFilteredQuests(uuid, this.currentQuestFilter);
-        int index = 0;
+        int rowIndex = 0;
+        String lastHeader = null;
         for (Quest quest : quests) {
             QuestStatus status = manager.getQuestStatus(uuid, quest.getId());
             if (this.hideCompleted && status == QuestStatus.COMPLETED) {
@@ -451,9 +571,19 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             if (this.hideUnavailable && status == QuestStatus.NOT_STARTED && !quest.meetsRequirements(uuid)) {
                 continue;
             }
+
+            String groupHeader = getQuestGroupHeader(quest);
+            if (groupHeader != null && !groupHeader.equals(lastHeader)) {
+                cmd.append("#QuestList", QUEST_HEADER_UI);
+                String headerRoot = "#QuestList[" + rowIndex + "]";
+                cmd.set(headerRoot + " #HeaderText.Text", groupHeader);
+                rowIndex++;
+                lastHeader = groupHeader;
+            }
+
             cmd.append("#QuestList", QUEST_ITEM_UI);
 
-            String itemRoot = "#QuestList[" + index + "]";
+            String itemRoot = "#QuestList[" + rowIndex + "]";
             cmd.set(itemRoot + " #QuestName.Text", quest.getName());
 
             String statusColor;
@@ -482,11 +612,44 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 CustomUIEventBindingType.Activating,
                 itemRoot,
                 EventData.of("Button", "SelectQuest").append("QuestID", quest.getId()),
-                false
+                    false
             );
 
-            index++;
+            rowIndex++;
         }
+    }
+
+    private String getQuestGroupHeader(Quest quest) {
+        if (quest == null) {
+            return null;
+        }
+        switch (this.currentQuestFilter) {
+            case BY_LENGTH:
+                return quest.getLength().getDisplayName();
+            case BY_DIFFICULTY:
+                return quest.getDifficulty().getDisplayName();
+            case ALPHABETICAL:
+            default:
+                return getAlphabeticalHeader(quest.getName());
+        }
+    }
+
+    private String getAlphabeticalHeader(String questName) {
+        if (questName == null || questName.isBlank()) {
+            return "#";
+        }
+        String normalized = questName.trim();
+        if (normalized.length() > 4 && normalized.toLowerCase(Locale.ROOT).startsWith("the ")) {
+            normalized = normalized.substring(4).trim();
+        }
+        if (normalized.isEmpty()) {
+            return "#";
+        }
+        char first = Character.toUpperCase(normalized.charAt(0));
+        if (!Character.isLetter(first)) {
+            return "#";
+        }
+        return String.valueOf(first);
     }
 
     private void buildQuestDetailPanel(UICommandBuilder cmd, UIEventBuilder evt,
@@ -616,11 +779,32 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         boolean canStart = status == QuestStatus.NOT_STARTED && quest.meetsRequirements(uuid);
         boolean inProgress = status == QuestStatus.IN_PROGRESS;
 
-        cmd.set("#QuestActionButtons.Visible", canStart || inProgress);
+        cmd.set("#QuestActionButtons.Visible", true);
         cmd.set("#QuestAcceptRow.Visible", canStart);
         cmd.set("#QuestTrackRow.Visible", inProgress);
         cmd.set("#BtnAcceptQuest.Visible", canStart);
         cmd.set("#BtnTrackQuest.Visible", inProgress);
+        cmd.set("#QuestActionHint.Text",
+            "Length: " + quest.getLength().getDisplayName() + "  |  Difficulty: " + quest.getDifficulty().getDisplayName());
+        cmd.set("#QuestActionHint.Style.TextColor", getQuestDifficultyColor(quest.getDifficulty()));
+        cmd.set("#QuestActionHint.Visible", true);
+    }
+
+    private String getQuestDifficultyColor(dev.hytalemodding.origins.quests.QuestDifficulty difficulty) {
+        switch (difficulty) {
+            case TUTORIAL:
+                return "#7ec8ff";
+            case EASY:
+                return COLOR_GREEN;
+            case MEDIUM:
+                return COLOR_YELLOW;
+            case HARD:
+                return COLOR_ORANGE;
+            case ELITE:
+                return COLOR_RED;
+            default:
+                return COLOR_WHITE;
+        }
     }
 
     private void toggleQuestRequirement(String category) {
@@ -675,38 +859,6 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 appendAttributeRow(cmd, "#AttrMiscContent", row++, entry);
             }
         }
-    }
-
-    private void buildSkillDetailsPanel(UICommandBuilder cmd, SkillType skill) {
-        SkillDetailRegistry.SkillDetail detail = SkillDetailRegistry.getDetail(skill);
-        if (detail == null) {
-            cmd.set("#SkillDetailTitle.Text", DEFAULT_DETAIL_TITLE);
-            cmd.set("#SkillDetailDesc.Text", DEFAULT_DETAIL_DESC);
-            cmd.set("#SkillUnlockHeader.Visible", false);
-            cmd.set("#SkillUnlockScroll.Visible", false);
-            cmd.clear("#SkillUnlockList");
-            appendUnlockRow(cmd, "#SkillUnlockList", 0,
-                new SkillDetailRegistry.SkillUnlock(1, "No unlocks yet."));
-            return;
-        }
-
-        cmd.set("#SkillUnlockHeader.Visible", true);
-        cmd.set("#SkillUnlockScroll.Visible", true);
-        cmd.set("#SkillDetailTitle.Text", detail.title);
-        cmd.set("#SkillDetailDesc.Text", detail.description);
-        cmd.clear("#SkillUnlockList");
-
-        int row = 0;
-        for (SkillDetailRegistry.SkillUnlock unlock : detail.unlocks) {
-            appendUnlockRow(cmd, "#SkillUnlockList", row++, unlock);
-        }
-    }
-
-    private void appendUnlockRow(UICommandBuilder cmd, String container, int index, SkillDetailRegistry.SkillUnlock unlock) {
-        cmd.append(container, UNLOCK_ROW_UI);
-        String rowRoot = container + "[" + index + "]";
-        cmd.set(rowRoot + " #UnlockLevel.Text", "Lv " + unlock.level);
-        cmd.set(rowRoot + " #UnlockText.Text", unlock.text);
     }
 
     private void appendAttributeRow(UICommandBuilder cmd,
@@ -771,7 +923,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private AttributeEntry[] buildGatheringAttributes(UUID uuid, LevelingService service) {
         int mining = service.getSkillLevel(uuid, SkillType.MINING);
         int woodcutting = service.getSkillLevel(uuid, SkillType.WOODCUTTING);
-        int farming = service.getSkillLevel(uuid, SkillType.FARMING);
+        int fishing = service.getSkillLevel(uuid, SkillType.FISHING);
         int cooking = service.getSkillLevel(uuid, SkillType.COOKING);
         int alchemy = service.getSkillLevel(uuid, SkillType.ALCHEMY);
 
@@ -785,8 +937,9 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem.WOODCUTTING_DURABILITY_REDUCTION_CAP,
             woodcutting * dev.hytalemodding.origins.system.WoodcuttingDurabilitySystem.WOODCUTTING_DURABILITY_REDUCTION_PER_LEVEL
         );
-        double farmingYieldBonus = dev.hytalemodding.origins.system.FarmingHarvestPickupSystem.MAX_YIELD_BONUS
-            * (Math.min(farming, 99) / 99.0);
+        double fishingLevelRatio = Math.min(fishing, 99) / 99.0;
+        double fishingBiteSpeedBonus = fishingLevelRatio * FishingRegistry.BITE_SPEED_MAX_BONUS;
+        double fishingRareChance = FishingRegistry.BASE_RARE_CHANCE + (fishingLevelRatio * FishingRegistry.RARE_CHANCE_BONUS);
         double sickleXpBonus = dev.hytalemodding.origins.system.FarmingHarvestPickupSystem.SICKLE_XP_BONUS - 1.0;
         double cookingDoubleProc = Math.min(
             dev.hytalemodding.origins.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_CAP,
@@ -802,7 +955,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             new AttributeEntry("Mining durability reduction", formatPercent(miningDurability)),
             new AttributeEntry("Woodcutting speed bonus", formatBonusPercent(woodcuttingSpeed)),
             new AttributeEntry("Woodcutting durability reduction", formatPercent(woodcuttingDurability)),
-            new AttributeEntry("Farming yield bonus", formatBonusPercent(farmingYieldBonus)),
+            new AttributeEntry("Fishing bite speed bonus", formatBonusPercent(fishingBiteSpeedBonus)),
+            new AttributeEntry("Fishing rare fish chance", formatPercent(fishingRareChance)),
             new AttributeEntry("Farming sickle XP bonus", formatBonusPercent(sickleXpBonus)),
             new AttributeEntry("Cooking double proc chance", formatPercent(cookingDoubleProc)),
             new AttributeEntry("Alchemy double proc chance", formatPercent(alchemyDoubleProc))
@@ -866,6 +1020,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
 
     private String getTabTitle() {
         switch (this.selectedTab) {
+            case TAB_COMBAT_SETTINGS:
+                return "Combat Settings";
             case TAB_SERVER_INFO:
                 return "Server Info";
             case TAB_QUESTS:
@@ -989,23 +1145,55 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         static final String KEY_TAB_ID = "TabID";
         static final String KEY_CATEGORY = "Category";
         static final String KEY_QUEST_ID = "QuestID";
-        static final String KEY_SELECTED_INDEX = "SelectedIndex";
+        static final String KEY_QUEST_FILTER = "@QuestFilter";
+        static final String KEY_MELEE_COMBAT_STYLE = "@MeleeCombatStyle";
+        static final String KEY_RANGED_COMBAT_STYLE = "@RangedCombatStyle";
+        static final String KEY_MAGIC_COMBAT_STYLE = "@MagicCombatStyle";
+        static final String KEY_QUEST_FILTER_FALLBACK = "QuestFilter";
+        static final String KEY_MELEE_COMBAT_STYLE_FALLBACK = "MeleeCombatStyle";
+        static final String KEY_RANGED_COMBAT_STYLE_FALLBACK = "RangedCombatStyle";
+        static final String KEY_MAGIC_COMBAT_STYLE_FALLBACK = "MagicCombatStyle";
 
         public static final BuilderCodec<SkillMenuData> CODEC = BuilderCodec.builder(SkillMenuData.class, SkillMenuData::new)
-                .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
-                .addField(new KeyedCodec<>(KEY_SKILL_ID, Codec.STRING), (d, s) -> d.skillId = s, d -> d.skillId)
-                .addField(new KeyedCodec<>(KEY_TAB_ID, Codec.STRING), (d, s) -> d.tabId = s, d -> d.tabId)
-                .addField(new KeyedCodec<>(KEY_CATEGORY, Codec.STRING), (d, s) -> d.category = s, d -> d.category)
-                .addField(new KeyedCodec<>(KEY_QUEST_ID, Codec.STRING), (d, s) -> d.questId = s, d -> d.questId)
-                .addField(new KeyedCodec<>(KEY_SELECTED_INDEX, Codec.STRING), (d, s) -> d.selectedIndex = s, d -> d.selectedIndex)
+                .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.Button = s, d -> d.Button)
+                .addField(new KeyedCodec<>(KEY_SKILL_ID, Codec.STRING), (d, s) -> d.SkillID = s, d -> d.SkillID)
+                .addField(new KeyedCodec<>(KEY_TAB_ID, Codec.STRING), (d, s) -> d.TabID = s, d -> d.TabID)
+                .addField(new KeyedCodec<>(KEY_CATEGORY, Codec.STRING), (d, s) -> d.Category = s, d -> d.Category)
+                .addField(new KeyedCodec<>(KEY_QUEST_ID, Codec.STRING), (d, s) -> d.QuestID = s, d -> d.QuestID)
+                .addField(new KeyedCodec<>(KEY_QUEST_FILTER, Codec.STRING), (d, s) -> d.QuestFilter = s, d -> d.QuestFilter)
+                .addField(new KeyedCodec<>(KEY_MELEE_COMBAT_STYLE, Codec.STRING), (d, s) -> d.MeleeCombatStyle = s, d -> d.MeleeCombatStyle)
+                .addField(new KeyedCodec<>(KEY_RANGED_COMBAT_STYLE, Codec.STRING), (d, s) -> d.RangedCombatStyle = s, d -> d.RangedCombatStyle)
+                .addField(new KeyedCodec<>(KEY_MAGIC_COMBAT_STYLE, Codec.STRING), (d, s) -> d.MagicCombatStyle = s, d -> d.MagicCombatStyle)
+                .addField(new KeyedCodec<>(KEY_QUEST_FILTER_FALLBACK, Codec.STRING), (d, s) -> d.QuestFilter = s, d -> d.QuestFilter)
+                .addField(new KeyedCodec<>(KEY_MELEE_COMBAT_STYLE_FALLBACK, Codec.STRING), (d, s) -> d.MeleeCombatStyle = s, d -> d.MeleeCombatStyle)
+                .addField(new KeyedCodec<>(KEY_RANGED_COMBAT_STYLE_FALLBACK, Codec.STRING), (d, s) -> d.RangedCombatStyle = s, d -> d.RangedCombatStyle)
+                .addField(new KeyedCodec<>(KEY_MAGIC_COMBAT_STYLE_FALLBACK, Codec.STRING), (d, s) -> d.MagicCombatStyle = s, d -> d.MagicCombatStyle)
                 .build();
 
-        private String button;
-        private String skillId;
-        private String tabId;
-        private String category;
-        private String questId;
-        private String selectedIndex;
+        private String Button;
+        private String SkillID;
+        private String TabID;
+        private String Category;
+        private String QuestID;
+        private String QuestFilter;
+        private String MeleeCombatStyle;
+        private String RangedCombatStyle;
+        private String MagicCombatStyle;
+
+        @Override
+        public String toString() {
+            return "SkillMenuData{" +
+                "Button='" + Button + '\'' +
+                ", SkillID='" + SkillID + '\'' +
+                ", TabID='" + TabID + '\'' +
+                ", Category='" + Category + '\'' +
+                ", QuestID='" + QuestID + '\'' +
+                ", QuestFilter='" + QuestFilter + '\'' +
+                ", MeleeCombatStyle='" + MeleeCombatStyle + '\'' +
+                ", RangedCombatStyle='" + RangedCombatStyle + '\'' +
+                ", MagicCombatStyle='" + MagicCombatStyle + '\'' +
+                '}';
+        }
     }
 
     private static final class AttributeEntry {

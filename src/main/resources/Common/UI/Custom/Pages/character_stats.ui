@@ -1,22 +1,29 @@
 $C = "../Common.ui";
 
+@SkillCellButtonStyle = ButtonStyle(
+  Default: (Background: (TexturePath: "Images/skill_cell_bg.png")),
+  Hovered: (Background: (TexturePath: "Images/skill_cell_bg_hover.png")),
+  Pressed: (Background: (TexturePath: "Images/skill_cell_bg_pressed.png")),
+  Disabled: ()
+);
+
 // A single cell in the grid
 Button #SkillRoot {
-    Anchor: (Height: 52);
+    Anchor: (Height: 54);
     LayoutMode: Top;
+    Style: @SkillCellButtonStyle;
 
     Group #SkillCellBody {
-        Anchor: (Height: 46);
+        Anchor: (Height: 48);
         LayoutMode: Left; // This means "Stack children Left-to-Right" (Horizontal)
-        Padding: (Full: 5);
-        Background: #000000(0.2);
+        Padding: (Left: 8, Right: 8, Top: 4, Bottom: 4);
 
 
         // Icon Placeholder
         Group #IconBox {
-            Anchor: (Width: 30, Height: 32);
+            Anchor: (Width: 30, Height: 30);
             Background: "attack.png";
-            Padding: (Right: 8);
+            Padding: (Right: 6);
 
             Label #IconText {
                 Text: "?";
@@ -24,7 +31,7 @@ Button #SkillRoot {
             }
         }
 
-        Group { Anchor: (Width: 2); }
+        Group { Anchor: (Width: 4); }
 
         // Skill Info Group
         Group {
@@ -33,26 +40,23 @@ Button #SkillRoot {
 
             Label #SkillName {
                 Text: "Skill";
-                Style: (FontSize: 12, TextColor: #ffcc00);
+                Style: (FontSize: 11, TextColor: #ffcc00);
             }
 
             Label #SkillLevel {
                 Text: "1 / 99";
-                Style: (FontSize: 12, TextColor: #ffffff);
+                Style: (FontSize: 11, TextColor: #ffffff);
             }
 
-            Group { Anchor: (Height: 4); }
+            Group { Anchor: (Height: 3); }
 
             Group {
-                LayoutMode: Left;
                 Anchor: (Height: 4);
 
-                Group { Anchor: (Width: 1); }
-
                 Group #ProgressTrack {
-                    Anchor: (Width: 112, Height: 4);
+                    Anchor: (Width: 98, Height: 5, Left: -1);
                     LayoutMode: Left;
-                    Background: #000000(0.5);
+                    Background: #000000(0.65);
 
                     // The "Fill" (Foreground)
                     // We give it an ID so we can resize it in Java

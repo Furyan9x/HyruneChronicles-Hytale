@@ -205,24 +205,62 @@ public class QuestManager {
                 quests.sort(Comparator.comparing((Quest q) -> q.getLength().getSortOrder())
                     .thenComparing(Quest::getName));
                 break;
-            case HIDE_COMPLETED:
-                quests.removeIf(q -> {
-                    QuestProgress progress = getQuestProgress(playerId, q.getId());
-                    return progress != null && progress.getStatus() == QuestStatus.COMPLETED;
-                });
-                quests.sort(Comparator.comparing(Quest::getName));
-                break;
-            case HIDE_UNAVAILABLE:
-                quests.removeIf(q -> {
-                    QuestProgress progress = getQuestProgress(playerId, q.getId());
-                    boolean isCompleted = progress != null && progress.getStatus() == QuestStatus.COMPLETED;
-                    return !q.meetsRequirements(playerId) && !isCompleted;
-                });
-                quests.sort(Comparator.comparing(Quest::getName));
+            case BY_DIFFICULTY:
+                quests.sort(Comparator.comparing((Quest q) -> q.getDifficulty().getSortOrder())
+                    .thenComparing(Quest::getName));
                 break;
         }
 
         return quests;
+    }
+
+    public QuestListFilter getQuestListFilter(UUID playerId) {
+        if (playerId == null) {
+            return QuestListFilter.ALPHABETICAL;
+        }
+        PlayerQuestData data = getOrCreatePlayerData(playerId);
+        return QuestListFilter.fromString(data.getQuestListFilter(), QuestListFilter.ALPHABETICAL);
+    }
+
+    public void setQuestListFilter(UUID playerId, QuestListFilter filter) {
+        if (playerId == null) {
+            return;
+        }
+        PlayerQuestData data = getOrCreatePlayerData(playerId);
+        data.setQuestListFilter(filter != null ? filter.name() : null);
+        persist(data);
+    }
+
+    public boolean isHideCompleted(UUID playerId) {
+        if (playerId == null) {
+            return false;
+        }
+        return getOrCreatePlayerData(playerId).isHideCompleted();
+    }
+
+    public void setHideCompleted(UUID playerId, boolean hideCompleted) {
+        if (playerId == null) {
+            return;
+        }
+        PlayerQuestData data = getOrCreatePlayerData(playerId);
+        data.setHideCompleted(hideCompleted);
+        persist(data);
+    }
+
+    public boolean isHideUnavailable(UUID playerId) {
+        if (playerId == null) {
+            return false;
+        }
+        return getOrCreatePlayerData(playerId).isHideUnavailable();
+    }
+
+    public void setHideUnavailable(UUID playerId, boolean hideUnavailable) {
+        if (playerId == null) {
+            return;
+        }
+        PlayerQuestData data = getOrCreatePlayerData(playerId);
+        data.setHideUnavailable(hideUnavailable);
+        persist(data);
     }
 
     /**

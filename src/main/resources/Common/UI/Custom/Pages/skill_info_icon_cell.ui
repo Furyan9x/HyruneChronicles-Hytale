@@ -1,0 +1,28 @@
+@SkillIconButtonStyle = ButtonStyle(
+  Default: (Background: (TexturePath: "Images/skill_cell_bg.png")),
+  Hovered: (Background: (TexturePath: "Images/skill_cell_bg_hover.png")),
+  Pressed: (Background: (TexturePath: "Images/skill_cell_bg_pressed.png")),
+  Disabled: ()
+);
+
+Group {
+  LayoutMode: Top;
+  Anchor: (Width: 48, Height: 54);
+
+  Button #SkillIconButton {
+    Anchor: (Width: 48, Height: 48);
+    Style: @SkillIconButtonStyle;
+    Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
+
+    Group #SkillIcon {
+      Anchor: (Horizontal: 1, Vertical: 1);
+      Background: "Pages/skills.png";
+    }
+  }
+
+  Group #SelectedUnderline {
+    Anchor: (Height: 2, Left: 6, Right: 6);
+    Background: #f2d38a;
+    Visible: false;
+  }
+}

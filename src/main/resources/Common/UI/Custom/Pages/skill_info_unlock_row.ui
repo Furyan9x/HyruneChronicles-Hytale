@@ -1,0 +1,29 @@
+Group {
+  LayoutMode: Top;
+  Anchor: (Left: 0, Right: 0);
+
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 26, Left: 0, Right: 0);
+
+    Label #UnlockLevel {
+      Text: "1";
+      Anchor: (Width: 34, Height: 26);
+      Style: (FontSize: 12, TextColor: #f2d38a, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+    }
+
+    Label #UnlockText {
+      Text: "Unlock description";
+      Anchor: (Left: 0, Right: 0, Height: 26);
+      Style: (FontSize: 12, TextColor: #f7e9cd, VerticalAlignment: Center, Wrap: true);
+      FlexWeight: 1;
+    }
+  }
+
+  Group {
+    Anchor: (Height: 1, Left: 34, Right: 0);
+    Background: #FFFFFF10;
+  }
+
+  Group { Anchor: (Height: 3); }
+}

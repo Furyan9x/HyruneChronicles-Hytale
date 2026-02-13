@@ -1,0 +1,25 @@
+// Template for a quest list section header (A-Z, Length, Difficulty buckets)
+Group {
+  LayoutMode: Top;
+  Anchor: (Left: 0, Right: 0);
+  Padding: (Left: 8, Right: 8, Top: 4, Bottom: 2);
+  Background: #1f3554(0.55);
+
+  Label #HeaderText {
+    Text: "A";
+    Anchor: (Height: 14, Left: 0, Right: 0);
+    Style: (
+      FontSize: 11,
+      TextColor: #f2d38a,
+      RenderBold: true,
+      RenderUppercase: true,
+      LetterSpacing: 1,
+      VerticalAlignment: Center
+    );
+  }
+
+  Group #HeaderBorder {
+    Anchor: (Height: 1, Left: 0, Right: 0);
+    Background: #f2d38a;
+  }
+}

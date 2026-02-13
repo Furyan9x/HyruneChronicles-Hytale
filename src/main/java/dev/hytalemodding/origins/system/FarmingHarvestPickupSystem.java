@@ -21,7 +21,6 @@ import java.util.Locale;
  */
     public class FarmingHarvestPickupSystem extends EntityEventSystem<EntityStore, InteractivelyPickupItemEvent> {
         public static final double SICKLE_XP_BONUS = 1.25;
-        public static final double MAX_YIELD_BONUS = 3.0;
 
     public FarmingHarvestPickupSystem() {
         super(InteractivelyPickupItemEvent.class);
@@ -65,12 +64,6 @@ import java.util.Locale;
             return;
         }
 
-        int baseQty = itemStack.getQuantity();
-        int boostedQty = applyYieldBonus(baseQty, playerRef.getUuid());
-        if (boostedQty > baseQty) {
-            event.setItemStack(itemStack.withQuantity(boostedQty));
-        }
-
         LevelingService service = LevelingService.get();
         if (service == null) {
             return;
@@ -107,29 +100,5 @@ import java.util.Locale;
         }
     }
 
-    private static int applyYieldBonus(int baseQty, java.util.UUID uuid) {
-        if (baseQty <= 0 || uuid == null) {
-            return baseQty;
-        }
-
-        LevelingService service = LevelingService.get();
-        if (service == null) {
-            return baseQty;
-        }
-
-        int level = service.getSkillLevel(uuid, SkillType.FARMING);
-        if (level <= 0) {
-            return baseQty;
-        }
-
-        double bonusPercent = MAX_YIELD_BONUS * (Math.min(level, 99) / 99.0);
-        double total = baseQty * (1.0 + bonusPercent);
-        int newQty = (int) Math.floor(total);
-        double remainder = total - newQty;
-        if (Math.random() < remainder) {
-            newQty += 1;
-        }
-        return Math.max(baseQty, newQty);
-    }
 }
 

@@ -11,6 +11,9 @@ public class PlayerQuestData implements PlayerData {
     private UUID uuid;
     private Map<String, QuestProgress> questProgress = new HashMap<>();
     private int questPoints;
+    private String questListFilter;
+    private boolean hideCompleted;
+    private boolean hideUnavailable;
 
     public PlayerQuestData() {
     }
@@ -42,5 +45,29 @@ public class PlayerQuestData implements PlayerData {
 
     public void setQuestPoints(int questPoints) {
         this.questPoints = questPoints;
+    }
+
+    public String getQuestListFilter() {
+        return questListFilter;
+    }
+
+    public void setQuestListFilter(String questListFilter) {
+        this.questListFilter = questListFilter;
+    }
+
+    public boolean isHideCompleted() {
+        return hideCompleted;
+    }
+
+    public void setHideCompleted(boolean hideCompleted) {
+        this.hideCompleted = hideCompleted;
+    }
+
+    public boolean isHideUnavailable() {
+        return hideUnavailable;
+    }
+
+    public void setHideUnavailable(boolean hideUnavailable) {
+        this.hideUnavailable = hideUnavailable;
     }
 }

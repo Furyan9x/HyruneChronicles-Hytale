@@ -10,6 +10,7 @@ import dev.hytalemodding.origins.skills.SkillType;
 import dev.hytalemodding.origins.util.XPDropManager;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +25,16 @@ public class LevelingService {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final int MIN_LEVEL = 1;
     private static final int MAX_LEVEL = 99;
+
+    private static final EnumSet<CombatXpStyle> MELEE_XP_STYLES = EnumSet.of(
+        CombatXpStyle.ATTACK, CombatXpStyle.STRENGTH, CombatXpStyle.DEFENCE, CombatXpStyle.SHARED
+    );
+    private static final EnumSet<CombatXpStyle> RANGED_XP_STYLES = EnumSet.of(
+        CombatXpStyle.RANGED, CombatXpStyle.DEFENCE, CombatXpStyle.SHARED
+    );
+    private static final EnumSet<CombatXpStyle> MAGIC_XP_STYLES = EnumSet.of(
+        CombatXpStyle.MAGIC, CombatXpStyle.DEFENCE, CombatXpStyle.SHARED
+    );
 
     private static LevelingService instance;
 
@@ -81,6 +92,75 @@ public class LevelingService {
             return 0L;
         }
         return this.getOrCreate(id).getSkillXp(skill);
+    }
+
+    public CombatXpStyle getMeleeXpStyle(UUID id) {
+        PlayerLvlData data = this.getOrCreate(id);
+        CombatXpStyle style = data.getMeleeXpStyle();
+        if (!MELEE_XP_STYLES.contains(style)) {
+            style = CombatXpStyle.ATTACK;
+            data.setMeleeXpStyle(style);
+            persist(data);
+        }
+        return style;
+    }
+
+    public CombatXpStyle getRangedXpStyle(UUID id) {
+        PlayerLvlData data = this.getOrCreate(id);
+        CombatXpStyle style = data.getRangedXpStyle();
+        if (!RANGED_XP_STYLES.contains(style)) {
+            style = CombatXpStyle.RANGED;
+            data.setRangedXpStyle(style);
+            persist(data);
+        }
+        return style;
+    }
+
+    public CombatXpStyle getMagicXpStyle(UUID id) {
+        PlayerLvlData data = this.getOrCreate(id);
+        CombatXpStyle style = data.getMagicXpStyle();
+        if (!MAGIC_XP_STYLES.contains(style)) {
+            style = CombatXpStyle.MAGIC;
+            data.setMagicXpStyle(style);
+            persist(data);
+        }
+        return style;
+    }
+
+    public void setMeleeXpStyle(UUID id, CombatXpStyle style) {
+        if (id == null) {
+            return;
+        }
+        CombatXpStyle resolved = MELEE_XP_STYLES.contains(style) ? style : CombatXpStyle.ATTACK;
+        PlayerLvlData data = this.getOrCreate(id);
+        if (data.getMeleeXpStyle() != resolved) {
+            data.setMeleeXpStyle(resolved);
+            persist(data);
+        }
+    }
+
+    public void setRangedXpStyle(UUID id, CombatXpStyle style) {
+        if (id == null) {
+            return;
+        }
+        CombatXpStyle resolved = RANGED_XP_STYLES.contains(style) ? style : CombatXpStyle.RANGED;
+        PlayerLvlData data = this.getOrCreate(id);
+        if (data.getRangedXpStyle() != resolved) {
+            data.setRangedXpStyle(resolved);
+            persist(data);
+        }
+    }
+
+    public void setMagicXpStyle(UUID id, CombatXpStyle style) {
+        if (id == null) {
+            return;
+        }
+        CombatXpStyle resolved = MAGIC_XP_STYLES.contains(style) ? style : CombatXpStyle.MAGIC;
+        PlayerLvlData data = this.getOrCreate(id);
+        if (data.getMagicXpStyle() != resolved) {
+            data.setMagicXpStyle(resolved);
+            persist(data);
+        }
     }
 
     /**

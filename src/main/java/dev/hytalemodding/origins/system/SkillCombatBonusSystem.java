@@ -124,7 +124,9 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
 
         String weaponId = getHeldItemIdentifier(attacker);
         if (isWeaponRestricted(attackerPlayerRef, weaponId)) {
-            damage.setAmount(0f);
+            damage.getMetaStore().putMetaObject(Damage.BLOCKED, Boolean.TRUE);
+            //damage.setAmount(0f);
+            damage.setCancelled(true);
             return;
         }
 
@@ -233,7 +235,9 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         }
 
         if (isWeaponRestricted(attackerPlayerRef, weaponId)) {
-            damage.setAmount(0f);
+            damage.getMetaStore().putMetaObject(Damage.BLOCKED, Boolean.TRUE);
+            //damage.setAmount(0f);
+            damage.setCancelled(true);
             return;
         }
 
@@ -329,7 +333,8 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         return id.contains("wand")
             || id.contains("staff")
             || id.contains("spellbook")
-            || id.contains("scepter");
+            || id.contains("scepter")
+            || id.contains("grimoire");
     }
 
     public static String getHeldItemIdentifier(Player player) {

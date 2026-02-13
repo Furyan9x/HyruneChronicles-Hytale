@@ -13,15 +13,19 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Int
 import dev.hytalemodding.origins.commands.CharacterCommand;
 import dev.hytalemodding.origins.commands.CheckTagsCommand;
 import dev.hytalemodding.origins.commands.ClearNpcHologramsCommand;
+import dev.hytalemodding.origins.commands.ReloadConfigCommand;
 import dev.hytalemodding.origins.commands.SetSkillCommand;
+import dev.hytalemodding.origins.commands.SkillInfoCommand;
 import dev.hytalemodding.origins.component.GameModeDataComponent;
 import dev.hytalemodding.origins.database.JsonLevelRepository;
 import dev.hytalemodding.origins.database.JsonQuestRepository;
 import dev.hytalemodding.origins.database.JsonSlayerRepository;
 import dev.hytalemodding.origins.database.QuestRepository;
 import dev.hytalemodding.origins.bonus.SkillStatBonusListener;
+import dev.hytalemodding.origins.config.OriginsConfigManager;
 import dev.hytalemodding.origins.events.LevelingVisualsListener;
 import dev.hytalemodding.origins.events.FarmingHarvestListener;
+import dev.hytalemodding.origins.events.FarmingRequirementListener;
 import dev.hytalemodding.origins.registry.OriginsComponents;
 import dev.hytalemodding.origins.registry.OriginsDialogue;
 import dev.hytalemodding.origins.registry.OriginsSystems;
@@ -80,6 +84,7 @@ public class Origins extends JavaPlugin {
     protected void setup() {
         // Initialize database repositories
         JsonLevelRepository levelRepository = new JsonLevelRepository("./origins_data");
+        OriginsConfigManager.reload();
         // Initialize leveling formula
         LevelFormula formula = new LevelFormula();
         // Initialize core services.
@@ -119,6 +124,7 @@ public class Origins extends JavaPlugin {
         // Keep DrainPlayerFromWorldEvent too - it might be useful for world teleports
         this.getEventRegistry().registerGlobal(DrainPlayerFromWorldEvent.class, joinListener::onPlayerLeave);
         this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingHarvestListener()::onPlayerInteract);
+        this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingRequirementListener()::onPlayerInteract);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ArmorRequirementListener()::onInventoryChange);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new TradePackInventoryListener()::onInventoryChange);
 
@@ -140,7 +146,9 @@ public class Origins extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new CheckTagsCommand());
         this.getCommandRegistry().registerCommand(new CharacterCommand());
         this.getCommandRegistry().registerCommand(new SetSkillCommand());
+        this.getCommandRegistry().registerCommand(new SkillInfoCommand());
         this.getCommandRegistry().registerCommand(new ClearNpcHologramsCommand());
+        this.getCommandRegistry().registerCommand(new ReloadConfigCommand());
 
 
         LOGGER.at(Level.INFO).log("Origins leveling system initialized successfully!");

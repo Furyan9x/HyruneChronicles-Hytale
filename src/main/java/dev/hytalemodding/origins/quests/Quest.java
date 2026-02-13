@@ -14,13 +14,15 @@ public abstract class Quest {
     private final String name;
     private final String description;
     private final QuestLength length;
+    private final QuestDifficulty difficulty;
     private final int questPoints;
     
-    public Quest(String id, String name, String description, QuestLength length, int questPoints) {
+    public Quest(String id, String name, String description, QuestLength length, QuestDifficulty difficulty, int questPoints) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.length = length;
+        this.difficulty = difficulty;
         this.questPoints = questPoints;
     }
     
@@ -71,6 +73,7 @@ public abstract class Quest {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public QuestLength getLength() { return length; }
+    public QuestDifficulty getDifficulty() { return difficulty; }
     public int getQuestPoints() { return questPoints; }
     
     /**

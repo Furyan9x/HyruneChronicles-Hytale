@@ -47,12 +47,8 @@ public class NpcLevelDisplaySystem extends EntityTickingSystem<EntityStore> impl
         NpcLevelService service = Origins.getNpcLevelService();
         String baseName = resolveBaseName(store, ref, npc);
         if (service != null && service.isExcluded(npc.getNPCTypeId(), baseName)) {
-            Nameplate nameplate = store.getComponent(ref, Nameplate.getComponentType());
-            if (nameplate == null) {
-                commandBuffer.addComponent(ref, Nameplate.getComponentType(), new Nameplate(baseName));
-            } else if (!baseName.equals(nameplate.getText())) {
-                nameplate.setText(baseName);
-            }
+            // Excluded NPCs should keep their own role/display naming behavior.
+            // Do not mutate nameplate text here.
             return;
         }
 

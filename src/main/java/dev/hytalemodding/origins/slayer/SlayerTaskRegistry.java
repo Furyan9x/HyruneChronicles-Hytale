@@ -39,6 +39,20 @@ public class SlayerTaskRegistry {
         return min + random.nextInt(max - min + 1);
     }
 
+    public SlayerTaskDefinition getTaskById(String taskId) {
+        if (taskId == null || taskId.isBlank()) {
+            return null;
+        }
+        for (SlayerTaskTier tier : tiers) {
+            for (SlayerTaskDefinition task : tier.getTasks()) {
+                if (taskId.equalsIgnoreCase(task.getId())) {
+                    return task;
+                }
+            }
+        }
+        return null;
+    }
+
     public List<String> validate() {
         List<String> issues = new ArrayList<>();
         if (tiers.isEmpty()) {

@@ -18,6 +18,7 @@ import dev.hytalemodding.origins.skills.SkillType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -145,7 +146,7 @@ public class SlayerService {
         if (assignment.getState() == SlayerTaskState.COMPLETED) {
             return false;
         }
-        if (!assignment.getTargetNpcTypeId().equalsIgnoreCase(npcTypeId)) {
+        if (!matchesAssignmentTarget(assignment, npcTypeId)) {
             return false;
         }
 
@@ -231,6 +232,28 @@ public class SlayerService {
             persist(data);
         }
         return assignment;
+    }
+
+    private boolean matchesAssignmentTarget(SlayerTaskAssignment assignment, String npcTypeId) {
+        if (assignment == null || npcTypeId == null) {
+            return false;
+        }
+        String targetId = assignment.getTargetNpcTypeId();
+        if (targetId != null && targetId.equalsIgnoreCase(npcTypeId)) {
+            return true;
+        }
+
+        SlayerTaskDefinition task = taskRegistry.getTaskById(assignment.getTaskId());
+        if (task != null && npcService.isNpcInGroup(npcTypeId, task.getTargetGroupId())) {
+            return true;
+        }
+
+        if (targetId == null || targetId.isBlank()) {
+            return false;
+        }
+        String normalizedNpc = npcTypeId.toLowerCase(Locale.ROOT);
+        String normalizedTarget = targetId.toLowerCase(Locale.ROOT);
+        return normalizedNpc.contains(normalizedTarget) || normalizedTarget.contains(normalizedNpc);
     }
 
     private SlayerPlayerData loadOrCreate(UUID uuid) {
