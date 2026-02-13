@@ -1,7 +1,7 @@
-# Origins Mod
+# Hyrune Chronicles Mod
 
 ## Overview
-Origins is an RPG progression mod for Hytale focused on skill leveling, quests, and Slayer tasks. The codebase is organized around ECS systems, services, and data repositories for persistence.
+Hyrune Chronicles is an RPG progression mod for Hytale focused on mixing RS3, Archeage and Hytale together. The codebase is organized around ECS systems, services, and data repositories for persistence.
 
 ## Package Layout
 - `dev.hytalemodding.origins.database`: JSON repositories and persistence interfaces.
