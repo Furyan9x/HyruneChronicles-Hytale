@@ -14,13 +14,11 @@ public final class ItemInstanceMetadataMigration {
             return null;
         }
 
-        if (metadata.getVersion() <= 0) {
-            // Legacy instances had no explicit version marker.
-            metadata.setVersion(ItemInstanceMetadata.CURRENT_SCHEMA_VERSION);
-        } else if (metadata.getVersion() > ItemInstanceMetadata.CURRENT_SCHEMA_VERSION) {
+        if (metadata.getVersion() > ItemInstanceMetadata.CURRENT_SCHEMA_VERSION) {
             // Preserve unknown future versions as-is.
             return metadata;
         }
+        metadata.setVersion(ItemInstanceMetadata.CURRENT_SCHEMA_VERSION);
 
         if (metadata.getRarity() == null) {
             metadata.setRarity(ItemRarity.COMMON);
@@ -31,6 +29,8 @@ public final class ItemInstanceMetadataMigration {
         if (metadata.getSource() == null) {
             metadata.setSource(ItemRollSource.CRAFTED);
         }
+        metadata.setStatFlatRollsRaw(metadata.getStatFlatRollsRaw());
+        metadata.setStatPercentRollsRaw(metadata.getStatPercentRollsRaw());
 
         return metadata;
     }

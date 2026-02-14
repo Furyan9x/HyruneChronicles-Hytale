@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.hyrune.combat.CombatStateTracker;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 
@@ -25,6 +26,7 @@ import javax.annotation.Nonnull;
  * ECS system for skill regen.
  */
 public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
+    private static final String HEALTH_ID = "Health";
     private static final String MANA_ID = "Mana";
     private static final String STAMINA_ID = "Stamina";
 
@@ -58,15 +60,17 @@ public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
         LevelingService service = Hyrune.getService();
         int magicLevel = service.getSkillLevel(playerRef.getUuid(), SkillType.MAGIC);
         int agilityLevel = service.getSkillLevel(playerRef.getUuid(), SkillType.AGILITY);
+        var itemStats = PlayerItemizationStatsService.getCached(playerRef.getUuid());
 
-        applyManaRegen(statMap, magicLevel, dt);
+        applyManaRegen(statMap, magicLevel, (float) itemStats.getItemManaRegenBonusPerSecond(), dt);
 
         if (!isSprinting(holder) && !CombatStateTracker.isInCombat(playerRef.getUuid())) {
-            applyStaminaRegen(statMap, agilityLevel, dt);
+            applyStaminaRegen(statMap, agilityLevel, (float) itemStats.getItemStaminaRegenBonusPerSecond(), dt);
+            applyHealthRegen(statMap, (float) itemStats.getItemHpRegenBonusPerSecond(), dt);
         }
     }
 
-    private static float applyManaRegen(EntityStatMap statMap, int magicLevel, float dt) {
+    private static float applyManaRegen(EntityStatMap statMap, int magicLevel, float itemBonus, float dt) {
         EntityStatValue manaValue = statMap.get(MANA_ID);
         if (manaValue == null) {
             return 0f;
@@ -78,7 +82,7 @@ public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
             return 0f;
         }
 
-        float amountToAdd = magicLevel * SkillStatBonusApplier.MANA_REGEN_PER_MAGIC * dt;
+        float amountToAdd = ((magicLevel * SkillStatBonusApplier.MANA_REGEN_PER_MAGIC) + itemBonus) * dt;
         if (amountToAdd <= 0f) {
             return 0f;
         }
@@ -88,7 +92,7 @@ public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
         return newAmount - current;
     }
 
-    private static float applyStaminaRegen(EntityStatMap statMap, int agilityLevel, float dt) {
+    private static float applyStaminaRegen(EntityStatMap statMap, int agilityLevel, float itemBonus, float dt) {
         EntityStatValue staminaValue = statMap.get(STAMINA_ID);
         if (staminaValue == null) {
             return 0f;
@@ -100,13 +104,38 @@ public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
             return 0f;
         }
 
-        float amountToAdd = agilityLevel * SkillStatBonusApplier.STAMINA_REGEN_PER_AGILITY * dt;
+        float amountToAdd = ((agilityLevel * SkillStatBonusApplier.STAMINA_REGEN_PER_AGILITY) + itemBonus) * dt;
         if (amountToAdd <= 0f) {
             return 0f;
         }
 
         float newAmount = Math.min(max, current + amountToAdd);
         statMap.setStatValue(staminaValue.getIndex(), newAmount);
+        return newAmount - current;
+    }
+
+    private static float applyHealthRegen(EntityStatMap statMap, float itemHpRegenBonus, float dt) {
+        if (itemHpRegenBonus <= 0f) {
+            return 0f;
+        }
+        EntityStatValue hpValue = statMap.get(HEALTH_ID);
+        if (hpValue == null) {
+            return 0f;
+        }
+
+        float current = hpValue.get();
+        float max = hpValue.getMax();
+        if (current >= max) {
+            return 0f;
+        }
+
+        float amountToAdd = itemHpRegenBonus * dt;
+        if (amountToAdd <= 0f) {
+            return 0f;
+        }
+
+        float newAmount = Math.min(max, current + amountToAdd);
+        statMap.setStatValue(hpValue.getIndex(), newAmount);
         return newAmount - current;
     }
 

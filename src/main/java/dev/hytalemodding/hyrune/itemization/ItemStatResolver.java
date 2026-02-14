@@ -3,118 +3,119 @@ package dev.hytalemodding.hyrune.itemization;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import dev.hytalemodding.hyrune.repair.ItemRarity;
 
-import java.util.Locale;
+import java.util.Map;
 
 /**
- * Resolves effective stats from base item family + rolled metadata.
+ * Resolves effective specialized stats from base archetype + rolled metadata.
  */
 public final class ItemStatResolver {
     private ItemStatResolver() {
     }
 
     public static EffectiveItemStats resolve(ItemStack stack) {
-        BaseStats base = resolveBaseStats(stack != null ? stack.getItemId() : null);
+        return resolveDetailed(stack).getResolvedStats();
+    }
+
+    public static ItemStatResolution resolveDetailed(ItemStack stack) {
+        String itemId = stack != null ? stack.getItemId() : null;
         ItemInstanceMetadata metadata = stack != null
             ? stack.getFromMetadataOrNull(ItemInstanceMetadata.KEYED_CODEC)
             : null;
-        if (metadata == null) {
-            return new EffectiveItemStats(base.damage, base.defence, base.healing, base.utility);
-        }
-
-        ItemRarity rarity = metadata.getRarity();
-        double rarityMult = getRarityStatMultiplier(rarity);
-        double dmg = base.damage * rarityMult * (1.0 + metadata.getDamageRoll());
-        double def = base.defence * rarityMult * (1.0 + metadata.getDefenceRoll());
-        double heal = base.healing * rarityMult * (1.0 + metadata.getHealingRoll());
-        double util = base.utility * rarityMult * (1.0 + metadata.getUtilityRoll());
-
-        switch (metadata.getCatalyst()) {
-            case WATER:
-                heal *= 1.20;
-                util *= 1.10;
-                break;
-            case FIRE:
-                dmg *= 1.20;
-                break;
-            case EARTH:
-                def *= 1.20;
-                break;
-            case NONE:
-            default:
-                break;
-        }
-
-        double droppedPenalty = clamp(metadata.getDroppedPenalty(), 0d, 1d);
-        if (droppedPenalty > 0d) {
-            double keep = 1.0 - droppedPenalty;
-            dmg *= keep;
-            def *= keep;
-            heal *= keep;
-            util *= keep;
-        }
-
-        return new EffectiveItemStats(dmg, def, heal, util);
+        return resolveDetailed(itemId, metadata);
     }
 
-    private static double getRarityStatMultiplier(ItemRarity rarity) {
-        if (rarity == null) {
-            return 1.0;
+    public static ItemStatResolution resolveDetailed(String itemId, ItemInstanceMetadata metadata) {
+        ItemArchetype archetype = ItemArchetypeResolver.resolve(itemId);
+        double tierScalar = ItemizationSpecializedStatConfigHelper.tierScalar(itemId);
+
+        ItemizedStatBlock base = baseStatsForArchetype(archetype, tierScalar);
+        ItemizedStatBlock resolved = ItemizedStatBlock.empty();
+
+        ItemRarity rarity = metadata == null ? ItemRarity.COMMON : metadata.getRarity();
+        double rarityScalar = ItemizationSpecializedStatConfigHelper.rarityScalar(rarity);
+        double droppedKeep = 1.0 - clamp(metadata == null ? 0.0 : metadata.getDroppedPenalty(), 0.0, 1.0);
+        CatalystAffinity catalyst = metadata == null ? CatalystAffinity.NONE : metadata.getCatalyst();
+
+        for (ItemizedStat stat : ItemizedStat.values()) {
+            double baseValue = base.get(stat);
+            double flatRoll = metadata == null ? 0.0 : metadata.getFlatStatRoll(stat);
+            double percentRoll = metadata == null ? 0.0 : metadata.getPercentStatRoll(stat);
+            double catalystScalar = ItemizationSpecializedStatConfigHelper.catalystFamilyBias(catalyst, stat.getFamily());
+            double value = ((baseValue + flatRoll) * (1.0 + percentRoll)) * rarityScalar * catalystScalar * droppedKeep;
+            if (value > 0.0) {
+                resolved.set(stat, value);
+            }
         }
-        switch (rarity) {
-            case UNCOMMON:
-                return 1.10;
-            case RARE:
-                return 1.22;
-            case EPIC:
-                return 1.36;
-            case VOCATIONAL:
-                return 1.36;
-            case LEGENDARY:
-                return 1.52;
-            case MYTHIC:
-                return 1.70;
-            case COMMON:
-            default:
-                return 1.0;
-        }
+
+        EffectiveItemStats baseSummary = summarize(base);
+        EffectiveItemStats resolvedSummary = summarize(resolved);
+
+        return new ItemStatResolution(
+            itemId,
+            archetype,
+            base,
+            resolved,
+            baseSummary,
+            resolvedSummary,
+            rarityScalar,
+            droppedKeep
+        );
     }
 
-    private static BaseStats resolveBaseStats(String itemId) {
-        if (itemId == null) {
-            return new BaseStats(0, 0, 0, 0);
+    private static ItemizedStatBlock baseStatsForArchetype(ItemArchetype archetype, double tierScalar) {
+        ItemizedStatBlock out = ItemizedStatBlock.empty();
+        Map<ItemizedStat, Double> configured = ItemizationSpecializedStatConfigHelper.baseStatsForArchetype(archetype);
+        for (Map.Entry<ItemizedStat, Double> entry : configured.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                continue;
+            }
+            out.set(entry.getKey(), Math.max(0.0, entry.getValue() * tierScalar));
         }
-        String id = itemId.toLowerCase(Locale.ROOT);
+        return out;
+    }
 
-        if (id.startsWith("weapon_")) {
-            return new BaseStats(12, 2, 0, 2);
+    private static EffectiveItemStats summarize(ItemizedStatBlock stats) {
+        if (stats == null) {
+            return new EffectiveItemStats(0, 0, 0, 0);
         }
-        if (id.startsWith("armor_")) {
-            return new BaseStats(1, 10, 0, 1);
-        }
-        if (id.startsWith("tool_")) {
-            return new BaseStats(3, 3, 0, 6);
-        }
-        if (id.contains("staff") || id.contains("wand")) {
-            return new BaseStats(8, 3, 6, 3);
-        }
-        return new BaseStats(1, 1, 0, 0);
+
+        double damage = 0.0;
+        damage += stats.get(ItemizedStat.PHYSICAL_DAMAGE);
+        damage += stats.get(ItemizedStat.MAGICAL_DAMAGE);
+        damage += stats.get(ItemizedStat.PHYSICAL_PENETRATION) * 4.0;
+        damage += stats.get(ItemizedStat.MAGICAL_PENETRATION) * 4.0;
+        damage += stats.get(ItemizedStat.CRIT_BONUS) * 2.0;
+        damage += (stats.get(ItemizedStat.PHYSICAL_CRIT_CHANCE) + stats.get(ItemizedStat.MAGICAL_CRIT_CHANCE)) * 2.0;
+
+        double defence = 0.0;
+        defence += stats.get(ItemizedStat.PHYSICAL_DEFENCE);
+        defence += stats.get(ItemizedStat.MAGICAL_DEFENCE);
+        defence += stats.get(ItemizedStat.BLOCK_EFFICIENCY) * 25.0;
+        defence += stats.get(ItemizedStat.CRIT_REDUCTION) * 20.0;
+        defence += stats.get(ItemizedStat.MAX_HP) * 0.25;
+        defence += stats.get(ItemizedStat.HP_REGEN) * 15.0;
+        defence += stats.get(ItemizedStat.REFLECT_DAMAGE) * 15.0;
+
+        double healing = 0.0;
+        healing += stats.get(ItemizedStat.HEALING_POWER);
+        healing += stats.get(ItemizedStat.HEALING_CRIT_CHANCE) * 10.0;
+        healing += stats.get(ItemizedStat.HEALING_CRIT_BONUS) * 8.0;
+        healing += stats.get(ItemizedStat.MANA_COST_REDUCTION) * 6.0;
+
+        double utility = 0.0;
+        utility += stats.get(ItemizedStat.MANA_REGEN) * 15.0;
+        utility += stats.get(ItemizedStat.STAMINA_REGEN) * 15.0;
+        utility += stats.get(ItemizedStat.MOVEMENT_SPEED) * 40.0;
+        utility += stats.get(ItemizedStat.ATTACK_SPEED) * 30.0;
+        utility += stats.get(ItemizedStat.CAST_SPEED) * 30.0;
+
+        return new EffectiveItemStats(damage, defence, healing, utility);
     }
 
     private static double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    private static final class BaseStats {
-        private final double damage;
-        private final double defence;
-        private final double healing;
-        private final double utility;
-
-        private BaseStats(double damage, double defence, double healing, double utility) {
-            this.damage = damage;
-            this.defence = defence;
-            this.healing = healing;
-            this.utility = utility;
+        if (Double.isNaN(value)) {
+            return min;
         }
+        return Math.max(min, Math.min(max, value));
     }
 }

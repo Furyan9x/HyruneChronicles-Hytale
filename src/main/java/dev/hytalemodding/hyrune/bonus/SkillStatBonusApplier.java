@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementMa
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Hyrune;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.tradepack.TradePackUtils;
@@ -30,6 +31,7 @@ public final class SkillStatBonusApplier {
     public static final float STAMINA_REGEN_PER_AGILITY = 1.0f / 99.0f;
 
     private static final String HEALTH_MODIFIER_ID = "hyrune:health_bonus";
+    private static final String ITEM_HEALTH_MODIFIER_ID = "hyrune:item_health_bonus";
     private static final String MANA_MAX_MODIFIER_ID = "hyrune:mana_max_bonus";
     private static final String STAMINA_MAX_MODIFIER_ID = "hyrune:stamina_max_bonus";
 
@@ -72,7 +74,11 @@ public final class SkillStatBonusApplier {
 
         LevelingService service = Hyrune.getService();
         int agility = service.getSkillLevel(playerRef.getUuid(), SkillType.AGILITY);
-        float bonus = (agility / 99.0f) * MOVEMENT_SPEED_BONUS_AT_99;
+        var itemStats = PlayerItemizationStatsService.getCached(playerRef.getUuid());
+        float agilityBonus = (agility / 99.0f) * MOVEMENT_SPEED_BONUS_AT_99;
+        float utilityBonus = (float) itemStats.getItemUtilityMoveSpeedBonus();
+        float speedStyleBonus = (float) (itemStats.getItemAttackSpeedBonus() * 0.15f
+            + itemStats.getItemCastSpeedBonus() * 0.10f);
 
         float defaultBaseSpeed = movementManager.getDefaultSettings().baseSpeed;
         if (defaultBaseSpeed < 0.1f) {
@@ -82,7 +88,8 @@ public final class SkillStatBonusApplier {
         float packMultiplier = TradePackUtils.hasTradePack(playerRef)
             ? TradePackUtils.TRADE_PACK_SPEED_MULTIPLIER
             : 1.0f;
-        movementManager.getSettings().baseSpeed = defaultBaseSpeed * (1.0f + bonus) * packMultiplier;
+        float speedMultiplier = Math.max(0.1f, 1.0f + agilityBonus + utilityBonus + speedStyleBonus);
+        movementManager.getSettings().baseSpeed = defaultBaseSpeed * speedMultiplier * packMultiplier;
         if (playerRef.getPacketHandler() != null) {
             movementManager.update(playerRef.getPacketHandler());
         }
@@ -108,10 +115,15 @@ public final class SkillStatBonusApplier {
 
         int healthIndex = getStatIndex(statMap, HEALTH_ID);
         if (healthIndex >= 0) {
-            float healthBonus = constitution * HEALTH_PER_CONSTITUTION;
+            double itemMaxHp = PlayerItemizationStatsService.getCached(uuid).getItemMaxHpBonus();
+            float healthBonus = (float) (constitution * HEALTH_PER_CONSTITUTION);
+            float itemHealthBonus = (float) Math.max(0.0, itemMaxHp);
             Modifier healthModifier = new StaticModifier(Modifier.ModifierTarget.MAX,
                 StaticModifier.CalculationType.ADDITIVE, healthBonus);
             statMap.putModifier(healthIndex, HEALTH_MODIFIER_ID, healthModifier);
+            Modifier itemHealthModifier = new StaticModifier(Modifier.ModifierTarget.MAX,
+                StaticModifier.CalculationType.ADDITIVE, itemHealthBonus);
+            statMap.putModifier(healthIndex, ITEM_HEALTH_MODIFIER_ID, itemHealthModifier);
         }
 
         int manaIndex = getStatIndex(statMap, MANA_ID);

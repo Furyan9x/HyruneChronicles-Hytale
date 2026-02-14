@@ -62,6 +62,6 @@ public class ItemMetaCommand extends AbstractPlayerCommand {
                 + ", catalyst=" + metadata.getCatalyst().name()
                 + ", seed=" + metadata.getSeed()));
         }
-        ctx.sendMessage(Message.raw("[ItemMeta] use /itemrolls for roll/effective stats, /itemdiag for generation counters."));
+        ctx.sendMessage(Message.raw("[ItemMeta] use /itemrolls (held-item specialized breakdown), /itemstats (equipped totals), /itemdiag (generation counters)."));
     }
 }

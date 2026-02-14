@@ -23,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.Message;
 import dev.hytalemodding.Hyrune;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.registry.CombatRequirementRegistry;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
@@ -89,7 +90,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
-        applyDefenceBonus(index, archetypeChunk, damage);
+        applyDefenceBonus(index, archetypeChunk, store, damage);
 
         Damage.Source source = damage.getSource();
         if (source instanceof Damage.ProjectileSource projectileSource) {
@@ -130,6 +131,8 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
+        applyItemDamageBonus(attacker, damage, false);
+
         LevelingService service = Hyrune.getService();
         int attackLevel = service.getSkillLevel(attackerPlayerRef.getUuid(), SkillType.ATTACK);
         if (attackLevel <= 0) {
@@ -142,10 +145,12 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         damage.setAmount(after);
 
         applyStrengthCrit(attackerPlayerRef, damage, cause);
+        applyItemCritBonus(attacker, damage, false);
     }
 
     private static void applyDefenceBonus(int index,
                                           ArchetypeChunk<EntityStore> archetypeChunk,
+                                          Store<EntityStore> store,
                                           Damage damage) {
         var holder = EntityUtils.toHolder(index, archetypeChunk);
         Player victim = holder.getComponent(Player.getComponentType());
@@ -160,12 +165,14 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
 
         LevelingService service = Hyrune.getService();
         int defenceLevel = service.getSkillLevel(victimRef.getUuid(), SkillType.DEFENCE);
-        if (defenceLevel <= 0) {
-            return;
-        }
-
-        float reduction = Math.min(DEFENCE_DAMAGE_REDUCTION_CAP,
-            defenceLevel * DEFENCE_DAMAGE_REDUCTION_PER_LEVEL);
+        float skillReduction = defenceLevel <= 0
+            ? 0.0f
+            : Math.min(DEFENCE_DAMAGE_REDUCTION_CAP, defenceLevel * DEFENCE_DAMAGE_REDUCTION_PER_LEVEL);
+        boolean magicalIncoming = isMagicalIncomingDamage(damage, store);
+        float itemReduction = (float) (magicalIncoming
+            ? PlayerItemizationStatsService.getOrRecompute(victim).getMagicalDefenceReductionBonus()
+            : PlayerItemizationStatsService.getOrRecompute(victim).getPhysicalDefenceReductionBonus());
+        float reduction = clamp(skillReduction + itemReduction, -0.50f, 0.85f);
         float before = damage.getAmount();
         float after = before * (1.0f - reduction);
         damage.setAmount(after);
@@ -243,6 +250,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
 
         boolean ranged = isRangedWeapon(weaponId);
         boolean magic = !ranged && isMagicWeapon(weaponId);
+        applyItemDamageBonus(attacker, damage, magic);
         if (DEBUG_PROJECTILE) {
             LOGGER.at(Level.INFO).log("Projectile bonus check: weaponId=" + weaponId
                 + " ranged=" + ranged
@@ -252,12 +260,14 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         if (ranged) {
             applyRangedDamage(attackerPlayerRef, damage);
             applyRangedCrit(attackerPlayerRef, damage);
+            applyItemCritBonus(attacker, damage, false);
             return;
         }
 
         if (magic) {
             applyMagicDamage(attackerPlayerRef, damage);
             applyMagicCrit(attackerPlayerRef, damage);
+            applyItemCritBonus(attacker, damage, true);
         }
     }
 
@@ -317,6 +327,34 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         float multiplier = MAGIC_CRIT_BASE_MULTIPLIER
             + (level * MAGIC_CRIT_DAMAGE_BONUS_PER_LEVEL);
         damage.setAmount(damage.getAmount() * multiplier);
+    }
+
+    private static void applyItemDamageBonus(Player attacker, Damage damage, boolean magical) {
+        if (attacker == null || damage == null) {
+            return;
+        }
+        float itemMultiplier = (float) (magical
+            ? PlayerItemizationStatsService.getOrRecompute(attacker).getMagicalDamageMultiplier()
+            : PlayerItemizationStatsService.getOrRecompute(attacker).getPhysicalDamageMultiplier());
+        if (itemMultiplier <= 0f) {
+            return;
+        }
+        damage.setAmount(damage.getAmount() * itemMultiplier);
+    }
+
+    private static void applyItemCritBonus(Player attacker, Damage damage, boolean magical) {
+        if (attacker == null || damage == null) {
+            return;
+        }
+        var stats = PlayerItemizationStatsService.getOrRecompute(attacker);
+        double chance = magical ? stats.getMagicalCritChanceBonus() : stats.getPhysicalCritChanceBonus();
+        if (chance <= 0.0 || ThreadLocalRandom.current().nextDouble() >= chance) {
+            return;
+        }
+        float multiplier = (float) stats.getCritBonusMultiplier();
+        if (multiplier > 1.0f) {
+            damage.setAmount(damage.getAmount() * multiplier);
+        }
     }
 
     public static boolean isRangedWeapon(String weaponId) {
@@ -421,6 +459,43 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         }
         String normalized = id.toLowerCase();
         return normalized.contains("projectile") || normalized.contains("arrow");
+    }
+
+    private static boolean isMagicalIncomingDamage(Damage damage, Store<EntityStore> store) {
+        if (damage == null) {
+            return false;
+        }
+        DamageCause cause = damage.getCause();
+        if (cause != null) {
+            String id = cause.getId();
+            if (id != null) {
+                String normalized = id.toLowerCase();
+                if (normalized.contains("magic") || normalized.contains("spell")) {
+                    return true;
+                }
+            }
+        }
+
+        Damage.Source source = damage.getSource();
+        Ref<EntityStore> attackerRef = null;
+        if (source instanceof Damage.EntitySource entitySource) {
+            attackerRef = entitySource.getRef();
+        } else if (source instanceof Damage.ProjectileSource projectileSource) {
+            attackerRef = projectileSource.getRef();
+        }
+        if (attackerRef == null || !attackerRef.isValid()) {
+            return false;
+        }
+        Player attacker = store.getComponent(attackerRef, Player.getComponentType());
+        if (attacker == null) {
+            return false;
+        }
+        String weaponId = getHeldItemIdentifier(attacker);
+        return weaponId != null && isMagicWeapon(weaponId);
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
 

@@ -22,6 +22,7 @@ import dev.hytalemodding.hyrune.commands.SocialDebugCommand;
 import dev.hytalemodding.hyrune.commands.ItemMetaCommand;
 import dev.hytalemodding.hyrune.commands.ItemRollsCommand;
 import dev.hytalemodding.hyrune.commands.ItemDiagCommand;
+import dev.hytalemodding.hyrune.commands.ItemStatsCommand;
 import dev.hytalemodding.hyrune.commands.CatalystUiCommand;
 import dev.hytalemodding.hyrune.component.GameModeDataComponent;
 import dev.hytalemodding.hyrune.database.JsonLevelRepository;
@@ -35,6 +36,7 @@ import dev.hytalemodding.hyrune.events.LevelingVisualsListener;
 import dev.hytalemodding.hyrune.events.FarmingHarvestListener;
 import dev.hytalemodding.hyrune.events.FarmingRequirementListener;
 import dev.hytalemodding.hyrune.events.ItemizationInventoryListener;
+import dev.hytalemodding.hyrune.itemization.tooltip.DynamicTooltipLevelUpListener;
 import dev.hytalemodding.hyrune.itemization.tooltip.HyruneDynamicTooltipService;
 import dev.hytalemodding.hyrune.registry.HyruneComponents;
 import dev.hytalemodding.hyrune.registry.HyruneDialogue;
@@ -65,6 +67,7 @@ import dev.hytalemodding.hyrune.npc.NpcLevelService;
 import dev.hytalemodding.hyrune.quests.QuestManager;
 
 import javax.annotation.Nonnull;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -140,6 +143,7 @@ public class Hyrune extends JavaPlugin {
 
         this.service.registerLevelUpListener(new LevelingVisualsListener());
         this.service.registerLevelUpListener(new SkillStatBonusListener());
+        this.service.registerLevelUpListener(new DynamicTooltipLevelUpListener());
 
         registerCommands();
 
@@ -202,6 +206,7 @@ public class Hyrune extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new SocialDebugCommand());
         this.getCommandRegistry().registerCommand(new ItemMetaCommand());
         this.getCommandRegistry().registerCommand(new ItemRollsCommand());
+        this.getCommandRegistry().registerCommand(new ItemStatsCommand());
         this.getCommandRegistry().registerCommand(new ItemDiagCommand());
         this.getCommandRegistry().registerCommand(new CatalystUiCommand());
     }
@@ -252,6 +257,15 @@ public class Hyrune extends JavaPlugin {
      */
     public static HyruneDynamicTooltipService getDynamicTooltipService() {
         return instance != null ? instance.dynamicTooltipService : null;
+    }
+
+    /**
+     * Invalidates and refreshes dynamic tooltips for one player.
+     * Useful for level-ups, potion buffs/debuffs, and other temporary stat changes.
+     */
+    public static boolean refreshDynamicTooltipsForPlayer(UUID playerUuid) {
+        HyruneDynamicTooltipService service = getDynamicTooltipService();
+        return service != null && service.invalidateAndRefreshPlayer(playerUuid);
     }
 
 

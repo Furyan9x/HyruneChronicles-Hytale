@@ -48,14 +48,25 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+def devServerRoot = providers.gradleProperty('devServerRoot')
+    .orElse('C:/Users/devin/Desktop/HytaleServer/Server')
+def devModsDir = devServerRoot.map { root -> file("${root}/mods") }
+def devConfigDir = devServerRoot.map { root -> file("${root}/hyrune_data") }
+
 tasks.register('copyToDevEnv', Copy) {
+    // Dev server mods directory can contain stale junctions/symlinks outside this repo.
+    // Disable state tracking to avoid incremental snapshot failures on unreadable targets.
+    doNotTrackState('Destination may contain external junctions/symlinks.')
+    onlyIf { devModsDir.get().exists() }
     from jar.archiveFile
-    into file('C:/Users/devin/Desktop/HytaleServer/Server/mods')
+    into devModsDir
 }
 
 tasks.register('copyGameplayConfigToDevEnv', Copy) {
+    doNotTrackState('Destination may contain external junctions/symlinks.')
+    onlyIf { devConfigDir.get().exists() }
     from file('hyrune_data/gameplay_config.json')
-    into file('C:/Users/devin/Desktop/HytaleServer/Server/hyrune_data')
+    into devConfigDir
 }
 
 tasks.named('copyToDevEnv') {

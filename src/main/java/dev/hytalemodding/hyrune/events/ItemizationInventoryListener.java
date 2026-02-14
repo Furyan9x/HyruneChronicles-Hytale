@@ -6,8 +6,10 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent;
 import com.hypixel.hytale.server.core.universe.world.World;
 import dev.hytalemodding.Hyrune;
+import dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.itemization.ItemRollCoordinator;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.itemization.tooltip.HyruneDynamicTooltipService;
 
 import java.util.Set;
@@ -45,6 +47,9 @@ public class ItemizationInventoryListener {
         world.execute(() -> {
             try {
                 ItemRollCoordinator.applyPendingCraftRolls(player);
+                PlayerItemizationStatsService.recompute(player);
+                SkillStatBonusApplier.apply(player.getPlayerRef());
+                SkillStatBonusApplier.applyMovementSpeed(player.getPlayerRef());
                 HyruneDynamicTooltipService tooltipService = Hyrune.getDynamicTooltipService();
                 if (tooltipService != null) {
                     boolean refreshed = tooltipService.invalidateAndRefreshPlayer(uuid);

@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.quests.QuestManager;
 import dev.hytalemodding.hyrune.social.SocialService;
@@ -56,10 +57,12 @@ public class PlayerJoinListener {
             NameplateManager.update(uuid);
             SkillStatBonusApplier.apply(holder, uuid);
             PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
+            TradePackManager.sync(playerComp);
+            PlayerItemizationStatsService.recompute(playerComp);
             if (playerRef != null) {
+                SkillStatBonusApplier.apply(playerRef);
                 SkillStatBonusApplier.applyMovementSpeed(playerRef);
             }
-            TradePackManager.sync(playerComp);
         }
     }
 
@@ -71,6 +74,7 @@ public class PlayerJoinListener {
         PlayerRef playerRef = event.getPlayerRef();
         UUID uuid = playerRef.getUuid();
         persistAll(uuid);
+        PlayerItemizationStatsService.clear(uuid);
         safelyRun(uuid, "TradePackManager", () -> TradePackManager.clear(uuid));
     }
 
@@ -79,6 +83,7 @@ public class PlayerJoinListener {
 
         if (playerComp != null) {
             persistAll(playerComp.getUuid());
+            PlayerItemizationStatsService.clear(playerComp.getUuid());
             safelyRun(playerComp.getUuid(), "TradePackManager", () -> TradePackManager.clear(playerComp.getUuid()));
         }
     }

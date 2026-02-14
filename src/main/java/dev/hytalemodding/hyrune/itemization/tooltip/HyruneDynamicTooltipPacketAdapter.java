@@ -536,7 +536,7 @@ public final class HyruneDynamicTooltipPacketAdapter {
                 continue;
             }
 
-            HyruneDynamicTooltipComposer.ComposedTooltip composed = tooltipComposer.compose(item.itemId, item.metadata);
+            HyruneDynamicTooltipComposer.ComposedTooltip composed = tooltipComposer.compose(playerUuid, item.itemId, item.metadata);
             if (composed == null) {
                 if (slotKey != null) {
                     virtualItemRegistry.trackSlotVirtualId(playerUuid, slotKey, null);
