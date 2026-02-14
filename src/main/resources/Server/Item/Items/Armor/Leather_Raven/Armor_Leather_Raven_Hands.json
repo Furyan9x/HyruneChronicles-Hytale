@@ -21,30 +21,33 @@
     "Texture":  "Items/Armors/Leather_Raven/Hands_Texture.png",
     "Recipe":  {
                    "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
                                      "ItemId":  "Ingredient_Leather_Heavy",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  },
                                  {
                                      "ItemId":  "Ingredient_Feathers_Dark",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
                                  },
                                  {
                                      "ItemId":  "Ingredient_Bolt_Cotton",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Armor_Hands"
-                                                               ],
-                                                "Id":  "Armor_Bench",
-                                                "Type":  "Crafting"
+                                                               ]
                                             }
-                                        ],
-                   "KnowledgeRequired":  true
+                                        ]
                },
     "Armor":  {
                   "ArmorSlot":  "Hands",
@@ -81,5 +84,6 @@
                             ]
              },
     "MaxDurability":  120,
-    "ItemSoundSetId":  "ISS_Armor_Leather"
+    "ItemSoundSetId":  "ISS_Armor_Leather",
+    "Quality":  "Common"
 }

@@ -62,7 +62,7 @@
                             ]
              },
     "Set":  "Furniture_Royal_Magic",
-    "Quality":  "Developer",
+    "Quality":  "Common",
     "ItemSoundSetId":  "ISS_Items_Cloth",
     "Recipe":  {
                    "TimeSeconds":  2,

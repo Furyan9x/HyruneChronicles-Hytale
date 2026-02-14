@@ -22,30 +22,33 @@
     "Texture":  "Items/Armors/Leather_Heavy/Chest_Texture.png",
     "Recipe":  {
                    "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
                                      "ItemId":  "Ingredient_Leather_Heavy",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  6
                                  },
                                  {
+                                     "ItemId":  null,
                                      "ResourceTypeId":  "Wood_Trunk",
                                      "Quantity":  2
                                  },
                                  {
                                      "ItemId":  "Ingredient_Bolt_Wool",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Armor_Chest"
-                                                               ],
-                                                "Id":  "Armor_Bench",
-                                                "Type":  "Crafting"
+                                                               ]
                                             }
-                                        ],
-                   "KnowledgeRequired":  false
+                                        ]
                },
     "Armor":  {
                   "ArmorSlot":  "Chest",

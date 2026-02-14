@@ -1,0 +1,113 @@
+{
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Armor_Iron_Chest.name"
+                              },
+    "Quality":  "Common",
+    "ItemLevel":  20,
+    "PlayerAnimationsId":  "Block",
+    "ItemSoundSetId":  "ISS_Armor_Heavy",
+    "Categories":  [
+                       "Items.Armors"
+                   ],
+    "Icon":  "Icons/ItemsGenerated/Armor_Iron_Chest.png",
+    "IconProperties":  {
+                           "Rotation":  [
+                                            22.5,
+                                            45,
+                                            22.5
+                                        ],
+                           "Scale":  0.45,
+                           "Translation":  [
+                                               0,
+                                               -13.2
+                                           ]
+                       },
+    "Model":  "Items/Armors/Iron/Chest.blockymodel",
+    "Texture":  "Items/Armors/Iron/Chest_Texture.png",
+    "Recipe":  {
+                   "TimeSeconds":  3,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  16
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  7
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Fabric_Scrap_Linen",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  6
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Armor_Chest"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "Interactions":  {
+                         "Primary":  {
+                                         "Interactions":  [
+                                                              {
+                                                                  "Type":  "EquipItem"
+                                                              }
+                                                          ]
+                                     },
+                         "Secondary":  {
+                                           "Interactions":  [
+                                                                {
+                                                                    "Type":  "EquipItem"
+                                                                }
+                                                            ]
+                                       }
+                     },
+    "Armor":  {
+                  "ArmorSlot":  "Chest",
+                  "BaseDamageResistance":  0,
+                  "CosmeticsToHide":  [
+                                          "Overtop",
+                                          "Cape"
+                                      ],
+                  "DamageResistance":  {
+                                           "Physical":  [
+                                                            {
+                                                                "Amount":  0.09,
+                                                                "CalculationType":  "Multiplicative"
+                                                            }
+                                                        ],
+                                           "Projectile":  [
+                                                              {
+                                                                  "Amount":  0.09,
+                                                                  "CalculationType":  "Multiplicative"
+                                                              }
+                                                          ]
+                                       },
+                  "StatModifiers":  {
+                                        "Health":  [
+                                                       {
+                                                           "Amount":  17,
+                                                           "CalculationType":  "Additive"
+                                                       }
+                                                   ]
+                                    }
+              },
+    "MaxDurability":  100,
+    "DurabilityLossOnHit":  0.5,
+    "Tags":  {
+                 "Type":  [
+                              "Armor"
+                          ],
+                 "Family":  [
+                                "Iron"
+                            ]
+             }
+}

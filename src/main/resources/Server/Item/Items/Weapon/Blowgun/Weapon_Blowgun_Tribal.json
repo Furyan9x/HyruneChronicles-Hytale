@@ -1,0 +1,61 @@
+{
+    "Parent":  "Template_Weapon_Sword",
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Weapon_Blowgun_Tribal.name"
+                              },
+    "Categories":  [
+                       "Items.Weapons"
+                   ],
+    "Model":  "NPC/Intelligent/Slothian/Models/Weapons/Blowgun/Tribal.blockymodel",
+    "Texture":  "NPC/Intelligent/Slothian/Models/Weapons/Blowgun/Tribal_Texture.png",
+    "Icon":  "Icons/ItemsGenerated/Weapon_Blowgun_Tribal.png",
+    "PlayerAnimationsId":  "Sword",
+    "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Wood_Trunk",
+                                     "Quantity":  4
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Fibre",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  6
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  4
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  10
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Fletcher_Bench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Fletcher_Blowguns"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "IconProperties":  {
+                           "Scale":  0.3,
+                           "Translation":  [
+                                               40,
+                                               43
+                                           ],
+                           "Rotation":  [
+                                            195,
+                                            135,
+                                            315
+                                        ]
+                       },
+    "Quality":  "Common"
+}

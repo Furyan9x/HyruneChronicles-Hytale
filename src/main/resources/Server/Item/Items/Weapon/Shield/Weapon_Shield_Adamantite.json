@@ -1,0 +1,55 @@
+{
+    "Parent":  "Template_Weapon_Shield",
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Weapon_Shield_Adamantite.name"
+                              },
+    "Model":  "Items/Weapons/Shield/Adamantite.blockymodel",
+    "Texture":  "Items/Weapons/Shield/Adamantite_Texture.png",
+    "Icon":  "Icons/ItemsGenerated/Weapon_Shield_Adamantite.png",
+    "Quality":  "Common",
+    "ItemLevel":  40,
+    "Recipe":  {
+                   "TimeSeconds":  4.5,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Adamantite",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  8
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Heavy",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  4
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Fabric_Scrap_Cindercloth",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  3
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Weapon_Shield"
+                                                               ],
+                                                "RequiredTierLevel":  3
+                                            }
+                                        ]
+               },
+    "InteractionVars":  {
+                            "Guard_Wield":  {
+                                                "Interactions":  [
+                                                                     {
+                                                                         "Parent":  "Weapon_Shield_Secondary_Guard_Wield",
+                                                                         "StaminaCost":  {
+                                                                                             "Value":  21.78,
+                                                                                             "CostType":  "Damage"
+                                                                                         }
+                                                                     }
+                                                                 ]
+                                            }
+                        }
+}

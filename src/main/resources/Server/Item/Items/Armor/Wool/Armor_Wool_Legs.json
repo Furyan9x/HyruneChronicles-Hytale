@@ -21,16 +21,32 @@
     "Model":  "Items/Armors/Wool/Feet.blockymodel",
     "Texture":  "Items/Armors/Wool/Feet_Texture.png",
     "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
-
+                                 {
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
+                                 }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Arcanebench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
-                                                                   "Armor_Legs"
-                                                               ],
-                                                "Id":  "Armor_Bench",
-                                                "Type":  "Crafting"
+                                                                   "Arcane_Armor_Legs"
+                                                               ]
                                             }
                                         ]
                },

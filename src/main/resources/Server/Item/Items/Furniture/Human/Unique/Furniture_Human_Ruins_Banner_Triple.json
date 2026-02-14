@@ -69,7 +69,7 @@
                             ]
              },
     "ItemSoundSetId":  "ISS_Items_Cloth",
-    "Quality":  "Developer",
+    "Quality":  "Common",
     "Recipe":  {
                    "TimeSeconds":  2,
                    "KnowledgeRequired":  false,

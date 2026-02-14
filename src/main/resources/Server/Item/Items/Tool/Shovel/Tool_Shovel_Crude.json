@@ -141,18 +141,22 @@
     "MaxDurability":  150,
     "Quality":  "Common",
     "Recipe":  {
-                   "TimeSeconds":  3.5,
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Bar_Iron",
-                                     "Quantity":  6
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
                                      "ItemId":  "Ingredient_Leather_Light",
-                                     "Quantity":  3
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Fabric_Scrap_Linen",
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
                                      "Quantity":  2
                                  }
                              ],

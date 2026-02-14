@@ -8,35 +8,39 @@
     "Quality":  "Common",
     "ItemLevel":  40,
     "Recipe":  {
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
                                      "ItemId":  "Ingredient_Bar_Iron",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  4
                                  },
                                  {
+                                     "ItemId":  null,
                                      "ResourceTypeId":  "Wood_Trunk",
                                      "Quantity":  6
                                  },
                                  {
                                      "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  4
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Armory",
                                                 "Type":  "DiagramCrafting",
                                                 "Categories":  [
                                                                    "Weapons.Club"
-                                                               ],
-                                                "Id":  "Armory"
+                                                               ]
                                             },
                                             {
+                                                "Id":  "Weapon_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Weapon_Club"
-                                                               ],
-                                                "Id":  "Weapon_Bench"
+                                                               ]
                                             }
                                         ]
                },

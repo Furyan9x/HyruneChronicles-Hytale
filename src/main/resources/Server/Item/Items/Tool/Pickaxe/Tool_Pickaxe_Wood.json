@@ -1,103 +1,113 @@
 {
-  "TranslationProperties": {
-    "Name": "server.items.Tool_Pickaxe_Wood.name"
-  },
-  "Parent": "Tool_Pickaxe_Crude",
-  "Icon": "Icons/ItemsGenerated/Tool_Pickaxe_Wood.png",
-  "Model": "Items/Tools/Pickaxe/Wood.blockymodel",
-  "Texture": "Items/Tools/Pickaxe/Wood_Texture.png",
-  "Recipe": {
-    "Input": [
-      {
-        "ItemId": "Ingredient_Fibre",
-        "Quantity": 3
-      },
-      {
-        "ItemId": "Ingredient_Stick",
-        "Quantity": 6
-      }
-    ],
-    "BenchRequirement": [
-      {
-        "Id": "Workbench",
-        "Type": "Crafting",
-        "Categories": [
-          "Workbench_Tools"
-        ]
-      }
-    ]
-  },
-  "Tool": {
-    "Specs": [
-      {
-        "Power": 1,
-        "GatherType": "SoftBlocks"
-      },
-      {
-        "Power": 0.1,
-        "GatherType": "Soils"
-      },
-      {
-        "Power": 0.05,
-        "GatherType": "Woods"
-      },
-      {
-        "Power": 0.1,
-        "GatherType": "Rocks",
-        "Quality": 1
-      },
-      {
-        "Power": 0.5,
-        "GatherType": "Benches"
-      },
-      {
-        "Power": 0.034,
-        "GatherType": "VolcanicRocks"
-      },
-      {
-        "Power": 0.1,
-        "GatherType": "OreCopper"
-      },
-      {
-        "Power": 0.071,
-        "GatherType": "OreIron"
-      },
-      {
-        "Power": 0.071,
-        "GatherType": "OreSilver"
-      },
-      {
-        "Power": 0.071,
-        "GatherType": "OreGold"
-      },
-      {
-        "Power": 0.056,
-        "GatherType": "OreThorium"
-      },
-      {
-        "Power": 0.056,
-        "GatherType": "OreCobalt"
-      },
-      {
-        "Power": 0.045,
-        "GatherType": "OreAdamantite"
-      },
-      {
-        "Power": 0.038,
-        "GatherType": "OreMithril"
-      }
-    ],
-    "DurabilityLossBlockTypes": [
-      {
-        "BlockSets": [
-          "Stone",
-          "Rock",
-          "Ores",
-          "Soil"
-        ],
-        "DurabilityLossOnHit": 0.25
-      }
-    ]
-  },
-  "Quality": "Common"
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Tool_Pickaxe_Wood.name"
+                              },
+    "Parent":  "Tool_Pickaxe_Crude",
+    "Icon":  "Icons/ItemsGenerated/Tool_Pickaxe_Wood.png",
+    "Model":  "Items/Tools/Pickaxe/Wood.blockymodel",
+    "Texture":  "Items/Tools/Pickaxe/Wood_Texture.png",
+    "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Workbench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Workbench_Tools"
+                                                               ],
+                                                "RequiredTierLevel":  2
+                                            }
+                                        ]
+               },
+    "Tool":  {
+                 "Specs":  [
+                               {
+                                   "Power":  1,
+                                   "GatherType":  "SoftBlocks"
+                               },
+                               {
+                                   "Power":  0.1,
+                                   "GatherType":  "Soils"
+                               },
+                               {
+                                   "Power":  0.05,
+                                   "GatherType":  "Woods"
+                               },
+                               {
+                                   "Power":  0.1,
+                                   "GatherType":  "Rocks",
+                                   "Quality":  1
+                               },
+                               {
+                                   "Power":  0.5,
+                                   "GatherType":  "Benches"
+                               },
+                               {
+                                   "Power":  0.034,
+                                   "GatherType":  "VolcanicRocks"
+                               },
+                               {
+                                   "Power":  0.1,
+                                   "GatherType":  "OreCopper"
+                               },
+                               {
+                                   "Power":  0.071,
+                                   "GatherType":  "OreIron"
+                               },
+                               {
+                                   "Power":  0.071,
+                                   "GatherType":  "OreSilver"
+                               },
+                               {
+                                   "Power":  0.071,
+                                   "GatherType":  "OreGold"
+                               },
+                               {
+                                   "Power":  0.056,
+                                   "GatherType":  "OreThorium"
+                               },
+                               {
+                                   "Power":  0.056,
+                                   "GatherType":  "OreCobalt"
+                               },
+                               {
+                                   "Power":  0.045,
+                                   "GatherType":  "OreAdamantite"
+                               },
+                               {
+                                   "Power":  0.038,
+                                   "GatherType":  "OreMithril"
+                               }
+                           ],
+                 "DurabilityLossBlockTypes":  [
+                                                  {
+                                                      "BlockSets":  [
+                                                                        "Stone",
+                                                                        "Rock",
+                                                                        "Ores",
+                                                                        "Soil"
+                                                                    ],
+                                                      "DurabilityLossOnHit":  0.25
+                                                  }
+                                              ]
+             },
+    "Quality":  "Common"
 }

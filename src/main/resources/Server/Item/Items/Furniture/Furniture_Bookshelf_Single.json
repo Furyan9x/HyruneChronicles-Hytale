@@ -125,7 +125,7 @@
                             ]
              },
     "ItemSoundSetId":  "ISS_Blocks_Wood",
-    "Quality":  "Developer",
+    "Quality":  "Common",
     "Recipe":  {
                    "TimeSeconds":  2,
                    "KnowledgeRequired":  false,

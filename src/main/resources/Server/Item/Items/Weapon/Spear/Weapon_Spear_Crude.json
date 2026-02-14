@@ -79,18 +79,22 @@
 
                },
     "Recipe":  {
-                   "OutputQuantity":  3,
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
+                                     "ItemId":  null,
                                      "ResourceTypeId":  "Rubble",
                                      "Quantity":  3
                                  },
                                  {
                                      "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  3
                                  },
                                  {
                                      "ItemId":  "Ingredient_Fibre",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
                                  }
                              ],
@@ -99,7 +103,7 @@
                                                 "Id":  "Weapon_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
-                                                                   "Weapon_Longsword"
+                                                                   "Weapon_Spear"
                                                                ]
                                             }
                                         ]

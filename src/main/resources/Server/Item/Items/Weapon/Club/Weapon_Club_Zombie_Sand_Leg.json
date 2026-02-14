@@ -177,36 +177,39 @@
                },
     "ItemSoundSetId":  "ISS_Weapons_Blunt_Small",
     "Recipe":  {
-                   "TimeSeconds":  3,
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Bar_Mithril",
-                                     "Quantity":  4
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
-                                     "ResourceTypeId":  "Wood_Trunk",
-                                     "Quantity":  6
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Fibre",
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
                                      "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Armory",
                                                 "Type":  "DiagramCrafting",
                                                 "Categories":  [
                                                                    "Weapons.Club"
-                                                               ],
-                                                "Id":  "Armory"
+                                                               ]
                                             },
                                             {
+                                                "Id":  "Weapon_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Weapon_Club"
-                                                               ],
-                                                "Id":  "Weapon_Bench"
+                                                               ]
                                             }
                                         ]
                }

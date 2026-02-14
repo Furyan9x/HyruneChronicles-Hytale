@@ -6,7 +6,7 @@
     "Model":  "Items/Weapons/Dagger/Bronze_Ancient.blockymodel",
     "Texture":  "Items/Weapons/Dagger/Bronze_Ancient_Texture.png",
     "Icon":  "Icons/ItemsGenerated/Weapon_Daggers_Bronze_Ancient.png",
-    "Quality":  "Uncommon",
+    "Quality":  "Common",
     "ItemLevel":  30,
     "InteractionVars":  {
                             "Swing_Left_Damage":  {
@@ -176,30 +176,33 @@
                                                          }
                         },
     "Recipe":  {
-                   "TimeSeconds":  5,
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Bar_Mithril",
-                                     "Quantity":  10
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Leather_Storm",
-                                     "Quantity":  3
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Voidheart",
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Weapon_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Weapon_Daggers"
                                                                ],
-                                                "Id":  "Weapon_Bench",
-                                                "RequiredTierLevel":  3
+                                                "RequiredTierLevel":  2
                                             }
                                         ]
                }

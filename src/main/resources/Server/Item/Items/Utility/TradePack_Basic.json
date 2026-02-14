@@ -1,48 +1,48 @@
 {
-  "TranslationProperties": {
-    "Name": "server.items.TradePack_Basic.name",
-    "Description": "server.items.TradePack_Basic.description"
-  },
-  "Categories": [
-    "Items.Armors"
-  ],
-  "Icon": "Icons/ItemsGenerated/Utility_Leather_Medium_Backpack.png",
-  "Quality": "Common",
-  "ItemLevel": 1,
-  "Recipe": {
-    "Input": [
-      {
-        "ResourceTypeId": "Wood_Trunk",
-        "Quantity": 4
-      },
-      {
-        "ItemId": "Ingredient_Bar_Iron",
-        "Quantity": 2
-      },
-      {
-        "ItemId": "Ingredient_Hide_Light",
-        "Quantity": 2
-      }
-    ],
-    "BenchRequirement": [
-      {
-        "Type": "Crafting",
-        "Id": "Pack_Assembly",
-        "Categories": [
-          "PackAssembly_TradePacks"
-        ]
-      }
-    ]
-  },
-  "Model": "Items/Back/BackpackBig.blockymodel",
-  "Texture": "Items/Back/BackpackBig_Texture.png",
-  "Tags": {
-    "Type": [
-      "TradePack"
-    ]
-  },
-  "Utility": {
-    "Usable": true
-  },
-  "MaxStack": 1
+    "TranslationProperties":  {
+                                  "Name":  "server.items.TradePack_Basic.name",
+                                  "Description":  "server.items.TradePack_Basic.description"
+                              },
+    "Categories":  [
+                       "Items.Armors"
+                   ],
+    "Icon":  "Icons/ItemsGenerated/Utility_Leather_Medium_Backpack.png",
+    "Quality":  "Common",
+    "ItemLevel":  1,
+    "Recipe":  {
+                   "Input":  [
+                                 {
+                                     "ResourceTypeId":  "Wood_Trunk",
+                                     "Quantity":  4
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Hide_Light",
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Type":  "Crafting",
+                                                "Id":  "Pack_Assembly",
+                                                "Categories":  [
+                                                                   "PackAssembly_TradePacks"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "Model":  "Items/Back/BackpackBig.blockymodel",
+    "Texture":  "Items/Back/BackpackBig_Texture.png",
+    "Tags":  {
+                 "Type":  [
+                              "TradePack"
+                          ]
+             },
+    "Utility":  {
+                    "Usable":  true
+                },
+    "MaxStack":  1
 }

@@ -9,29 +9,33 @@
     "Quality":  "Common",
     "ItemLevel":  45,
     "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "Quantity":  4,
-                                     "ItemId":  "Ingredient_Bar_Iron"
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
-                                     "Quantity":  4,
-                                     "ItemId":  "Ingredient_Bar_Silver"
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
                                  },
                                  {
-                                     "Quantity":  3,
-                                     "ItemId":  "Ingredient_Leather_Heavy"
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
-                   "TimeSeconds":  4,
-                   "KnowledgeRequired":  false,
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Weapon_Bench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Weapon_Sword"
                                                                ],
-                                                "Id":  "Weapon_Bench",
-                                                "Type":  "Crafting"
+                                                "RequiredTierLevel":  3
                                             }
                                         ]
                }

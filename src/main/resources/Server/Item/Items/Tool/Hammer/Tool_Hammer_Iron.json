@@ -1,0 +1,44 @@
+{
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Tool_Hammer_Iron.name",
+                                  "Description":  "server.items.Tool_Hammer_Iron.description"
+                              },
+    "Parent":  "Tool_Hammer_Crude",
+    "Icon":  "Icons/ItemsGenerated/Tool_Hammer_Iron.png",
+    "Quality":  "Common",
+    "ItemLevel":  20,
+    "Model":  "Items/Tools/Hammer/Iron.blockymodel",
+    "Texture":  "Items/Tools/Hammer/Iron_Texture.png",
+    "MaxStack":  1,
+    "Recipe":  {
+                   "TimeSeconds":  3.5,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  6
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  3
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Fabric_Scrap_Linen",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Workbench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Workbench_Tools"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "MaxDurability":  500
+}

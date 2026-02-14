@@ -1,91 +1,91 @@
 {
-  "TranslationProperties": {
-    "Name": "server.items.Repair_Bench.name",
-    "Description": "server.items.Repair_Bench.description"
-  },
-  "Recipe": {
-    "Input": [
-      {
-        "Quantity": 5,
-        "ResourceTypeId": "Wood_Trunk"
-      },
-      {
-        "Quantity": 4,
-        "ResourceTypeId": "Rock"
-      },
-      {
-        "Quantity": 2,
-        "ItemId": "Ingredient_Hide_Medium"
-      }
-    ],
-    "BenchRequirement": [
-      {
-        "Type": "Crafting",
-        "Categories": [
-          "Workbench_Crafting"
-        ],
-        "Id": "Workbench"
-      }
-    ]
-  },
-  "Icon": "Icons/ItemsGenerated/Repair_Bench.png",
-  "Categories": [
-    "Furniture.Benches"
-  ],
-  "BlockType": {
-    "Material": "Solid",
-    "DrawType": "Model",
-    "Opacity": "Transparent",
-    "CustomModel": "Blocks/Benches/Workbench.blockymodel",
-    "CustomModelTexture": [
-      {
-        "Texture": "Blocks/Benches/Workbench_Texture.png",
-        "Weight": 1
-      }
-    ],
-    "HitboxType": "Bench_Workbench",
-    "VariantRotation": "NESW",
-    "Flags": {
-      "IsUsable": true
-    },
-    "Interactions": {
-      "Use": {
-        "Interactions": [
-          {
-            "Type": "OriginsRepairBench"
-          }
-        ]
-      }
-    },
-    "BlockParticleSetId": "Wood",
-    "ParticleColor": "#6e4a2f",
-    "Support": {
-      "Down": [
-        {
-          "FaceType": "Full"
-        }
-      ]
-    },
-    "BlockSoundSetId": "Wood"
-  },
-  "PlayerAnimationsId": "Block",
-  "IconProperties": {
-    "Scale": 0.42,
-    "Rotation": [
-      345,
-      221,
-      345
-    ],
-    "Translation": [
-      -13,
-      -23
-    ]
-  },
-  "Tags": {
-    "Type": [
-      "Bench"
-    ]
-  },
-  "MaxStack": 1,
-  "ItemSoundSetId": "ISS_Blocks_Wood"
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Repair_Bench.name",
+                                  "Description":  "server.items.Repair_Bench.description"
+                              },
+    "Recipe":  {
+                   "Input":  [
+                                 {
+                                     "Quantity":  5,
+                                     "ResourceTypeId":  "Wood_Trunk"
+                                 },
+                                 {
+                                     "Quantity":  4,
+                                     "ResourceTypeId":  "Rock"
+                                 },
+                                 {
+                                     "Quantity":  2,
+                                     "ItemId":  "Ingredient_Hide_Medium"
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Workbench_Crafting"
+                                                               ],
+                                                "Id":  "Workbench"
+                                            }
+                                        ]
+               },
+    "Icon":  "Icons/ItemsGenerated/Repair_Bench.png",
+    "Categories":  [
+                       "Furniture.Benches"
+                   ],
+    "BlockType":  {
+                      "Material":  "Solid",
+                      "DrawType":  "Model",
+                      "Opacity":  "Transparent",
+                      "CustomModel":  "Blocks/Benches/Workbench.blockymodel",
+                      "CustomModelTexture":  [
+                                                 {
+                                                     "Texture":  "Blocks/Benches/Workbench_Texture.png",
+                                                     "Weight":  1
+                                                 }
+                                             ],
+                      "HitboxType":  "Bench_Workbench",
+                      "VariantRotation":  "NESW",
+                      "Flags":  {
+                                    "IsUsable":  true
+                                },
+                      "Interactions":  {
+                                           "Use":  {
+                                                       "Interactions":  [
+                                                                            {
+                                                                                "Type":  "HyruneRepairBench"
+                                                                            }
+                                                                        ]
+                                                   }
+                                       },
+                      "BlockParticleSetId":  "Wood",
+                      "ParticleColor":  "#6e4a2f",
+                      "Support":  {
+                                      "Down":  [
+                                                   {
+                                                       "FaceType":  "Full"
+                                                   }
+                                               ]
+                                  },
+                      "BlockSoundSetId":  "Wood"
+                  },
+    "PlayerAnimationsId":  "Block",
+    "IconProperties":  {
+                           "Scale":  0.42,
+                           "Rotation":  [
+                                            345,
+                                            221,
+                                            345
+                                        ],
+                           "Translation":  [
+                                               -13,
+                                               -23
+                                           ]
+                       },
+    "Tags":  {
+                 "Type":  [
+                              "Bench"
+                          ]
+             },
+    "MaxStack":  1,
+    "ItemSoundSetId":  "ISS_Blocks_Wood"
 }

@@ -1,11 +1,25 @@
-# Origins custom translations
-interactionHints.talk = Press [{key}] to talk
-items.Weapon_Staff_Wizard.name = "Novice Staff"
-items.Pack_Assembly_Bench.name = "Pack Assembly Bench"
-items.Pack_Assembly_Bench.description = "A workbench for assembling Trade Packs"
-items.TradePack_Basic.name = "Trade Pack"
-items.TradePack_Basic.description = "A bulky bundle of goods ready for delivery."
-benchCategories.packAssembly.tradePacks = "Trade Packs"
-items.Repair_Bench.name = "Repair Bench"
-items.Repair_Bench.description = "Use crafting materials to repair your equipment."
+﻿interactionHints.talk = Press [{key}] to talk
+items.Weapon_Staff_Wizard.name = Novice Staff
+items.Pack_Assembly_Bench.name = Pack Assembly Bench
+items.Pack_Assembly_Bench.description = "A workbench for assembling Trade Packs
+items.TradePack_Basic.name = Trade Pack
+items.TradePack_Basic.description = A bulky bundle of goods ready for delivery.
+benchCategories.packAssembly.tradePacks = Trade Packs
+items.Repair_Bench.name = Repair Bench
+items.Repair_Bench.description = Use crafting materials to repair your equipment.
 repair.missing_material.name = You need {quantity}x {material} to repair this.
+general.qualities.Mythic = Mythic
+items.Bench_Fletcher.name = Fletcher's Workbench
+items.Bench_Fletcher.description = Dedicated station for bows, arrows, darts, and blowguns.
+benchCategories.arcane.armorHead = Arcane Headgear
+benchCategories.arcane.armorChest = Arcane Robes
+benchCategories.arcane.armorHands = Arcane Gloves
+benchCategories.arcane.armorLegs = Arcane Legwear
+benchCategories.arcane.weapons = Arcane Weapons
+benchCategories.weapon.longsword = Longswords
+benchCategories.weapon.spear = Spears
+benchCategories.fletcher.bows = Bows
+benchCategories.fletcher.darts = Darts
+benchCategories.fletcher.arrows = Arrows
+benchCategories.fletcher.blowguns = Blowguns
+

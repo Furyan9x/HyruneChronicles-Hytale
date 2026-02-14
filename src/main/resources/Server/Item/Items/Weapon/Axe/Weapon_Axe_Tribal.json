@@ -8,29 +8,32 @@
     "Quality":  "Common",
     "ItemLevel":  15,
     "Recipe":  {
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
                                      "ItemId":  "Ingredient_Bar_Iron",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  4
                                  },
                                  {
+                                     "ItemId":  null,
                                      "ResourceTypeId":  "Wood_Trunk",
                                      "Quantity":  2
                                  },
                                  {
                                      "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  4
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Weapon_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Weapon_Axe"
-                                                               ],
-                                                "Id":  "Weapon_Bench",
-                                                "RequiredTierLevel":  3
+                                                               ]
                                             }
                                         ]
                },

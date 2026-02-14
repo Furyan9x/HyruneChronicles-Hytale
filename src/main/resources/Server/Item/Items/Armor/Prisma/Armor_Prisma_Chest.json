@@ -1,94 +1,98 @@
 {
-  "TranslationProperties": {
-    "Name": "server.items.Armor_Prisma_Chest.name"
-  },
-  "Parent": "Armor_Iron_Chest",
-  "Recipe": {
-    "Input": [
-      {
-        "Quantity": 12,
-        "ItemId": "Ingredient_Bar_Prisma"
-      },
-      {
-        "Quantity": 5,
-        "ItemId": "Ingredient_Leather_Prismatic"
-      },
-      {
-        "Quantity": 4,
-        "ItemId": "Ingredient_Bolt_Prismaloom"
-      }
-    ],
-    "BenchRequirement": [
-      {
-        "Categories": [
-          "Armor_Chest"
-        ],
-        "Id": "Armor_Bench",
-        "Type": "Crafting"
-      }
-    ],
-    "RequiredTierLevel": 3
-  },
-  "Quality": "Common",
-  "ItemLevel": 75,
-  "Icon": "Icons/ItemsGenerated/Armor_Prisma_Chest.png",
-  "IconProperties": {
-    "Rotation": [
-      22.5,
-      45,
-      22.5
-    ],
-    "Scale": 0.3,
-    "Translation": [
-      -2.4,
-      -6
-    ]
-  },
-  "Model": "Items/Armors/Prisma/Chest.blockymodel",
-  "Texture": "Items/Armors/Prisma/Chest_Texture.png",
-  "Armor": {
-    "ArmorSlot": "Chest",
-    "BaseDamageResistance": 0,
-    "CosmeticsToHide": [
-      "Overtop"
-    ],
-    "DamageResistance": {
-      "Physical": [
-        {
-          "Amount": 0.09,
-          "CalculationType": "Multiplicative"
-        }
-      ],
-      "Projectile": [
-        {
-          "Amount": 0.09,
-          "CalculationType": "Multiplicative"
-        }
-      ]
-    },
-    "StatModifiers": {
-      "Health": [
-        {
-          "Amount": 17,
-          "CalculationType": "Additive"
-        }
-      ],
-      "Mana": [
-        {
-          "Amount": 20,
-          "CalculationType": "Additive"
-        }
-      ]
-    }
-  },
-  "MaxDurability": 250,
-  "Tags": {
-    "Type": [
-      "Armor"
-    ],
-    "Family": [
-      "Prisma"
-    ]
-  },
-  "ItemSoundSetId": "ISS_Armor_Heavy"
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Armor_Prisma_Chest.name"
+                              },
+    "Parent":  "Armor_Iron_Chest",
+    "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Armor_Chest"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "Quality":  "Common",
+    "ItemLevel":  75,
+    "Icon":  "Icons/ItemsGenerated/Armor_Prisma_Chest.png",
+    "IconProperties":  {
+                           "Rotation":  [
+                                            22.5,
+                                            45,
+                                            22.5
+                                        ],
+                           "Scale":  0.3,
+                           "Translation":  [
+                                               -2.4,
+                                               -6
+                                           ]
+                       },
+    "Model":  "Items/Armors/Prisma/Chest.blockymodel",
+    "Texture":  "Items/Armors/Prisma/Chest_Texture.png",
+    "Armor":  {
+                  "ArmorSlot":  "Chest",
+                  "BaseDamageResistance":  0,
+                  "CosmeticsToHide":  [
+                                          "Overtop"
+                                      ],
+                  "DamageResistance":  {
+                                           "Physical":  [
+                                                            {
+                                                                "Amount":  0.09,
+                                                                "CalculationType":  "Multiplicative"
+                                                            }
+                                                        ],
+                                           "Projectile":  [
+                                                              {
+                                                                  "Amount":  0.09,
+                                                                  "CalculationType":  "Multiplicative"
+                                                              }
+                                                          ]
+                                       },
+                  "StatModifiers":  {
+                                        "Health":  [
+                                                       {
+                                                           "Amount":  17,
+                                                           "CalculationType":  "Additive"
+                                                       }
+                                                   ],
+                                        "Mana":  [
+                                                     {
+                                                         "Amount":  20,
+                                                         "CalculationType":  "Additive"
+                                                     }
+                                                 ]
+                                    }
+              },
+    "MaxDurability":  250,
+    "Tags":  {
+                 "Type":  [
+                              "Armor"
+                          ],
+                 "Family":  [
+                                "Prisma"
+                            ]
+             },
+    "ItemSoundSetId":  "ISS_Armor_Heavy"
 }

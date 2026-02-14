@@ -1,0 +1,130 @@
+$C = "../Common.ui";
+
+@TitleText = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@BodyText = LabelStyle(FontSize: 14, TextColor: #f7e9cd, VerticalAlignment: Center);
+@SectionHeader = LabelStyle(FontSize: 13, TextColor: #f2d38a, HorizontalAlignment: Start, RenderBold: true);
+@ValueText = LabelStyle(FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center);
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 820, Height: 560);
+
+  Group #Title {
+    Anchor: (Top: 0, Left: 0, Right: 0, Height: 50);
+
+    Label {
+      Text: "Catalyst Imbuement";
+      Style: @TitleText;
+      Anchor: (Full: 0);
+    }
+    TextButton #CatalystClose {
+      Anchor: (Right: 4, Top: 8, Width: 24, Height: 24);
+      Text: "X";
+      Style: $C.@HeaderTextButtonStyle;
+    }
+  }
+
+  Group #Content {
+    LayoutMode: Top;
+    Padding: (Top: 56, Left: 20, Right: 20, Bottom: 20);
+
+    Label {
+      Text: "Insert catalyst is auto-filled from your hand. Select a receiver item and click Imbue.";
+      Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
+      Anchor: (Height: 28, Left: 0, Right: 0);
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group #InsertRow {
+      LayoutMode: Left;
+      Anchor: (Left: 0, Right: 0, Height: 44);
+      Background: #000000(0.35);
+      Padding: (Left: 12, Right: 12);
+
+      ItemIcon #CatalystIcon {
+        Anchor: (Width: 28, Height: 28);
+        Padding: (Top: 8);
+      }
+
+      Group { Anchor: (Width: 10); }
+
+      Label #CatalystName {
+        Anchor: (Width: 260, Height: 44);
+        Style: @ValueText;
+      }
+
+      Label #CatalystAffinity {
+        Anchor: (Width: 180, Height: 44);
+        Style: @ValueText;
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group #ReceiverPreview {
+      LayoutMode: Top;
+      Anchor: (Left: 0, Right: 0, Height: 86);
+      Background: #000000(0.35);
+      Padding: (Left: 12, Top: 8, Right: 12);
+
+      Label {
+        Text: "Receiver";
+        Style: @SectionHeader;
+        Anchor: (Height: 18, Left: 0, Right: 0);
+      }
+
+      Label #ReceiverPreviewName {
+        Text: "Receiver: none";
+        Style: @ValueText;
+        Anchor: (Height: 20, Left: 0, Right: 0);
+      }
+
+      Label #ReceiverPreviewCatalyst {
+        Text: "Current Catalyst: none";
+        Style: @ValueText;
+        Anchor: (Height: 20, Left: 0, Right: 0);
+      }
+
+      Label #ReceiverPreviewImbued {
+        Text: "Imbued Name: -";
+        Style: @ValueText;
+        Anchor: (Height: 20, Left: 0, Right: 0);
+      }
+    }
+
+    Group { Anchor: (Height: 10); }
+
+    Group #ReceiverListScroll {
+      LayoutMode: TopScrolling;
+      FlexWeight: 1;
+      Anchor: (Left: 0, Right: 0);
+
+      Group #ReceiverList {
+        LayoutMode: Top;
+        Anchor: (Left: 0, Right: 0);
+        Padding: (Bottom: 4);
+      }
+    }
+
+    Label #ReceiverEmpty {
+      Text: "No eligible rolled items found in inventory.";
+      Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
+      Anchor: (Height: 28, Left: 0, Right: 0);
+      Visible: false;
+    }
+
+    Group { Anchor: (Height: 10); }
+
+    Group {
+      LayoutMode: Center;
+      Anchor: (Left: 0, Right: 0, Height: 42);
+
+      TextButton #ImbueButton {
+        Anchor: (Width: 220, Height: 34);
+        Text: "Imbue";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+    }
+  }
+}
+

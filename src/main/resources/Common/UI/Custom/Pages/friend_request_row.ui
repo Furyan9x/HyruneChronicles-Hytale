@@ -1,0 +1,38 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 40, Left: 0, Right: 0);
+  Padding: (Left: 6, Right: 6, Top: 4, Bottom: 4);
+  Background: #25190c(0.72);
+
+  Label #RequestName {
+    Text: "Player";
+    FlexWeight: 1;
+    Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center);
+  }
+
+  Button #RequestAcceptBtn {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 72, Height: 24);
+    Style: $C.@SecondaryButtonStyle;
+
+    Label {
+      Text: "Accept";
+      Style: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+
+  Group { Anchor: (Width: 6); }
+
+  Button #RequestDenyBtn {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 66, Height: 24);
+    Style: $C.@SecondaryButtonStyle;
+
+    Label {
+      Text: "Deny";
+      Style: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+}

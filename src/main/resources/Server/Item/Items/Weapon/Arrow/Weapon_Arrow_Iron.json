@@ -5,7 +5,7 @@
     "Categories":  [
                        "Items.Weapons"
                    ],
-    "Quality":  "Uncommon",
+    "Quality":  "Common",
     "ItemLevel":  20,
     "PlayerAnimationsId":  "Dagger",
     "IconProperties":  {
@@ -157,33 +157,32 @@
                },
     "ItemSoundSetId":  "ISS_Weapons_Arrows",
     "Recipe":  {
-                   "TimeSeconds":  0.5,
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "Quantity":  4,
-                                     "ItemId":  "Ingredient_Stick"
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
-                                     "ResourceTypeId":  "Rubble",
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
-                   "OutputQuantity":  4,
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Fletcher_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
-                                                                   "Workbench_Survival"
-                                                               ],
-                                                "Id":  "Workbench"
-                                            },
-                                            {
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Weapon_Bow"
-                                                               ],
-                                                "Id":  "Weapon_Bench"
+                                                                   "Fletcher_Arrows"
+                                                               ]
                                             }
                                         ]
                }

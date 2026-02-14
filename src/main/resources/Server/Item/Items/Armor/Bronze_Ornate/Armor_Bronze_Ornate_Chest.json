@@ -21,30 +21,33 @@
     "Texture":  "Items/Armors/Bronze_Ornate/Chest_Texture.png",
     "Recipe":  {
                    "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
                                      "ItemId":  "Ingredient_Bar_Bronze",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  6
                                  },
                                  {
+                                     "ItemId":  null,
                                      "ResourceTypeId":  "Wood_Trunk",
                                      "Quantity":  2
                                  },
                                  {
                                      "ItemId":  "Ingredient_Leather_Medium",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Armor_Chest"
-                                                               ],
-                                                "Id":  "Armor_Bench",
-                                                "Type":  "Crafting"
+                                                               ]
                                             }
-                                        ],
-                   "KnowledgeRequired":  true
+                                        ]
                },
     "Armor":  {
                   "ArmorSlot":  "Chest",
@@ -88,5 +91,5 @@
              },
     "MaxDurability":  120,
     "ItemSoundSetId":  "ISS_Armor_Heavy",
-    "Quality":  "Rare"
+    "Quality":  "Common"
 }

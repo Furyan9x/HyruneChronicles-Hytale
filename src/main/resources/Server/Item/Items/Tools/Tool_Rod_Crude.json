@@ -1,69 +1,76 @@
 {
-  "TranslationProperties": {
-    "Name": "Crude Fishing Rod",
-    "Description": "Not the best... but it'll catch a fish!"
-  },
-  "Categories": [
-    "Items.Tools"
-  ],
-  "Quality": "Common",
-  "MaxStack": 1,
-  "ItemLevel": 3,
-  "Icon": "Icons/ItemsGenerated/Tool_Rod_Crude.png",
-  "Model": "Items/Tools/Tool_Rod_Crude.blockymodel",
-  "Texture": "Items/Tools/Tool_Rod_Crude_Texture.png",
-  "UsePlayerAnimations": true,
-  "PlayerAnimationsId": "Fishing_Rod_Animations",
-  "Recipe": {
-    "TimeSeconds": 1,
-    "KnowledgeRequired": false,
-    "Input": [
-      {
-        "ResourceTypeId": "Rubble",
-        "Quantity": 2
-      },
-      {
-        "ItemId": "Ingredient_Stick",
-        "Quantity": 5
-      }
-    ],
-    "BenchRequirement": [
-      {
-        "Id": "Workbench",
-        "Type": "Crafting",
-        "Categories": [
-          "Workbench_Tools"
-        ]
-      }
-    ]
-  },
-  "Set": "",
-  "Interactions": {
-    "Secondary": {
-      "Interactions": [
-        {
-          "Type": "OriginsFishing"
-        }
-      ]
-    }
-  },
-  "IconProperties": {
-    "Scale": 0.5,
-    "Rotation": [
-      342,
-      217,
-      44
-    ],
-    "Translation": [
-      -47,
-      -48
-    ]
-  },
-  "MaxDurability": 150,
-  "Tags": {
-    "Type": [
-      "Tool"
-    ]
-  },
-  "ItemSoundSetId": "ISS_Weapons_Wood"
+    "TranslationProperties":  {
+                                  "Name":  "Crude Fishing Rod",
+                                  "Description":  "Not the best... but it\u0027ll catch a fish!"
+                              },
+    "Categories":  [
+                       "Items.Tools"
+                   ],
+    "Quality":  "Common",
+    "MaxStack":  1,
+    "ItemLevel":  3,
+    "Icon":  "Icons/ItemsGenerated/Tool_Rod_Crude.png",
+    "Model":  "Items/Tools/Tool_Rod_Crude.blockymodel",
+    "Texture":  "Items/Tools/Tool_Rod_Crude_Texture.png",
+    "UsePlayerAnimations":  true,
+    "PlayerAnimationsId":  "Fishing_Rod_Animations",
+    "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  4
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Plank_Oak",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Workbench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Workbench_Tools"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "Set":  "",
+    "Interactions":  {
+                         "Secondary":  {
+                                           "Interactions":  [
+                                                                {
+                                                                    "Type":  "HyruneFishing"
+                                                                }
+                                                            ]
+                                       }
+                     },
+    "IconProperties":  {
+                           "Scale":  0.5,
+                           "Rotation":  [
+                                            342,
+                                            217,
+                                            44
+                                        ],
+                           "Translation":  [
+                                               -47,
+                                               -48
+                                           ]
+                       },
+    "MaxDurability":  150,
+    "Tags":  {
+                 "Type":  [
+                              "Tool"
+                          ]
+             },
+    "ItemSoundSetId":  "ISS_Weapons_Wood"
 }

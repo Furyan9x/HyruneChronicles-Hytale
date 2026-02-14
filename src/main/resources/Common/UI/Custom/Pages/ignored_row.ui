@@ -1,0 +1,25 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 38, Left: 0, Right: 0);
+  Padding: (Left: 6, Right: 6, Top: 4, Bottom: 4);
+  Background: #2b1015(0.72);
+
+  Label #IgnoredName {
+    Text: "Player";
+    FlexWeight: 1;
+    Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center);
+  }
+
+  Button #IgnoredUnignoreBtn {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 90, Height: 24);
+    Style: $C.@SecondaryButtonStyle;
+
+    Label {
+      Text: "Unignore";
+      Style: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+}

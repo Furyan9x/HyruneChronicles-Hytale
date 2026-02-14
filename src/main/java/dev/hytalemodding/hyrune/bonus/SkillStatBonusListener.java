@@ -1,0 +1,23 @@
+package dev.hytalemodding.hyrune.bonus;
+
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import dev.hytalemodding.hyrune.events.LevelUpListener;
+
+import java.util.UUID;
+
+/**
+ * Event listener for skill stat bonuses.
+ */
+public class SkillStatBonusListener implements LevelUpListener {
+    @Override
+    public void onLevelUp(UUID uuid, int newLevel, String source) {
+        PlayerRef player = Universe.get().getPlayer(uuid);
+        if (player == null) {
+            return;
+        }
+
+        SkillStatBonusApplier.apply(player);
+        SkillStatBonusApplier.applyMovementSpeed(player);
+    }
+}

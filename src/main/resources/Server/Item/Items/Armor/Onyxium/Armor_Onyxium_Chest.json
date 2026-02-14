@@ -1,94 +1,98 @@
 {
-  "TranslationProperties": {
-    "Name": "server.items.Armor_Onyxium_Chest.name"
-  },
-  "Parent": "Armor_Iron_Chest",
-  "Recipe": {
-    "Input": [
-      {
-        "Quantity": 10,
-        "ItemId": "Ingredient_Bar_Onyxium"
-      },
-      {
-        "Quantity": 4,
-        "ItemId": "Ingredient_Leather_Heavy"
-      },
-      {
-        "Quantity": 4,
-        "ItemId": "Ingredient_Fabric_Scrap_Shadoweave"
-      }
-    ],
-    "BenchRequirement": [
-      {
-        "Categories": [
-          "Armor_Chest"
-        ],
-        "Id": "Armor_Bench",
-        "Type": "Crafting"
-      }
-    ],
-    "RequiredTierLevel": 3
-  },
-  "Quality": "Epic",
-  "ItemLevel": 65,
-  "Icon": "Icons/ItemsGenerated/Armor_Onyxium_Chest.png",
-  "IconProperties": {
-    "Scale": 0.305,
-    "Rotation": [
-      22.5,
-      45,
-      22.5
-    ],
-    "Translation": [
-      0,
-      -18
-    ]
-  },
-  "Model": "Items/Armors/Onyxium/Chest.blockymodel",
-  "Texture": "Items/Armors/Onyxium/Chest_Texture.png",
-  "Armor": {
-    "ArmorSlot": "Chest",
-    "BaseDamageResistance": 0,
-    "CosmeticsToHide": [
-      "Overtop"
-    ],
-    "DamageResistance": {
-      "Physical": [
-        {
-          "Amount": 0.09,
-          "CalculationType": "Multiplicative"
-        }
-      ],
-      "Projectile": [
-        {
-          "Amount": 0.09,
-          "CalculationType": "Multiplicative"
-        }
-      ]
-    },
-    "StatModifiers": {
-      "Health": [
-        {
-          "Amount": 17,
-          "CalculationType": "Additive"
-        }
-      ],
-      "Mana": [
-        {
-          "Amount": 16,
-          "CalculationType": "Additive"
-        }
-      ]
-    }
-  },
-  "Tags": {
-    "Type": [
-      "Armor"
-    ],
-    "Family": [
-      "Onyxium"
-    ]
-  },
-  "MaxDurability": 120,
-  "ItemSoundSetId": "ISS_Armor_Heavy"
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Armor_Onyxium_Chest.name"
+                              },
+    "Parent":  "Armor_Iron_Chest",
+    "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Armor_Chest"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "Quality":  "Common",
+    "ItemLevel":  65,
+    "Icon":  "Icons/ItemsGenerated/Armor_Onyxium_Chest.png",
+    "IconProperties":  {
+                           "Scale":  0.305,
+                           "Rotation":  [
+                                            22.5,
+                                            45,
+                                            22.5
+                                        ],
+                           "Translation":  [
+                                               0,
+                                               -18
+                                           ]
+                       },
+    "Model":  "Items/Armors/Onyxium/Chest.blockymodel",
+    "Texture":  "Items/Armors/Onyxium/Chest_Texture.png",
+    "Armor":  {
+                  "ArmorSlot":  "Chest",
+                  "BaseDamageResistance":  0,
+                  "CosmeticsToHide":  [
+                                          "Overtop"
+                                      ],
+                  "DamageResistance":  {
+                                           "Physical":  [
+                                                            {
+                                                                "Amount":  0.09,
+                                                                "CalculationType":  "Multiplicative"
+                                                            }
+                                                        ],
+                                           "Projectile":  [
+                                                              {
+                                                                  "Amount":  0.09,
+                                                                  "CalculationType":  "Multiplicative"
+                                                              }
+                                                          ]
+                                       },
+                  "StatModifiers":  {
+                                        "Health":  [
+                                                       {
+                                                           "Amount":  17,
+                                                           "CalculationType":  "Additive"
+                                                       }
+                                                   ],
+                                        "Mana":  [
+                                                     {
+                                                         "Amount":  16,
+                                                         "CalculationType":  "Additive"
+                                                     }
+                                                 ]
+                                    }
+              },
+    "Tags":  {
+                 "Type":  [
+                              "Armor"
+                          ],
+                 "Family":  [
+                                "Onyxium"
+                            ]
+             },
+    "MaxDurability":  120,
+    "ItemSoundSetId":  "ISS_Armor_Heavy"
 }

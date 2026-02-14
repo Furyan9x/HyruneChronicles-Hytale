@@ -94,37 +94,32 @@
                                  },
     "ItemSoundSetId":  "ISS_Weapons_Wood",
     "Recipe":  {
-                   "TimeSeconds":  4,
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Bar_Cobalt",
-                                     "Quantity":  10
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Leather_Heavy",
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Fabric_Scrap_Shadoweave",
-                                     "Quantity":  3
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Fletcher_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
-                                                                   "Weapon_Bow"
-                                                               ],
-                                                "Id":  "Weapon_Bench",
-                                                "RequiredTierLevel":  2
-                                            },
-                                            {
-                                                "Type":  "DiagramCrafting",
-                                                "Categories":  [
-                                                                   "Weapons.Bow"
-                                                               ],
-                                                "Id":  "Armory"
+                                                                   "Fletcher_Bows"
+                                                               ]
                                             }
                                         ]
                }

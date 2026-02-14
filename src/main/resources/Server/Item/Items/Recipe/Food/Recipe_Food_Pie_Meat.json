@@ -4,7 +4,7 @@
                                   "Description":  "server.items.Recipe_Food_Pie_Meat.description"
                               },
     "Icon":  "Icons/ItemsGenerated/Recipe_Page.png",
-    "Quality":  "Rare",
+    "Quality":  "Common",
     "Categories":  [
                        "Items.Recipes"
                    ],

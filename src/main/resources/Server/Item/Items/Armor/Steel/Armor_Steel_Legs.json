@@ -4,18 +4,23 @@
                               },
     "Parent":  "Armor_Iron_Legs",
     "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Bar_Iron",
-                                     "Quantity":  13
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
                                      "ItemId":  "Ingredient_Leather_Light",
-                                     "Quantity":  6
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Fabric_Scrap_Linen",
-                                     "Quantity":  4
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
@@ -26,9 +31,7 @@
                                                                    "Armor_Legs"
                                                                ]
                                             }
-                                        ],
-                   "KnowledgeRequired":  false,
-                   "TimeSeconds":  3
+                                        ]
                },
     "Icon":  "Icons/ItemsGenerated/Armor_Steel_Legs.png",
     "IconProperties":  {
@@ -85,5 +88,5 @@
                             ]
              },
     "ItemSoundSetId":  "ISS_Armor_Heavy",
-    "Quality":  "Uncommon"
+    "Quality":  "Common"
 }

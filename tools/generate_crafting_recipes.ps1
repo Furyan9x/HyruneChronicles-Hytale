@@ -1,11 +1,40 @@
 param(
     [string]$AssetsRoot = "C:\\Users\\devin\\Desktop\\HytaleServer\\Assets",
     [string]$OutputRoot = (Join-Path (Resolve-Path ".").Path "src\\main\\resources\\Server\\Item\\Items"),
-    [string]$ReportPath = (Join-Path (Resolve-Path ".").Path "codex\\crafting_audit.md")
+    [string]$ReportPath = (Join-Path (Resolve-Path ".").Path "codex\\crafting_generation_report.md"),
+    [string]$ExclusionListPath = "",
+    [string[]]$ExcludeIds = @(),
+    [switch]$DryRun,
+    [switch]$Overwrite,
+    [switch]$PruneExcluded
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false)
+
+# ===========================
+# User-Editable Bench Routing
+# ===========================
+$ArcaneArmorKeywords = @("cloth", "linen", "silk", "wool")
+$ArcaneArmorCategoryBySlot = @{
+    "head" = "Arcane_Armor_Head"
+    "chest" = "Arcane_Armor_Chest"
+    "legs" = "Arcane_Armor_Legs"
+    "hands" = "Arcane_Armor_Hands"
+}
+$ForcedWeaponBenchRouting = @{
+    "spear" = @{ BenchId = "Weapon_Bench"; Category = "Weapon_Spear" }
+    "longsword" = @{ BenchId = "Weapon_Bench"; Category = "Weapon_Longsword" }
+    "staff" = @{ BenchId = "Arcanebench"; Category = "Arcane_Weapons" }
+    "wand" = @{ BenchId = "Arcanebench"; Category = "Arcane_Weapons" }
+    "spellbook" = @{ BenchId = "Arcanebench"; Category = "Arcane_Weapons" }
+    "shortbow" = @{ BenchId = "Fletcher_Bench"; Category = "Fletcher_Bows" }
+    "crossbow" = @{ BenchId = "Fletcher_Bench"; Category = "Fletcher_Bows" }
+    "dart" = @{ BenchId = "Fletcher_Bench"; Category = "Fletcher_Darts" }
+    "arrow" = @{ BenchId = "Fletcher_Bench"; Category = "Fletcher_Arrows" }
+    "blowgun" = @{ BenchId = "Fletcher_Bench"; Category = "Fletcher_Blowguns" }
+}
 
 $itemsRoot = Join-Path $AssetsRoot "Server\\Item\\Items"
 if (-not (Test-Path $itemsRoot)) {
@@ -13,23 +42,102 @@ if (-not (Test-Path $itemsRoot)) {
 }
 $itemsRoot = (Resolve-Path $itemsRoot).Path.TrimEnd('\')
 
-$items = @{}
-Get-ChildItem -Recurse -File -Path $itemsRoot -Filter *.json | ForEach-Object {
-    try {
-        $data = Get-Content $_.FullName -Raw | ConvertFrom-Json
-    } catch {
-        return
+function To-NormalizedId {
+    param([string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value)) { return "" }
+    return $Value.Trim().ToLowerInvariant()
+}
+
+function Is-EligibleItemId {
+    param([string]$ItemId)
+    $id = To-NormalizedId $ItemId
+    return $id.StartsWith("weapon_") -or $id.StartsWith("armor_") -or $id.StartsWith("tool_")
+}
+
+function Parse-ItemShape {
+    param([string]$ItemId)
+    $tokens = (To-NormalizedId $ItemId).Split("_")
+    if ($tokens.Length -lt 2) { return @("", "") }
+    return @($tokens[0], $tokens[1])
+}
+
+function Is-ExcludedByPrefix {
+    param([string]$ItemId)
+    $id = To-NormalizedId $ItemId
+    $blockedPrefixes = @(
+        "weapon_bomb",
+        "weapon_grenade_",
+        "weapon_poison_flask_",
+        "weapon_dev_",
+        "armor_dev_",
+        "armor_kweebec_",
+        "armor_QA_",
+        "armor_trooper_",
+        "armor_trork_",
+        "weapon_assault_",
+        "weapon_handgun",
+        "weapon_gun",
+        "tool_dev_",
+        "tool_bark_scraper",
+        "tool_pickaxe_scrap",
+        "tool_growth_potion",
+        "tool_map",
+        "tool_sap_shunt",
+        "tool_trap_bait",
+        "tool_sickle_steel_rusty",
+        "test_",
+        "_rusty",
+        "bandage_",
+        "_trork",
+        "_scrap",
+        "_claws_",
+        "_turret",
+        "_npc",
+        "_spiked",
+        "_cutlass",
+        "special_"
+    )
+    foreach ($prefixRaw in $blockedPrefixes) {
+        $prefix = To-NormalizedId $prefixRaw
+        if (-not $prefix) { continue }
+        if ($prefix.Contains("*")) {
+            if ($id -like $prefix) { return $true }
+            continue
+        }
+        # Tokens that start with "_" are treated as contains-match (e.g. "_rusty", "_scrap", "_npc").
+        if ($prefix.StartsWith("_")) {
+            if ($id.Contains($prefix)) { return $true }
+            continue
+        }
+        if ($id.StartsWith($prefix)) {
+            return $true
+        }
     }
-    $id = $_.BaseName
-    $relPath = $_.FullName.Substring($itemsRoot.Length + 1)
-    $items[$id] = [PSCustomObject]@{
-        Id = $id
-        IdLower = $id.ToLowerInvariant()
-        Path = $_.FullName
-        RelPath = $relPath
-        Dir = Split-Path $relPath -Parent
-        Data = $data
+    return $false
+}
+
+function Load-ExcludedIds {
+    param([string]$FilePath, [string[]]$CliIds)
+    $ids = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+
+    foreach ($id in $CliIds) {
+        $normalized = To-NormalizedId $id
+        if ($normalized) { $null = $ids.Add($normalized) }
     }
+
+    if (-not [string]::IsNullOrWhiteSpace($FilePath)) {
+        if (-not (Test-Path $FilePath)) {
+            throw "Exclusion list file not found: $FilePath"
+        }
+        Get-Content $FilePath | ForEach-Object {
+            $line = $_.Trim()
+            if (-not $line -or $line.StartsWith("#")) { return }
+            $normalized = To-NormalizedId $line
+            if ($normalized) { $null = $ids.Add($normalized) }
+        }
+    }
+
+    return $ids
 }
 
 function Get-PropValue {
@@ -38,13 +146,6 @@ function Get-PropValue {
     $prop = $Obj.PSObject.Properties[$Name]
     if ($prop) { return $prop.Value }
     return $null
-}
-
-function Get-CollectionCount {
-    param($Value)
-    if ($null -eq $Value) { return 0 }
-    if ($Value -is [System.Array]) { return $Value.Count }
-    return 1
 }
 
 function Set-PropValue {
@@ -60,382 +161,409 @@ function Set-PropValue {
 
 function Ensure-Array {
     param($Value)
-    if ($null -eq $Value) { return $null }
+    if ($null -eq $Value) { return @() }
     if ($Value -is [System.Array]) { return $Value }
     return @($Value)
 }
 
-function Get-EffectiveRecipe {
-    param(
-        [string]$Id,
-        [hashtable]$Seen
-    )
-    if (-not $Id) { return $null }
-    if ($Seen.ContainsKey($Id)) { return $null }
-    $Seen[$Id] = $true
-    $entry = $items[$Id]
-    if (-not $entry) { return $null }
-    $data = $entry.Data
-    $recipe = Get-PropValue -Obj $data -Name "Recipe"
-    if ($recipe) { return $recipe }
-    $parent = Get-PropValue -Obj $data -Name "Parent"
-    if ($parent) { return Get-EffectiveRecipe -Id $parent -Seen $Seen }
+function Get-ArmorSlot {
+    param([string]$ItemId, $Data)
+    $id = To-NormalizedId $ItemId
+    if ($id.EndsWith("_head")) { return "head" }
+    if ($id.EndsWith("_hands")) { return "hands" }
+    if ($id.EndsWith("_legs")) { return "legs" }
+    if ($id.EndsWith("_chest")) { return "chest" }
+
+    $armor = Get-PropValue -Obj $Data -Name "Armor"
+    $slot = To-NormalizedId (Get-PropValue -Obj $armor -Name "ArmorSlot")
+    if ($slot -eq "head" -or $slot -eq "hands" -or $slot -eq "legs" -or $slot -eq "chest") { return $slot }
+    return "chest"
+}
+
+function Get-ArmorCategoryForSlot {
+    param([string]$Slot)
+    if ([string]::IsNullOrWhiteSpace($Slot)) { return "Armor_Chest" }
+    return "Armor_" + ($Slot.Substring(0,1).ToUpperInvariant() + $Slot.Substring(1))
+}
+
+function Resolve-BenchOverride {
+    param([string]$ItemId, $Data)
+    $shape = Parse-ItemShape $ItemId
+    $itemClass = $shape[0]
+    $subType = $shape[1]
+    $id = To-NormalizedId $ItemId
+
+    if ($itemClass -eq "weapon") {
+        if ($ForcedWeaponBenchRouting.ContainsKey($subType)) {
+            $route = $ForcedWeaponBenchRouting[$subType]
+            return @([PSCustomObject]@{
+                Id = $route.BenchId
+                Type = "Crafting"
+                Categories = @($route.Category)
+            })
+        }
+        return $null
+    }
+
+    if ($itemClass -eq "armor") {
+        $slot = Get-ArmorSlot -ItemId $ItemId -Data $Data
+        foreach ($keyword in $ArcaneArmorKeywords) {
+            if ($id.Contains($keyword)) {
+                $arcaneCategory = if ($ArcaneArmorCategoryBySlot.ContainsKey($slot)) { $ArcaneArmorCategoryBySlot[$slot] } else { "Arcane_Armor_Chest" }
+                return @([PSCustomObject]@{
+                    Id = "Arcanebench"
+                    Type = "Crafting"
+                    Categories = @($arcaneCategory)
+                })
+            }
+        }
+        return @([PSCustomObject]@{
+            Id = "Armor_Bench"
+            Type = "Crafting"
+            Categories = @(Get-ArmorCategoryForSlot -Slot $slot)
+        })
+    }
+
     return $null
 }
 
-function Get-RecipeSignature {
-    param($BenchRequirement)
-    if (-not $BenchRequirement) { return "" }
-    $parts = @()
-    foreach ($bench in $BenchRequirement) {
-        if (-not $bench) { continue }
-        $categories = ""
-        $benchCategories = Get-PropValue -Obj $bench -Name "Categories"
-        if ($benchCategories) { $categories = ($benchCategories -join "/") }
-        $benchId = Get-PropValue -Obj $bench -Name "Id"
-        $benchType = Get-PropValue -Obj $bench -Name "Type"
-        $parts += ("{0}|{1}|{2}" -f $benchId, $benchType, $categories)
-    }
-    return ($parts -join ";")
+function Write-TextNoBom {
+    param([string]$Path, [string]$Content)
+    [System.IO.File]::WriteAllText($Path, $Content + [Environment]::NewLine, $Utf8NoBomEncoding)
 }
 
-$groupBench = @{}
-$groupRecipe = @{}
-$groupCounts = @{}
-$typeBenchCounts = @{}
-$barMap = @{}
-
-$excludeContains = @(
-    "debug_","debug","rock_","_qa_","wood_","plant_","prototype_","ore_","soil_","template_","crystal_","ingredient_",
-    "tree","forgotten_","filter_","egg_","stalactite_","editortool_","editor_","test_","spawner_","awn_","hub_",
-    "lime_","luid_","mplate_","ock_","ototype_","rubble_","sh_","yzer_","_sap_shunt","utility_","memory_"
-)
-$excludeStarts = @("co_","deco_","il_","lant_","cloth_roof_","recipe_book_")
-$excludeExact = @("recipe_page","launchpad")
-$excludeContains += "instance_gateway"
-$excludeContains += "weapon_mace_scrap_npc"
-
-function Is-Excluded {
-    param($Entry)
-    if (-not $Entry) { return $false }
-    $id = $Entry.IdLower
-    if (-not $id) { return $false }
-    foreach ($token in $excludeStarts) {
-        if ($id.StartsWith($token)) { return $true }
-    }
-    foreach ($token in $excludeExact) {
-        if ($id -eq $token) { return $true }
-    }
-    foreach ($token in $excludeContains) {
-        if ($id.Contains($token)) { return $true }
-    }
-    if ($id.Contains("test")) { return $true }
-    if ($Entry.RelPath -and $Entry.RelPath -match '(?i)\\Minigames\\') { return $true }
-    return $false
+function Write-LinesNoBom {
+    param([string]$Path, [string[]]$Lines)
+    [System.IO.File]::WriteAllText($Path, (($Lines -join [Environment]::NewLine) + [Environment]::NewLine), $Utf8NoBomEncoding)
 }
 
-foreach ($id in $items.Keys) {
-    $entry = $items[$id]
-    if (Is-Excluded $entry) { continue }
-    $data = $entry.Data
-    $recipe = Get-PropValue -Obj $data -Name "Recipe"
-    $inputs = Get-PropValue -Obj $recipe -Name "Input"
-    if ($recipe -and $inputs) {
-        foreach ($input in @($inputs)) {
-            $itemId = Get-PropValue -Obj $input -Name "ItemId"
-            if ($itemId -and $itemId -match '^Ingredient_Bar_(.+)$') {
-                $token = $Matches[1].ToLowerInvariant()
-                if (-not $barMap.ContainsKey($token)) {
-                    $barMap[$token] = $itemId
-                }
-            }
-        }
+function Normalize-Recipe {
+    param($Recipe, [string]$ItemId = "", $Data = $null)
+    if (-not $Recipe) {
+        $Recipe = [PSCustomObject]@{}
     }
 
-    $benchReq = Get-PropValue -Obj $recipe -Name "BenchRequirement"
-    $validBench = $true
-    if (-not $benchReq -or (Get-CollectionCount $benchReq) -eq 0) { $validBench = $false }
-    if ($benchReq) {
-        foreach ($bench in @($benchReq)) {
-            $benchId = Get-PropValue -Obj $bench -Name "Id"
-            if (-not $benchId -or $benchId -eq "TODO") { $validBench = $false }
-        }
-    }
-    if (-not $recipe -or -not $validBench) { continue }
+    $inputs = Ensure-Array (Get-PropValue -Obj $Recipe -Name "Input")
+    $benches = Ensure-Array (Get-PropValue -Obj $Recipe -Name "BenchRequirement")
+    $timeSeconds = Get-PropValue -Obj $Recipe -Name "TimeSeconds"
+    if ($null -eq $timeSeconds) { $timeSeconds = 2 }
 
-    $group = $entry.Dir
-    if (-not $groupBench.ContainsKey($group)) {
-        $groupBench[$group] = $benchReq
-        $groupRecipe[$group] = $recipe
-        $groupCounts[$group] = 1
-    } else {
-        $groupCounts[$group]++
-    }
-
-    $tags = Get-PropValue -Obj $data -Name "Tags"
-    $tagTypes = Get-PropValue -Obj $tags -Name "Type"
-    if ($tagTypes) {
-        foreach ($type in $tagTypes) {
-            if (-not $typeBenchCounts.ContainsKey($type)) {
-                $typeBenchCounts[$type] = @{}
-            }
-            $sig = Get-RecipeSignature -BenchRequirement $benchReq
-            if (-not $typeBenchCounts[$type].ContainsKey($sig)) {
-                $typeBenchCounts[$type][$sig] = 0
-            }
-            $typeBenchCounts[$type][$sig]++
-        }
-    }
-}
-
-function Get-BestBenchForType {
-    param([string]$Type)
-    if (-not $typeBenchCounts.ContainsKey($Type)) { return $null }
-    $bestSig = $null
-    $bestCount = -1
-    foreach ($sig in $typeBenchCounts[$Type].Keys) {
-        $count = $typeBenchCounts[$Type][$sig]
-        if ($count -gt $bestCount) {
-            $bestCount = $count
-            $bestSig = $sig
-        }
-    }
-    if (-not $bestSig) { return $null }
-    $benchReq = @()
-    foreach ($entry in $bestSig.Split(";")) {
-        if (-not $entry) { continue }
-        $parts = $entry.Split("|")
-        $bench = [ordered]@{
-            Id = $parts[0]
-        }
-        if ($parts.Length -gt 1 -and $parts[1]) { $bench["Type"] = $parts[1] }
-        if ($parts.Length -gt 2 -and $parts[2]) { $bench["Categories"] = $parts[2].Split("/") }
-        $benchReq += $bench
-    }
-    return $benchReq
-}
-
-function Get-MaterialToken {
-    param($data, [string]$id)
-    $candidates = @()
-    $tags = Get-PropValue -Obj $data -Name "Tags"
-    $families = Get-PropValue -Obj $tags -Name "Family"
-    if ($families) {
-        foreach ($fam in $families) {
-            $candidates += $fam.ToString()
-        }
-    }
-    $candidates += $id
-    foreach ($candidate in $candidates) {
-        foreach ($token in $barMap.Keys) {
-            if ($candidate.ToLowerInvariant().Contains($token)) {
-                return $token
-            }
-        }
-    }
-    return $null
-}
-
-function ApplyMaterialSubstitution {
-    param($recipe, [string]$targetToken)
-    if (-not $recipe -or -not $targetToken -or -not $barMap.ContainsKey($targetToken)) { return $recipe }
-    $inputs = Get-PropValue -Obj $recipe -Name "Input"
-    if (-not $inputs) { return $recipe }
-    foreach ($input in @($inputs)) {
+    $normalizedInputs = @()
+    foreach ($input in $inputs) {
+        if (-not $input) { continue }
         $itemId = Get-PropValue -Obj $input -Name "ItemId"
-        if ($itemId -and $itemId -match '^Ingredient_Bar_(.+)$') {
-            $input.ItemId = $barMap[$targetToken]
+        $resourceTypeId = Get-PropValue -Obj $input -Name "ResourceTypeId"
+        $quantity = Get-PropValue -Obj $input -Name "Quantity"
+        if ($null -eq $quantity) { $quantity = 1 }
+        $normalizedInputs += [PSCustomObject]@{
+            ItemId = $itemId
+            ResourceTypeId = $resourceTypeId
+            Quantity = [int]$quantity
         }
     }
-    return $recipe
-}
-
-function Normalize-RecipeArrays {
-    param($Recipe)
-    if (-not $Recipe) { return $Recipe }
-    $inputs = Get-PropValue -Obj $Recipe -Name "Input"
-    if ($inputs) { Set-PropValue -Obj $Recipe -Name "Input" -Value (Ensure-Array $inputs) }
-    $benches = Get-PropValue -Obj $Recipe -Name "BenchRequirement"
-    if ($benches) { Set-PropValue -Obj $Recipe -Name "BenchRequirement" -Value (Ensure-Array $benches) }
-    return $Recipe
-}
-
-$missing = @()
-$benchIssues = @()
-$overrides = @()
-
-foreach ($id in ($items.Keys | Sort-Object)) {
-    $entry = $items[$id]
-    if (Is-Excluded $entry) { continue }
-    $data = $entry.Data
-    $seen = @{}
-    $recipe = Get-EffectiveRecipe -Id $id -Seen $seen
-    if (-not $recipe) {
-        $missing += $id
-        $overrides += $id
-        continue
+    if (@($normalizedInputs).Count -eq 0) {
+        $normalizedInputs = @(
+            [PSCustomObject]@{ ItemId = "Ingredient_Stick"; ResourceTypeId = $null; Quantity = 2 },
+            [PSCustomObject]@{ ItemId = "Ingredient_Leather_Light"; ResourceTypeId = $null; Quantity = 1 },
+            [PSCustomObject]@{ ItemId = $null; ResourceTypeId = "Rubble"; Quantity = 2 }
+        )
     }
-    $benchReq = Get-PropValue -Obj $recipe -Name "BenchRequirement"
-    $badBench = $false
-    if (-not $benchReq -or (Get-CollectionCount $benchReq) -eq 0) { $badBench = $true }
-    if ($benchReq) {
-        foreach ($bench in @($benchReq)) {
-            $benchId = Get-PropValue -Obj $bench -Name "Id"
-            if (-not $benchId -or $benchId -eq "TODO") { $badBench = $true }
+    while (@($normalizedInputs).Count -lt 3) {
+        $next = switch (@($normalizedInputs).Count) {
+            0 { [PSCustomObject]@{ ItemId = "Ingredient_Stick"; ResourceTypeId = $null; Quantity = 2 } }
+            1 { [PSCustomObject]@{ ItemId = "Ingredient_Leather_Light"; ResourceTypeId = $null; Quantity = 1 } }
+            default { [PSCustomObject]@{ ItemId = $null; ResourceTypeId = "Rubble"; Quantity = 2 } }
         }
+        $normalizedInputs += $next
     }
-    if ($badBench) {
-        $benchIssues += $id
-        $overrides += $id
-    }
-}
-
-$overrides = $overrides | Sort-Object -Unique
-
-function Get-TemplateRecipe {
-    param($entry, [string]$id)
-    $group = $entry.Dir
-    if ($groupRecipe.ContainsKey($group)) {
-        return $groupRecipe[$group]
+    if (@($normalizedInputs).Count -gt 5) {
+        $normalizedInputs = @($normalizedInputs | Select-Object -First 5)
     }
 
-    $parent = Get-PropValue -Obj $entry.Data -Name "Parent"
-    if ($parent) {
-        $seen = @{}
-        $parentRecipe = Get-EffectiveRecipe -Id $parent -Seen $seen
-        if ($parentRecipe) { return $parentRecipe }
+    $normalizedBenches = @()
+    foreach ($bench in $benches) {
+        if (-not $bench) { continue }
+        $benchId = Get-PropValue -Obj $bench -Name "Id"
+        if ([string]::IsNullOrWhiteSpace($benchId) -or $benchId -eq "TODO") { continue }
+        $benchType = Get-PropValue -Obj $bench -Name "Type"
+        $benchCategories = Ensure-Array (Get-PropValue -Obj $bench -Name "Categories")
+        $requiredTier = Get-PropValue -Obj $bench -Name "RequiredTierLevel"
+        $normalizedBench = [ordered]@{
+            Id = $benchId
+            Type = $(if ([string]::IsNullOrWhiteSpace($benchType)) { "Crafting" } else { $benchType })
+            Categories = $benchCategories
+        }
+        if ($null -ne $requiredTier) {
+            $normalizedBench["RequiredTierLevel"] = [int]$requiredTier
+        }
+        $normalizedBenches += [PSCustomObject]$normalizedBench
     }
-
-    $tagTypes = Get-PropValue -Obj (Get-PropValue -Obj $entry.Data -Name "Tags") -Name "Type"
-    if ($tagTypes) {
-        foreach ($type in $tagTypes) {
-            $benchReq = Get-BestBenchForType -Type $type
-            if ($benchReq) {
-                return [PSCustomObject]@{
-                    TimeSeconds = 2
-                    KnowledgeRequired = $false
-                    Input = @(
-                        @{ ItemId = "Ingredient_Stick"; Quantity = 2 },
-                        @{ ResourceTypeId = "Rubble"; Quantity = 2 }
-                    )
-                    BenchRequirement = $benchReq
-                }
+    if (@($normalizedBenches).Count -eq 0) {
+        $forcedBench = Resolve-BenchOverride -ItemId $ItemId -Data $Data
+        if ($forcedBench) {
+            $normalizedBenches = @($forcedBench)
+        } else {
+            $shape = Parse-ItemShape $ItemId
+            $itemClass = $shape[0]
+            $subType = $shape[1]
+            if ($itemClass -eq "weapon") {
+                $cat = if ($subType) { "Weapon_" + $subType.Substring(0,1).ToUpperInvariant() + $subType.Substring(1) } else { "Weapon_Generic" }
+                $normalizedBenches = @([PSCustomObject]@{ Id = "Weapon_Bench"; Type = "Crafting"; Categories = @($cat) })
+            } elseif ($itemClass -eq "armor") {
+                $slot = Get-ArmorSlot -ItemId $ItemId -Data $Data
+                $normalizedBenches = @([PSCustomObject]@{ Id = "Armor_Bench"; Type = "Crafting"; Categories = @(Get-ArmorCategoryForSlot -Slot $slot) })
+            } else {
+                $normalizedBenches = @([PSCustomObject]@{ Id = "Workbench"; Type = "Crafting"; Categories = @("Workbench_Tools") })
             }
         }
     }
 
     return [PSCustomObject]@{
-        TimeSeconds = 2
+        TimeSeconds = $timeSeconds
         KnowledgeRequired = $false
-        Input = @(
-            @{ ItemId = "Ingredient_Stick"; Quantity = 2 },
-            @{ ResourceTypeId = "Rubble"; Quantity = 2 }
-        )
-        BenchRequirement = @(
-            @{ Id = "Workbench"; Type = "Crafting"; Categories = @("Workbench_Crafting") }
-        )
+        Input = $normalizedInputs
+        BenchRequirement = $normalizedBenches
     }
 }
 
-function Get-TemplateBench {
-    param($entry)
-    $group = $entry.Dir
-    if ($groupBench.ContainsKey($group)) {
-        return $groupBench[$group]
+function Get-JsonCanonical {
+    param($Obj)
+    return (($Obj | ConvertTo-Json -Depth 100) -replace "`r`n", "`n")
+}
+
+function Get-ExistingJsonCanonical {
+    param([string]$Path)
+    if (-not (Test-Path $Path)) { return $null }
+    try {
+        $obj = Get-Content -Raw $Path | ConvertFrom-Json
+        return Get-JsonCanonical $obj
+    } catch {
+        return $null
     }
-    $tagTypes = Get-PropValue -Obj (Get-PropValue -Obj $entry.Data -Name "Tags") -Name "Type"
-    if ($tagTypes) {
-        foreach ($type in $tagTypes) {
-            $benchReq = Get-BestBenchForType -Type $type
-            if ($benchReq) { return $benchReq }
+}
+
+function Validate-Recipe {
+    param([string]$ItemId, $Recipe)
+
+    $issues = @()
+    if (-not $Recipe) {
+        $issues += "${ItemId}: missing Recipe object"
+        return $issues
+    }
+
+    $inputs = Ensure-Array (Get-PropValue -Obj $Recipe -Name "Input")
+    if (@($inputs).Count -eq 0) {
+        $issues += "${ItemId}: missing recipe inputs"
+    }
+    if (@($inputs).Count -lt 3 -or @($inputs).Count -gt 5) {
+        $issues += "${ItemId}: ingredient count must be between 3 and 5"
+    }
+    foreach ($input in $inputs) {
+        if (-not $input) {
+            $issues += "${ItemId}: null input entry"
+            continue
+        }
+        $itemRef = Get-PropValue -Obj $input -Name "ItemId"
+        $resourceRef = Get-PropValue -Obj $input -Name "ResourceTypeId"
+        $quantity = Get-PropValue -Obj $input -Name "Quantity"
+        if ([string]::IsNullOrWhiteSpace($itemRef) -and [string]::IsNullOrWhiteSpace($resourceRef)) {
+            $issues += "${ItemId}: input missing ItemId/ResourceTypeId"
+        }
+        if ($null -eq $quantity -or [int]$quantity -le 0) {
+            $issues += "${ItemId}: input quantity must be > 0"
         }
     }
-    return @(
-        @{ Id = "Workbench"; Type = "Crafting"; Categories = @("Workbench_Crafting") }
-    )
+
+    $output = Get-PropValue -Obj $Recipe -Name "Output"
+    if ($output) {
+        $outItemId = Get-PropValue -Obj $output -Name "ItemId"
+        $outQuantity = Get-PropValue -Obj $output -Name "Quantity"
+        if ([string]::IsNullOrWhiteSpace($outItemId)) {
+            $issues += "${ItemId}: malformed recipe output missing ItemId"
+        }
+        if ($null -ne $outQuantity -and [int]$outQuantity -le 0) {
+            $issues += "${ItemId}: malformed recipe output quantity must be > 0"
+        }
+    }
+
+    return $issues
 }
 
-$written = 0
-$skippedExisting = 0
-$fixedBench = 0
-$addedRecipe = 0
+$excludedIds = Load-ExcludedIds -FilePath $ExclusionListPath -CliIds $ExcludeIds
+if ($null -eq $excludedIds) {
+    $excludedIds = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+}
 
-foreach ($id in $overrides) {
-    $entry = $items[$id]
-    if (-not $entry) { continue }
+$allItems = @{}
+Get-ChildItem -Recurse -File -Path $itemsRoot -Filter *.json | ForEach-Object {
+    $id = $_.BaseName
+    try {
+        $data = Get-Content -Raw $_.FullName | ConvertFrom-Json
+    } catch {
+        return
+    }
+    $allItems[$id] = [PSCustomObject]@{
+        Id = $id
+        IdLower = To-NormalizedId $id
+        Path = $_.FullName
+        RelPath = $_.FullName.Substring($itemsRoot.Length + 1)
+        Data = $data
+    }
+}
+
+$eligibleItems = @()
+foreach ($entry in $allItems.Values) {
+    if (-not (Is-EligibleItemId $entry.Id)) { continue }
+    if (Is-ExcludedByPrefix $entry.Id) { continue }
+    if ($excludedIds.Contains($entry.IdLower)) { continue }
+    $eligibleItems += $entry
+}
+
+$recipeIdsSeen = @{}
+$duplicateRecipeIds = @()
+$missingIngredientRefs = @()
+$ingredientCountViolations = @()
+$malformedOutputs = @()
+$validationIssues = @()
+
+$generatedCount = 0
+$changedCount = 0
+$newCount = 0
+$unchangedCount = 0
+$skippedExistingCount = 0
+$writeCount = 0
+$prunedExcludedCount = 0
+$diffRows = @()
+
+if ($PruneExcluded -and -not $DryRun -and (Test-Path $OutputRoot)) {
+    Get-ChildItem -Recurse -File -Path $OutputRoot -Filter *.json | ForEach-Object {
+        $outputItemId = $_.BaseName
+        $outputItemIdLower = To-NormalizedId $outputItemId
+        if (-not (Is-EligibleItemId $outputItemId)) { return }
+        if (-not (Is-ExcludedByPrefix $outputItemId) -and -not $excludedIds.Contains($outputItemIdLower)) { return }
+        Remove-Item -Path $_.FullName -Force
+        $prunedExcludedCount++
+    }
+}
+
+foreach ($entry in ($eligibleItems | Sort-Object IdLower)) {
+    $sourceData = $entry.Data
+    $recipe = Normalize-Recipe (Get-PropValue -Obj $sourceData -Name "Recipe") -ItemId $entry.Id -Data $sourceData
+    $forcedBench = Resolve-BenchOverride -ItemId $entry.Id -Data $sourceData
+    if ($forcedBench) {
+        $recipe.BenchRequirement = @($forcedBench)
+    }
+    Set-PropValue -Obj $sourceData -Name "Recipe" -Value $recipe
+    Set-PropValue -Obj $sourceData -Name "Quality" -Value "Common"
+
+    $recipeId = Get-PropValue -Obj $recipe -Name "Id"
+    if ([string]::IsNullOrWhiteSpace($recipeId)) {
+        $recipeId = "generated:$($entry.IdLower)"
+    }
+    if ($recipeIdsSeen.ContainsKey($recipeId)) {
+        $duplicateRecipeIds += "$recipeId -> $($recipeIdsSeen[$recipeId]), $($entry.Id)"
+    } else {
+        $recipeIdsSeen[$recipeId] = $entry.Id
+    }
+
+    $issues = Validate-Recipe -ItemId $entry.Id -Recipe $recipe
+    foreach ($issue in $issues) {
+        $validationIssues += $issue
+        if ($issue.Contains("missing recipe inputs") -or $issue.Contains("input missing ItemId/ResourceTypeId")) {
+            $missingIngredientRefs += $issue
+        }
+        if ($issue.Contains("ingredient count must be between 3 and 5")) {
+            $ingredientCountViolations += $issue
+        }
+        if ($issue.Contains("malformed recipe output")) {
+            $malformedOutputs += $issue
+        }
+    }
+
     $targetPath = Join-Path $OutputRoot $entry.RelPath
-    if (Test-Path $targetPath) {
-        $skippedExisting++
+    $generatedJson = Get-JsonCanonical $sourceData
+    $existingJson = Get-ExistingJsonCanonical $targetPath
+
+    $status = "new"
+    if ($null -ne $existingJson) {
+        if ($existingJson -eq $generatedJson) {
+            $status = "unchanged"
+        } else {
+            $status = "changed"
+        }
+    }
+
+    switch ($status) {
+        "new" { $newCount++ }
+        "changed" { $changedCount++ }
+        "unchanged" { $unchangedCount++ }
+    }
+    $generatedCount++
+    $diffRows += "- [$status] $($entry.RelPath)"
+
+    if ($DryRun) { continue }
+
+    if ((Test-Path $targetPath) -and -not $Overwrite -and $status -eq "changed") {
+        $skippedExistingCount++
         continue
     }
-    $data = $entry.Data
-    $seen = @{}
-    $recipe = Get-EffectiveRecipe -Id $id -Seen $seen
-    if (-not $recipe) {
-        $template = Get-TemplateRecipe -entry $entry -id $id
-        $targetToken = Get-MaterialToken -data $data -id $id
-        $template = ApplyMaterialSubstitution -recipe $template -targetToken $targetToken
-        $template = Normalize-RecipeArrays -Recipe $template
-        Set-PropValue -Obj $data -Name "Recipe" -Value $template
-        $addedRecipe++
-    } else {
-        $benchReq = Get-PropValue -Obj $recipe -Name "BenchRequirement"
-        $badBench = $false
-        if (-not $benchReq -or (Get-CollectionCount $benchReq) -eq 0) { $badBench = $true }
-        if ($benchReq) {
-            foreach ($bench in @($benchReq)) {
-                $benchId = Get-PropValue -Obj $bench -Name "Id"
-                if (-not $benchId -or $benchId -eq "TODO") { $badBench = $true }
-            }
-        }
-        if ($badBench) {
-            Set-PropValue -Obj $recipe -Name "BenchRequirement" -Value (Ensure-Array (Get-TemplateBench -entry $entry))
-            $recipe = Normalize-RecipeArrays -Recipe $recipe
-            Set-PropValue -Obj $data -Name "Recipe" -Value $recipe
-            $fixedBench++
-        } else {
-            $recipe = Normalize-RecipeArrays -Recipe $recipe
-            Set-PropValue -Obj $data -Name "Recipe" -Value $recipe
-        }
-    }
+    if ($status -eq "unchanged") { continue }
 
     $dir = Split-Path $targetPath -Parent
     if (-not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
-    $json = $data | ConvertTo-Json -Depth 100
-    $json | Set-Content -Path $targetPath -Encoding ASCII
-    $written++
+    Write-TextNoBom -Path $targetPath -Content $generatedJson
+    $writeCount++
 }
 
 $reportLines = @()
-$reportLines += "# Crafting Audit (Hytale Base Assets)"
+$reportLines += "# RNG Crafting Recipe Generation Report"
 $reportLines += ""
+$reportLines += "Run mode: $(if ($DryRun) { "dry-run" } else { "write" })"
 $reportLines += "Assets root: $AssetsRoot"
+$reportLines += "Output root: $OutputRoot"
+$reportLines += "Eligible scope: item ids starting with weapon_/armor_/tool_"
 $reportLines += ""
 $reportLines += "## Summary"
-$reportLines += "- Items scanned: $($items.Count)"
-$reportLines += "- Items with no effective recipe: $($missing.Count)"
-$reportLines += "- Items with bench issues: $($benchIssues.Count)"
-$reportLines += "- Overrides written: $written"
-$reportLines += "- Overrides skipped (already existed in mod): $skippedExisting"
-$reportLines += "- Recipes added: $addedRecipe"
-$reportLines += "- Bench requirements fixed: $fixedBench"
+$reportLines += "- Eligible items discovered: $($eligibleItems.Count)"
+$reportLines += "- Overrides generated: $generatedCount"
+$reportLines += "- Diff new: $newCount"
+$reportLines += "- Diff changed: $changedCount"
+$reportLines += "- Diff unchanged: $unchangedCount"
+$reportLines += "- Writes applied: $writeCount"
+$reportLines += "- Existing changed overrides skipped (no -Overwrite): $skippedExistingCount"
+$reportLines += "- Excluded ids (explicit): $($excludedIds.Count)"
+$reportLines += "- Excluded files pruned from output: $prunedExcludedCount"
 $reportLines += ""
-$reportLines += "## Assumptions"
-$reportLines += "- If an item lacks a Recipe, copy a template recipe from the most common recipe in the same directory group; fallback to parent recipe if present."
-$reportLines += "- If no group or parent recipe is available, choose the most common bench requirement for the item's Tags.Type and use a basic input fallback (Stick + Rubble)."
-$reportLines += '- If a recipe has a BenchRequirement with Id "TODO" or no benches, replace it using the group or type-derived bench.'
-$reportLines += "- Material substitution only adjusts Ingredient_Bar_* inputs when the item id or Tags.Family contains a matching material token."
-$reportLines += "- Existing mod overrides are not overwritten."
+$reportLines += "## Baseline Defaults Enforced"
+$reportLines += "- Recipe.KnowledgeRequired = false"
+$reportLines += "- Quality = Common"
+$reportLines += "- Recipe arrays normalized (Input/BenchRequirement)"
 $reportLines += ""
-$reportLines += "## Notes"
-$reportLines += "- Crafting XP and gating remain driven by item ids and existing CraftingSkillRegistry rules."
+$reportLines += "## Sanity Checks"
+$reportLines += "- Missing ingredient refs: $($missingIngredientRefs.Count)"
+$reportLines += "- Ingredient count violations (must be 3..5): $($ingredientCountViolations.Count)"
+$reportLines += "- Malformed outputs: $($malformedOutputs.Count)"
+$reportLines += "- Duplicate recipe ids: $($duplicateRecipeIds.Count)"
+$reportLines += ""
+if ($validationIssues.Count -gt 0) {
+    $reportLines += "### Validation Issues"
+    $reportLines += ($validationIssues | Sort-Object -Unique)
+    $reportLines += ""
+}
+if ($duplicateRecipeIds.Count -gt 0) {
+    $reportLines += "### Duplicate Recipe IDs"
+    $reportLines += ($duplicateRecipeIds | Sort-Object -Unique)
+    $reportLines += ""
+}
+$reportLines += "## Dry-Run Diff"
+$reportLines += ($diffRows | Sort-Object)
 
 $reportDir = Split-Path $ReportPath -Parent
 if (-not (Test-Path $reportDir)) {
     New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
 }
-$reportLines | Set-Content -Path $ReportPath -Encoding ASCII
+Write-LinesNoBom -Path $ReportPath -Lines $reportLines
 
-Write-Output \"Audit complete. Overrides written: $written. Report: $ReportPath\"
+Write-Output "Recipe generation complete. Mode=$(if ($DryRun) { "dry-run" } else { "write" }), eligible=$($eligibleItems.Count), report=$ReportPath"

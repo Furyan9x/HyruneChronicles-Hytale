@@ -1,81 +1,99 @@
 {
-  "TranslationProperties": {
-    "Name": "server.items.Armor_Diving_Crude_Legs.name"
-  },
-  "Parent": "Armor_Iron_Legs",
-  "Recipe": {
-    "Input": [],
-    "BenchRequirement": [
-      {
-        "Id": "Workbench",
-        "Type": "Crafting",
-        "Categories": [
-          "Workbench_Tinkering"
-        ]
-      }
-    ]
-  },
-  "ItemLevel": 30,
-  "Icon": "Icons/ItemsGenerated/Armor_Diving_Crude_Legs.png",
-  "IconProperties": {
-    "Rotation": [
-      22.5,
-      45,
-      22.5
-    ],
-    "Scale": 0.465,
-    "Translation": [
-      -6.61,
-      -1.81
-    ]
-  },
-  "Model": "Items/Armors/Diving_Crude/Legs.blockymodel",
-  "Texture": "Items/Armors/Diving_Crude/Legs_Texture.png",
-  "Armor": {
-    "ArmorSlot": "Legs",
-    "BaseDamageResistance": 0,
-    "DamageResistance": {
-      "Physical": [
-        {
-          "Amount": 0.07,
-          "CalculationType": "Multiplicative"
-        }
-      ],
-      "Projectile": [
-        {
-          "Amount": 0.07,
-          "CalculationType": "Multiplicative"
-        }
-      ]
-    },
-    "StatModifiers": {
-      "Oxygen": [
-        {
-          "Amount": 100,
-          "CalculationType": "Additive"
-        }
-      ],
-      "Health": [
-        {
-          "Amount": 13,
-          "CalculationType": "Additive"
-        }
-      ]
-    },
-    "CosmeticsToHide": [
-      "Pants",
-      "Shoes",
-      "Overpants"
-    ]
-  },
-  "Tags": {
-    "Type": [
-      "Armor"
-    ],
-    "Family": [
-      "Diving"
-    ]
-  },
-  "MaxDurability": 120,
-  "Quality": "Uncommon"
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Armor_Diving_Crude_Legs.name"
+                              },
+    "Parent":  "Armor_Iron_Legs",
+    "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Armor_Bench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Armor_Legs"
+                                                               ]
+                                            }
+                                        ]
+               },
+    "ItemLevel":  30,
+    "Icon":  "Icons/ItemsGenerated/Armor_Diving_Crude_Legs.png",
+    "IconProperties":  {
+                           "Rotation":  [
+                                            22.5,
+                                            45,
+                                            22.5
+                                        ],
+                           "Scale":  0.465,
+                           "Translation":  [
+                                               -6.61,
+                                               -1.81
+                                           ]
+                       },
+    "Model":  "Items/Armors/Diving_Crude/Legs.blockymodel",
+    "Texture":  "Items/Armors/Diving_Crude/Legs_Texture.png",
+    "Armor":  {
+                  "ArmorSlot":  "Legs",
+                  "BaseDamageResistance":  0,
+                  "DamageResistance":  {
+                                           "Physical":  [
+                                                            {
+                                                                "Amount":  0.07,
+                                                                "CalculationType":  "Multiplicative"
+                                                            }
+                                                        ],
+                                           "Projectile":  [
+                                                              {
+                                                                  "Amount":  0.07,
+                                                                  "CalculationType":  "Multiplicative"
+                                                              }
+                                                          ]
+                                       },
+                  "StatModifiers":  {
+                                        "Oxygen":  [
+                                                       {
+                                                           "Amount":  100,
+                                                           "CalculationType":  "Additive"
+                                                       }
+                                                   ],
+                                        "Health":  [
+                                                       {
+                                                           "Amount":  13,
+                                                           "CalculationType":  "Additive"
+                                                       }
+                                                   ]
+                                    },
+                  "CosmeticsToHide":  [
+                                          "Pants",
+                                          "Shoes",
+                                          "Overpants"
+                                      ]
+              },
+    "Tags":  {
+                 "Type":  [
+                              "Armor"
+                          ],
+                 "Family":  [
+                                "Diving"
+                            ]
+             },
+    "MaxDurability":  120,
+    "Quality":  "Common"
 }

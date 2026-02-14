@@ -1,0 +1,124 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+  $C.@DecoratedContainer {
+    Anchor: (Width: 430, Height: 520);
+
+    #Title {
+      Group {
+        Label #SocialTargetName {
+          Text: "Player";
+          Anchor: (Left: 0, Right: 0, Height: 30);
+          Style: (FontSize: 20, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        }
+
+        TextButton #BtnClose {
+          Anchor: (Right: 0, Top: 3, Width: 30, Height: 25);
+          Text: "X";
+        }
+      }
+    }
+
+    #Content {
+      LayoutMode: Top;
+      Padding: (Top: 8, Left: 18, Right: 18, Bottom: 18);
+
+      Group {
+        LayoutMode: Top;
+        Anchor: (Height: 54, Left: 0, Right: 0);
+        Background: #0c1d2d(0.8);
+        Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+        Label {
+          Text: "RELATIONSHIP";
+          Anchor: (Height: 12);
+          Style: (FontSize: 10, TextColor: #d9c6a5, RenderUppercase: true, RenderBold: true, LetterSpacing: 1, HorizontalAlignment: Center);
+        }
+        Group { Anchor: (Height: 4); }
+        Label #SocialRelationship {
+          Text: "No social relationship";
+          Anchor: (Height: 18);
+          Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+        }
+      }
+
+      Group { Anchor: (Height: 10); }
+
+      Group {
+        LayoutMode: Top;
+        Anchor: (Left: 0, Right: 0, Height: 318);
+        Background: #000000(0.25);
+        Padding: (Top: 10, Left: 12, Right: 12, Bottom: 10);
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          TextButton #BtnTrade { Anchor: (Width: 184, Height: 28); Text: "Trade"; Style: $C.@DefaultTextButtonStyle; }
+          Group { FlexWeight: 1; }
+          TextButton #BtnInspect { Anchor: (Width: 184, Height: 28); Text: "Inspect"; Style: $C.@DefaultTextButtonStyle; }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          TextButton #BtnInvite { Anchor: (Width: 184, Height: 28); Text: "Invite"; Style: $C.@DefaultTextButtonStyle; }
+          Group { FlexWeight: 1; }
+          TextButton #BtnAddFriend { Anchor: (Width: 184, Height: 28); Text: "Add Friend"; Style: $C.@DefaultTextButtonStyle; }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          TextButton #BtnAcceptFriend { Anchor: (Width: 184, Height: 28); Text: "Accept Request"; Style: $C.@DefaultTextButtonStyle; Visible: false; }
+          Group { FlexWeight: 1; }
+          TextButton #BtnDenyFriend { Anchor: (Width: 184, Height: 28); Text: "Deny Request"; Style: $C.@DefaultTextButtonStyle; Visible: false; }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          TextButton #BtnRemoveFriend { Anchor: (Width: 184, Height: 28); Text: "Remove Friend"; Style: $C.@DefaultTextButtonStyle; Visible: false; }
+          Group { FlexWeight: 1; }
+          TextButton #BtnIgnore { Anchor: (Width: 184, Height: 28); Text: "Ignore"; Style: $C.@DefaultTextButtonStyle; }
+        }
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 28);
+          Group { FlexWeight: 1; }
+          TextButton #BtnUnignore { Anchor: (Width: 184, Height: 28); Text: "Unignore"; Style: $C.@DefaultTextButtonStyle; Visible: false; }
+          Group { FlexWeight: 1; }
+        }
+
+        Group { Anchor: (Height: 10); }
+        Group { Anchor: (Height: 1, Left: 0, Right: 0); Background: #ffffff(0.15); }
+        Group { Anchor: (Height: 8); }
+
+        Label #AdminHeader {
+          Text: "ADMIN";
+          Anchor: (Height: 14, Left: 0, Right: 0);
+          Style: (FontSize: 10, TextColor: #d9c6a5, RenderUppercase: true, RenderBold: true, LetterSpacing: 1);
+        }
+        Group { Anchor: (Height: 4); }
+        Label #AdminPlaceholder {
+          Text: "No admin actions configured.";
+          Anchor: (Height: 16, Left: 0, Right: 0);
+          Style: (FontSize: 11, TextColor: #b5bfd3, HorizontalAlignment: Center);
+        }
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Label #SocialHint {
+        Text: "Tip: Look at a player and press F to open this menu.";
+        Anchor: (Height: 16, Left: 0, Right: 0);
+        Style: (FontSize: 10, TextColor: #9fb0c5, HorizontalAlignment: Center);
+      }
+    }
+  }
+}
+

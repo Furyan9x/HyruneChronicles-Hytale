@@ -61,7 +61,7 @@
              },
     "Scale":  0.6,
     "ItemSoundSetId":  "ISS_Blocks_Wood",
-    "Quality":  "Technical",
+    "Quality":  "Common",
     "Recipe":  {
                    "TimeSeconds":  2,
                    "KnowledgeRequired":  false,

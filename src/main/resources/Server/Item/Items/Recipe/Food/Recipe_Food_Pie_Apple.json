@@ -4,7 +4,7 @@
                                   "Description":  "server.items.Recipe_Food_Pie_Apple.description"
                               },
     "Icon":  "Icons/ItemsGenerated/Recipe_Food_Pie_Apple.png",
-    "Quality":  "Rare",
+    "Quality":  "Common",
     "Categories":  [
                        "Items.Recipes"
                    ],

@@ -1,0 +1,55 @@
+$C = "../Common.ui";
+
+@RowText = LabelStyle(FontSize: 14, TextColor: #f7e9cd, VerticalAlignment: Center, HorizontalAlignment: Start);
+@RowSub = LabelStyle(FontSize: 12, TextColor: #c4ccd6, VerticalAlignment: Center, HorizontalAlignment: Start);
+
+Group {
+  LayoutMode: Top;
+  Anchor: (Width: 760, Height: 64);
+
+  Group {
+    LayoutMode: Left;
+    Anchor: (Width: 760, Height: 58);
+    Background: #000000(0.35);
+    Padding: (Left: 12, Right: 12, Top: 6);
+
+    Group {
+      LayoutMode: Top;
+      Anchor: (Width: 540, Height: 48);
+
+      Label #ReceiverName {
+        Anchor: (Height: 20, Left: 0, Right: 0);
+        Style: @RowText;
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Height: 20, Left: 0, Right: 0);
+
+        Label #ReceiverRarity {
+          Anchor: (Width: 180, Height: 20);
+          Style: @RowSub;
+        }
+
+        Label #ReceiverCatalyst {
+          Anchor: (Width: 180, Height: 20);
+          Style: @RowSub;
+        }
+      }
+    }
+
+    Group { FlexWeight: 1; }
+
+    Group {
+      LayoutMode: Center;
+      Anchor: (Width: 140, Height: 48);
+
+      TextButton #ReceiverButton {
+        Anchor: (Width: 120, Height: 30);
+        Text: "Use";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+    }
+  }
+}
+

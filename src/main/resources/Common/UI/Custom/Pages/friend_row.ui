@@ -1,0 +1,48 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 42, Left: 0, Right: 0);
+  Padding: (Left: 6, Right: 6, Top: 4, Bottom: 4);
+  Background: #0d1f30(0.75);
+
+  Group {
+    LayoutMode: Top;
+    FlexWeight: 1;
+
+    Label #FriendName {
+      Text: "Friend";
+      Anchor: (Height: 16);
+      Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center);
+    }
+    Label #FriendStatus {
+      Text: "Offline";
+      Anchor: (Height: 14);
+      Style: (FontSize: 10, TextColor: #9fb0c5, VerticalAlignment: Center);
+    }
+  }
+
+  Button #FriendInteractBtn {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 88, Height: 24);
+    Style: $C.@SecondaryButtonStyle;
+
+    Label {
+      Text: "Interact";
+      Style: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+
+  Group { Anchor: (Width: 6); }
+
+  Button #FriendRemoveBtn {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 78, Height: 24);
+    Style: $C.@SecondaryButtonStyle;
+
+    Label {
+      Text: "Remove";
+      Style: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+}

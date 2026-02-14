@@ -1,0 +1,56 @@
+{
+    "TranslationProperties":  {
+                                  "Name":  "server.items.Tool_Hoe_Thorium.name"
+                              },
+    "Parent":  "Tool_Hoe_Crude",
+    "Icon":  "Icons/ItemsGenerated/Tool_Hoe_Thorium.png",
+    "Quality":  "Common",
+    "MaxStack":  1,
+    "ItemLevel":  4,
+    "Model":  "Items/Tools/Hoe/Thorium.blockymodel",
+    "Texture":  "Items/Tools/Hoe/Thorium_Texture.png",
+    "Recipe":  {
+                   "TimeSeconds":  2.5,
+                   "KnowledgeRequired":  false,
+                   "Input":  [
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Wood_Trunk",
+                                     "Quantity":  4
+                                 },
+                                 {
+                                     "ItemId":  "Ingredient_Bar_Thorium",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  3
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
+                                 }
+                             ],
+                   "BenchRequirement":  [
+                                            {
+                                                "Id":  "Farmingbench",
+                                                "Type":  "Crafting",
+                                                "Categories":  [
+                                                                   "Farming"
+                                                               ],
+                                                "RequiredTierLevel":  6
+                                            }
+                                        ]
+               },
+    "MaxDurability":  400,
+    "IconProperties":  {
+                           "Scale":  0.45,
+                           "Rotation":  [
+                                            45,
+                                            300,
+                                            0
+                                        ],
+                           "Translation":  [
+                                               28.2,
+                                               -25.2
+                                           ]
+                       }
+}

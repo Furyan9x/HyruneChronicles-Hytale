@@ -13,29 +13,33 @@
                   "Color":  "#521"
               },
     "Recipe":  {
-                   "TimeSeconds":  3,
+                   "TimeSeconds":  2,
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Bar_Copper",
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  },
                                  {
-                                     "ResourceTypeId":  "Wood_Trunk",
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Fibre",
-                                     "Quantity":  3
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Armor_Bench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Weapon_Shield"
                                                                ],
-                                                "Id":  "Armor_Bench"
+                                                "RequiredTierLevel":  2
                                             }
                                         ]
                }

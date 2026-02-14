@@ -171,46 +171,118 @@ $C.@PageOverlay {
           Anchor: (Height: 20);
           Style: (FontSize: 12, TextColor: #AAAAAA, RenderBold: true, RenderUppercase: true, LetterSpacing: 2);
         }
-        Group { Anchor: (Height: 8); }
-        // ... (Server Info Content kept concise for brevity, assuming it was correct) ...
-        Group {
+        Group { Anchor: (Height: 10); }
+
+        Group #ServerInfoTopBanner {
           LayoutMode: Left;
-          Anchor: (Height: 18);
-          Label { Text: "Players Online"; Style: (FontSize: 12, TextColor: #AAAAAA); }
-          Group { FlexWeight: 1; }
-          Label #ServerInfoPlayersOnline { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+          Anchor: (Height: 72, Left: 0, Right: 0);
+          Background: #0d1623(0.75);
+          Padding: (Left: 10, Right: 10, Top: 8, Bottom: 8);
+
+          Group {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Label { Text: "PLAYERS ONLINE"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, HorizontalAlignment: Center); }
+            Group { Anchor: (Height: 4); }
+            Label #ServerInfoPlayersOnline { Text: "-"; Style: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); }
+          }
+
+          Group { Anchor: (Width: 1, Top: 4, Bottom: 4); Background: #ffffff(0.15); }
+
+          Group {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Label { Text: "SERVER TIME"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, HorizontalAlignment: Center); }
+            Group { Anchor: (Height: 4); }
+            Label #ServerInfoServerTime { Text: "-"; Style: (FontSize: 16, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center); }
+          }
+
+          Group { Anchor: (Width: 1, Top: 4, Bottom: 4); Background: #ffffff(0.15); }
+
+          Group {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Label { Text: "SERVER DATE"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, HorizontalAlignment: Center); }
+            Group { Anchor: (Height: 4); }
+            Label #ServerInfoServerDate { Text: "-"; Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); }
+          }
+
+          Group { Anchor: (Width: 1, Top: 4, Bottom: 4); Background: #ffffff(0.15); }
+
+          Group {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Label { Text: "NEXT RESTART"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, HorizontalAlignment: Center); }
+            Group { Anchor: (Height: 4); }
+            Label #ServerInfoNextRestart { Text: "-"; Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); }
+          }
         }
-        Group { Anchor: (Height: 6); }
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 18);
-          Label { Text: "Server Time"; Style: (FontSize: 12, TextColor: #AAAAAA); }
-          Group { FlexWeight: 1; }
-          Label #ServerInfoServerTime { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+
+        Group { Anchor: (Height: 12); }
+
+        Group #ServerInfoEventCard {
+          LayoutMode: Top;
+          Anchor: (Height: 130, Left: 0, Right: 0);
+          Background: #000000(0.28);
+          Padding: (Top: 10, Left: 12, Right: 12, Bottom: 10);
+
+          Label {
+            Text: "CURRENT EVENT STATUS";
+            Anchor: (Height: 16);
+            Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+          }
+          Group { Anchor: (Height: 6); }
+
+          Label #ServerInfoEventStatus {
+            Text: "No event active";
+            Anchor: (Height: 22);
+            Style: (FontSize: 16, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center);
+          }
+          Group { Anchor: (Height: 6); }
+
+          Group { Anchor: (Height: 1, Left: 0, Right: 0); Background: #f2d38a(0.4); }
+          Group { Anchor: (Height: 8); }
+
+          Label #ServerInfoEventDescription {
+            Text: "No event is currently active. Check this panel for upcoming world events.";
+            Anchor: (Left: 0, Right: 0);
+            Style: (FontSize: 12, TextColor: #f7e9cd, Wrap: true, HorizontalAlignment: Center);
+          }
         }
-        Group { Anchor: (Height: 6); }
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 18);
-          Label { Text: "Local Time"; Style: (FontSize: 12, TextColor: #AAAAAA); }
-          Group { FlexWeight: 1; }
-          Label #ServerInfoLocalTime { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+
+        Group { Anchor: (Height: 10); }
+
+        Group #ServerInfoCommandsCard {
+          LayoutMode: Top;
+          Anchor: (Height: 90, Left: 0, Right: 0);
+          Background: #000000(0.25);
+          Padding: (Top: 8, Left: 12, Right: 12, Bottom: 8);
+
+          Label {
+            Text: "USEFUL COMMANDS";
+            Anchor: (Height: 16);
+            Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+          }
+          Group { Anchor: (Height: 6); }
+
+          Group {
+            LayoutMode: Top;
+            Anchor: (Height: 46, Left: 0, Right: 0);
+            Background: #111b2a(0.85);
+            Padding: (Top: 6, Left: 10, Right: 10, Bottom: 6);
+
+            Label { Text: "Open Character Menu"; Style: (FontSize: 11, TextColor: #b9c9e8, HorizontalAlignment: Center); }
+            Group { Anchor: (Height: 3); }
+            Label { Text: "/c   /char   /character"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); }
+          }
         }
-        Group { Anchor: (Height: 6); }
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 18);
-          Label { Text: "Server Date"; Style: (FontSize: 12, TextColor: #AAAAAA); }
-          Group { FlexWeight: 1; }
-          Label #ServerInfoServerDate { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
-        }
-        Group { Anchor: (Height: 6); }
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 18);
-          Label { Text: "Server Zone"; Style: (FontSize: 12, TextColor: #AAAAAA); }
-          Group { FlexWeight: 1; }
-          Label #ServerInfoServerZone { Text: "-"; Anchor: (Width: 120); Style: (FontSize: 12, TextColor: #FFFFFF); }
+
+        Group { FlexWeight: 1; }
+
+        Label #ServerInfoPatchVersion {
+          Text: "Patch: -";
+          Anchor: (Height: 14, Left: 0, Right: 0);
+          Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
         }
       }
 
@@ -647,7 +719,126 @@ $C.@PageOverlay {
         }
       }
 
-      Group #TabFriends { LayoutMode: Top; Visible: false; }
+      Group #TabFriends {
+        LayoutMode: Top;
+        Visible: false;
+
+        Group {
+          LayoutMode: Top;
+          Anchor: (Height: 54, Left: 0, Right: 0);
+          Background: #0d1f30(0.8);
+          Padding: (Top: 8, Left: 10, Right: 10, Bottom: 8);
+
+          Label {
+            Text: "FRIENDS LIST";
+            Anchor: (Height: 14);
+            Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1, HorizontalAlignment: Center);
+          }
+          Group { Anchor: (Height: 4); }
+          Label #FriendsPromptLabel {
+            Text: "Look at a player and press F to interact.";
+            Anchor: (Height: 16);
+            Style: (FontSize: 11, TextColor: #f7e9cd, HorizontalAlignment: Center);
+          }
+          Group { Anchor: (Height: 2); }
+          Label #FriendsSummaryLabel {
+            Text: "Friends: 0 | Online: 0 | Requests: 0";
+            Anchor: (Height: 14);
+            Style: (FontSize: 10, TextColor: #9fb0c5, HorizontalAlignment: Center);
+          }
+        }
+
+        Group { Anchor: (Height: 8); }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 356, Left: 0, Right: 0);
+
+          Group #FriendsColumn {
+            LayoutMode: Top;
+            Anchor: (Width: 380);
+            Background: #000000(0.25);
+            Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+            Label {
+              Text: "FRIENDS";
+              Anchor: (Height: 14);
+              Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+            }
+            Group { Anchor: (Height: 6); }
+
+            Group #FriendsListScroll {
+              LayoutMode: TopScrolling;
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Padding: (Right: 6);
+
+              Group #FriendsList {
+                LayoutMode: Top;
+                Anchor: (Left: 0, Right: 0);
+              }
+            }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #FriendsRightColumn {
+            LayoutMode: Top;
+            Anchor: (Width: 290);
+
+            Group {
+              LayoutMode: Top;
+              Anchor: (Height: 172, Left: 0, Right: 0);
+              Background: #000000(0.25);
+              Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+              Label {
+                Text: "INCOMING REQUESTS";
+                Anchor: (Height: 14);
+                Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+              }
+              Group { Anchor: (Height: 6); }
+
+              Group #FriendRequestsScroll {
+                LayoutMode: TopScrolling;
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Padding: (Right: 6);
+
+                Group #FriendRequestsList {
+                  LayoutMode: Top;
+                  Anchor: (Left: 0, Right: 0);
+                }
+              }
+            }
+
+            Group { Anchor: (Height: 10); }
+
+            Group {
+              LayoutMode: Top;
+              Anchor: (Height: 174, Left: 0, Right: 0);
+              Background: #000000(0.25);
+              Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+              Label {
+                Text: "IGNORED";
+                Anchor: (Height: 14);
+                Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+              }
+              Group { Anchor: (Height: 6); }
+
+              Group #IgnoredListScroll {
+                LayoutMode: TopScrolling;
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Padding: (Right: 6);
+
+                Group #IgnoredList {
+                  LayoutMode: Top;
+                  Anchor: (Left: 0, Right: 0);
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     // --- FOOTER (Global Stats) ---

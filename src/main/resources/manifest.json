@@ -1,8 +1,8 @@
 {
   "Group": "dev.hytalemodding",
-  "Name": "Origins",
-  "Version": "1.0.0",
-  "Description": "A System for gaining XP and Leveling Up",
+  "Name": "Hyrune Chronicles",
+  "Version": "0.0.8",
+  "Description": "Hyrune Chronicles RPG progression, itemization, and crafting systems",
   "Authors": [
     {
       "Name": "Sozen92",
@@ -16,5 +16,6 @@
   "OptionalDependencies": {},
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
-  "Main": "dev.hytalemodding.Origins"
+  "Main": "dev.hytalemodding.Hyrune"
 }
+

@@ -32,30 +32,34 @@
     "ItemSoundSetId":  "ISS_Weapons_Wood",
     "MaxStack":  25,
     "Recipe":  {
-                   "TimeSeconds":  1,
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "ItemId":  "Ingredient_Fabric_Scrap_Linen",
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Bar_Iron",
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  1
                                  },
                                  {
-                                     "ItemId":  "Ingredient_Leather_Light",
-                                     "Quantity":  1
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
-                   "OutputQuantity":  1,
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Workbench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Workbench_Tools"
-                                                               ],
-                                                "Id":  "Workbench"
+                                                               ]
                                             }
                                         ]
-               }
+               },
+    "Quality":  "Common"
 }

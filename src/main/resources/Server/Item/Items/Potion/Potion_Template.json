@@ -2,7 +2,7 @@
     "TranslationProperties":  {
                                   "Name":  "server.items.Potion_Health.name"
                               },
-    "Quality":  "Template",
+    "Quality":  "Common",
     "PlayerAnimationsId":  {
                                "Parent":  "Item",
                                "Animations":  {

@@ -22,30 +22,33 @@
     "Texture":  "Items/Armors/Leather_Light/Hands_Texture.png",
     "Recipe":  {
                    "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
                                      "ItemId":  "Ingredient_Bolt_Wool",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  },
                                  {
+                                     "ItemId":  null,
                                      "ResourceTypeId":  "Wood_Trunk",
                                      "Quantity":  1
                                  },
                                  {
                                      "ItemId":  "Ingredient_Bar_Copper",
+                                     "ResourceTypeId":  null,
                                      "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Arcanebench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
-                                                                   "Armor_Hands"
-                                                               ],
-                                                "Id":  "Armor_Bench",
-                                                "Type":  "Crafting"
+                                                                   "Arcane_Armor_Hands"
+                                                               ]
                                             }
-                                        ],
-                   "KnowledgeRequired":  false
+                                        ]
                },
     "Armor":  {
                   "ArmorSlot":  "Hands",

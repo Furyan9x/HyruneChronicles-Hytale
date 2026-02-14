@@ -6,30 +6,33 @@
     "Model":  "Items/Tools/Hatchet/Onyxium.blockymodel",
     "Texture":  "Items/Tools/Hatchet/Onyxium_Texture.png",
     "Recipe":  {
+                   "TimeSeconds":  2,
+                   "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "Quantity":  7,
-                                     "ItemId":  "Ingredient_Bar_Onyxium"
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
-                                     "Quantity":  2,
-                                     "ItemId":  "Ingredient_Leather_Heavy"
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
                                  },
                                  {
-                                     "Quantity":  4,
-                                     "ItemId":  "Ingredient_Fabric_Scrap_Shadoweave"
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
-                   "TimeSeconds":  4,
-                   "KnowledgeRequired":  false,
                    "BenchRequirement":  [
                                             {
+                                                "Id":  "Workbench",
+                                                "Type":  "Crafting",
                                                 "Categories":  [
                                                                    "Workbench_Tools"
                                                                ],
-                                                "RequiredTierLevel":  3,
-                                                "Id":  "Workbench",
-                                                "Type":  "Crafting"
+                                                "RequiredTierLevel":  2
                                             }
                                         ]
                },
@@ -106,5 +109,5 @@
              },
     "Icon":  "Icons/ItemsGenerated/Tool_Hatchet_Onyxium.png",
     "MaxDurability":  450,
-    "Quality":  "Epic"
+    "Quality":  "Common"
 }

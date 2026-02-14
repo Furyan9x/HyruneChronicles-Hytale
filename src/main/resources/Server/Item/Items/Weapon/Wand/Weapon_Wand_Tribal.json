@@ -137,20 +137,27 @@
                    "KnowledgeRequired":  false,
                    "Input":  [
                                  {
-                                     "Quantity":  2,
-                                     "ItemId":  "Ingredient_Stick"
+                                     "ItemId":  "Ingredient_Stick",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  2
                                  },
                                  {
-                                     "Quantity":  2,
-                                     "ResourceTypeId":  "Rubble"
+                                     "ItemId":  "Ingredient_Leather_Light",
+                                     "ResourceTypeId":  null,
+                                     "Quantity":  1
+                                 },
+                                 {
+                                     "ItemId":  null,
+                                     "ResourceTypeId":  "Rubble",
+                                     "Quantity":  2
                                  }
                              ],
                    "BenchRequirement":  [
                                             {
-                                                "Id":  "Weapon_Bench",
+                                                "Id":  "Arcanebench",
                                                 "Type":  "Crafting",
                                                 "Categories":  [
-                                                                   "Weapon_Longsword"
+                                                                   "Arcane_Weapons"
                                                                ]
                                             }
                                         ]
