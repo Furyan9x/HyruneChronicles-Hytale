@@ -23,15 +23,20 @@ public final class ItemInstanceMetadataMigration {
         if (metadata.getRarity() == null) {
             metadata.setRarity(ItemRarity.COMMON);
         }
-        if (metadata.getCatalyst() == null) {
-            metadata.setCatalyst(CatalystAffinity.NONE);
+        if (metadata.getPrefixRaw() == null || metadata.getPrefixRaw().isBlank()) {
+            metadata.setPrefixRaw("");
         }
         if (metadata.getSource() == null) {
             metadata.setSource(ItemRollSource.CRAFTED);
         }
+        if (metadata.getSocketCapacity() <= 0) {
+            metadata.setSocketCapacity(GemSocketConfigHelper.socketsForRarity(metadata.getRarity()));
+        }
+        metadata.setSocketedGems(metadata.getSocketedGems());
         metadata.setStatFlatRollsRaw(metadata.getStatFlatRollsRaw());
         metadata.setStatPercentRollsRaw(metadata.getStatPercentRollsRaw());
 
         return metadata;
     }
 }
+

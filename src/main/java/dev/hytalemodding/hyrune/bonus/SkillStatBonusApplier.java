@@ -26,6 +26,9 @@ public final class SkillStatBonusApplier {
     public static final float MANA_MAX_PER_MAGIC = 7.0f;
     public static final float STAMINA_MAX_PER_AGILITY = 40.0f / 99.0f;
     public static final float MOVEMENT_SPEED_BONUS_AT_99 = 0.35f;
+    public static final float ITEM_MOVEMENT_SPEED_SOFT_CAP = 0.20f;
+    public static final float ITEM_MOVEMENT_SPEED_HARD_CAP = 0.30f;
+    public static final float ITEM_MOVEMENT_SPEED_OVERFLOW_SCALE = 0.25f;
 
     public static final float MANA_REGEN_PER_MAGIC = 0.2f;
     public static final float STAMINA_REGEN_PER_AGILITY = 1.0f / 99.0f;
@@ -75,10 +78,8 @@ public final class SkillStatBonusApplier {
         LevelingService service = Hyrune.getService();
         int agility = service.getSkillLevel(playerRef.getUuid(), SkillType.AGILITY);
         var itemStats = PlayerItemizationStatsService.getCached(playerRef.getUuid());
-        float agilityBonus = (agility / 99.0f) * MOVEMENT_SPEED_BONUS_AT_99;
-        float utilityBonus = (float) itemStats.getItemUtilityMoveSpeedBonus();
-        float speedStyleBonus = (float) (itemStats.getItemAttackSpeedBonus() * 0.15f
-            + itemStats.getItemCastSpeedBonus() * 0.10f);
+        float agilityBonus = computeAgilityMovementSpeedBonus(agility);
+        float utilityBonus = applyItemMovementSpeedSoftCap(itemStats.getItemUtilityMoveSpeedBonus());
 
         float defaultBaseSpeed = movementManager.getDefaultSettings().baseSpeed;
         if (defaultBaseSpeed < 0.1f) {
@@ -88,11 +89,25 @@ public final class SkillStatBonusApplier {
         float packMultiplier = TradePackUtils.hasTradePack(playerRef)
             ? TradePackUtils.TRADE_PACK_SPEED_MULTIPLIER
             : 1.0f;
-        float speedMultiplier = Math.max(0.1f, 1.0f + agilityBonus + utilityBonus + speedStyleBonus);
+        float speedMultiplier = Math.max(0.1f, 1.0f + agilityBonus + utilityBonus);
         movementManager.getSettings().baseSpeed = defaultBaseSpeed * speedMultiplier * packMultiplier;
         if (playerRef.getPacketHandler() != null) {
             movementManager.update(playerRef.getPacketHandler());
         }
+    }
+
+    public static float applyItemMovementSpeedSoftCap(double rawItemMoveSpeedBonus) {
+        float raw = (float) rawItemMoveSpeedBonus;
+        if (raw <= ITEM_MOVEMENT_SPEED_SOFT_CAP) {
+            return raw;
+        }
+        float overflow = raw - ITEM_MOVEMENT_SPEED_SOFT_CAP;
+        float softened = ITEM_MOVEMENT_SPEED_SOFT_CAP + (overflow * ITEM_MOVEMENT_SPEED_OVERFLOW_SCALE);
+        return Math.min(ITEM_MOVEMENT_SPEED_HARD_CAP, softened);
+    }
+
+    public static float computeAgilityMovementSpeedBonus(int agilityLevel) {
+        return (agilityLevel / 99.0f) * MOVEMENT_SPEED_BONUS_AT_99;
     }
 
     public static void apply(@Nullable Holder<EntityStore> holder, @Nullable UUID uuid) {

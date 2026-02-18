@@ -8,7 +8,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.hyrune.itemization.ItemGenerationDiagnostics;
+import dev.hytalemodding.hyrune.itemization.ItemGenerationService;
 
 import javax.annotation.Nonnull;
 
@@ -26,11 +26,10 @@ public class ItemDiagCommand extends AbstractPlayerCommand {
                            @Nonnull Ref<EntityStore> ref,
                            @Nonnull PlayerRef playerRef,
                            @Nonnull World world) {
-        ctx.sendMessage(Message.raw("[ItemDiag] generation.attempts=" + ItemGenerationDiagnostics.attemptsBySourceSnapshot()
-            + ", ineligible=" + ItemGenerationDiagnostics.ineligibleBySourceSnapshot()
-            + ", alreadyRolled=" + ItemGenerationDiagnostics.alreadyRolledBySourceSnapshot()
-            + ", rolled=" + ItemGenerationDiagnostics.rolledBySourceSnapshot()));
-        ctx.sendMessage(Message.raw("[ItemDiag] generation.rolledByRarity=" + ItemGenerationDiagnostics.rolledBySourceAndRaritySnapshot()));
+        ctx.sendMessage(Message.raw("[ItemDiag] generation.attempts=" + ItemGenerationService.Diagnostics.attemptsBySourceSnapshot()
+            + ", ineligible=" + ItemGenerationService.Diagnostics.ineligibleBySourceSnapshot()
+            + ", alreadyRolled=" + ItemGenerationService.Diagnostics.alreadyRolledBySourceSnapshot()
+            + ", rolled=" + ItemGenerationService.Diagnostics.rolledBySourceSnapshot()));
+        ctx.sendMessage(Message.raw("[ItemDiag] generation.rolledByRarity=" + ItemGenerationService.Diagnostics.rolledBySourceAndRaritySnapshot()));
     }
 }
-

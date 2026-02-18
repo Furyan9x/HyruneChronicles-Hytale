@@ -31,6 +31,7 @@ public final class HyruneVirtualItemRegistry {
 
     public static final String VIRTUAL_SEPARATOR = "__hyrunedtt_";
     private static final String DESCRIPTION_KEY_PREFIX = "server.tooltip.dynamic.description.";
+    private static final String NAME_KEY_PREFIX = "server.tooltip.dynamic.name.";
 
     private final Map<String, ItemBase> virtualItemCache =
         Collections.synchronizedMap(new LruCache<>(10_000));
@@ -64,6 +65,10 @@ public final class HyruneVirtualItemRegistry {
 
     public static String getVirtualDescriptionKey(String virtualId) {
         return DESCRIPTION_KEY_PREFIX + virtualId;
+    }
+
+    public static String getVirtualNameKey(String virtualId) {
+        return NAME_KEY_PREFIX + virtualId;
     }
 
     public ItemBase getOrCreateVirtualItemBase(String baseItemId, String virtualId, ItemRarity rarity) {
@@ -127,6 +132,15 @@ public final class HyruneVirtualItemRegistry {
         return originalDescriptionCache.computeIfAbsent(cacheKey, ignored -> resolveOriginalDescription(itemId, safeLanguage));
     }
 
+    public String getOriginalName(String itemId, String language) {
+        String safeLanguage = language == null || language.isBlank() ? I18nModule.DEFAULT_LANGUAGE : language;
+        String localized = resolveLocalizedName(itemId, safeLanguage);
+        if (localized != null && !localized.isBlank()) {
+            return localized;
+        }
+        return humanizeItemId(itemId);
+    }
+
     public void onPlayerLeave(UUID playerUuid) {
         sentToPlayer.remove(playerUuid);
         playerSlotVirtualIds.remove(playerUuid);
@@ -172,6 +186,7 @@ public final class HyruneVirtualItemRegistry {
             } else {
                 out.translationProperties = new ItemTranslationProperties();
             }
+            out.translationProperties.name = getVirtualNameKey(virtualId);
             out.translationProperties.description = getVirtualDescriptionKey(virtualId);
             return out;
         } catch (Exception ex) {

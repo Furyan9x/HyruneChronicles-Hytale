@@ -17,7 +17,6 @@ import com.hypixel.hytale.builtin.crafting.window.BenchWindow;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.itemization.ItemRollCoordinator;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.registry.CraftingSkillRegistry;
@@ -28,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.logging.Level;
 
 /**
  * ECS system for crafting xp.
@@ -118,10 +116,6 @@ public class CraftingXpSystem extends EntityEventSystem<EntityStore, CraftRecipe
             );
             // Attempt immediate apply in case output is already in inventory.
             ItemRollCoordinator.applyPendingCraftRolls(player);
-            if (HyruneConfigManager.getConfig().itemizationDebugLogging) {
-                dev.hytalemodding.Hyrune.LOGGER.at(Level.INFO).log("[Itemization] CraftRecipeEvent queued+applied player="
-                    + uuid + ", item=" + itemId + ", qty=" + event.getQuantity());
-            }
         }
     }
 

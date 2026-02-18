@@ -1,78 +1,78 @@
 {
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Tool_Rod_Crude.name",
-                                  "Description":  "Crude Fishing Rod"
-                              },
-    "Categories":  [
-                       "Items.Tools"
-                   ],
-    "Quality":  "Common",
-    "MaxStack":  1,
-    "ItemLevel":  3,
-    "Icon":  "Icons/ItemsGenerated/Tool_Rod_Crude.png",
-    "Model":  "Items/Tools/Tool_Rod_Crude.blockymodel",
-    "Texture":  "Items/Tools/Tool_Rod_Crude_Texture.png",
-    "Recipe":  {
-                   "TimeSeconds":  2,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Bar_Iron",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  4
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Plank_Oak",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  2
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Leather_Light",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  1
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Id":  "Workbench",
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Workbench_Tools"
-                                                               ]
-                                            }
-                                        ]
-               },
-    "Set":  "",
-    "Interactions":  {
-                         "Secondary":  {
-                                           "Interactions":  [
-                                                                {
-                                                                    "Type":  "HyruneFishing",
-                                                                    "CancelOnItemChange":  true
-                                                                }
-                                                            ]
-                                       }
-                     },
-    "IconProperties":  {
-                           "Scale":  0.5,
-                           "Rotation":  [
-                                            342,
-                                            217,
-                                            44
-                                        ],
-                           "Translation":  [
-                                               -47,
-                                               -48
-                                           ]
-                       },
-    "MaxDurability":  150,
-    "Tags":  {
-                 "Type":  [
-                              "Tool"
-                          ]
-             },
-    "ItemSoundSetId":  "ISS_Weapons_Wood",
-    "UsePlayerAnimations":  true,
-    "DroppedItemAnimation":  "Items/Animations/Dropped/Dropped_Diagonal_Right_Floating.blockyanim",
-    "PlayerAnimationsId":  "Fishing_Rod_Animations"
+    "TranslationProperties": {
+        "Name": "server.items.Tool_Rod_Crude.name",
+        "Description": "Crude Fishing Rod"
+    },
+    "Categories": [
+        "Items.Tools"
+    ],
+    "Quality": "Common",
+    "MaxStack": 1,
+    "ItemLevel": 3,
+    "Icon": "Icons/ItemsGenerated/Tool_Rod_Crude.png",
+    "Model": "Items/Tools/Tool_Rod_Crude.blockymodel",
+    "Texture": "Items/Tools/Tool_Rod_Crude_Texture.png",
+    "Recipe": {
+        "TimeSeconds": 2,
+        "KnowledgeRequired": false,
+        "Input": [
+            {
+                "ItemId": "Ingredient_Bar_Iron",
+                "ResourceTypeId": null,
+                "Quantity": 4
+            },
+            {
+                "ItemId": "Ingredient_Plank_Oak",
+                "ResourceTypeId": null,
+                "Quantity": 2
+            },
+            {
+                "ItemId": "Ingredient_Leather_Light",
+                "ResourceTypeId": null,
+                "Quantity": 1
+            }
+        ],
+        "BenchRequirement": [
+            {
+                "Id": "Workbench",
+                "Type": "Crafting",
+                "Categories": [
+                    "Workbench_Tools"
+                ]
+            }
+        ]
+    },
+    "Set": "",
+    "Interactions": {
+        "Secondary": {
+            "Interactions": [
+                {
+                    "Type": "HyruneFishing",
+                    "CancelOnItemChange": true
+                }
+            ]
+        }
+    },
+    "IconProperties": {
+        "Scale": 0.5,
+        "Rotation": [
+            342,
+            217,
+            44
+        ],
+        "Translation": [
+            -47,
+            -48
+        ]
+    },
+    "MaxDurability": 150,
+    "Tags": {
+        "Type": [
+            "Tool"
+        ]
+    },
+    "ItemSoundSetId": "ISS_Weapons_Wood",
+    "UsePlayerAnimations": true,
+    "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Right_Floating.blockyanim",
+    "PlayerAnimationsId": "Fishing_Rod_Animations"
 }

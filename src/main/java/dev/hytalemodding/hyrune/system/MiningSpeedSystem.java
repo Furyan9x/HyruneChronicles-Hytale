@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.event.events.ecs.DamageBlockEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Hyrune;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.registry.ToolRequirementRegistry;
@@ -68,7 +69,8 @@ public class MiningSpeedSystem extends EntityEventSystem<EntityStore, DamageBloc
             return;
         }
 
-        float multiplier = 1.0f + (level * MINING_DAMAGE_PER_LEVEL);
+        double itemBonus = PlayerItemizationStatsService.getCached(uuidComponent.getUuid()).getItemBlockBreakSpeedBonus();
+        float multiplier = (1.0f + (level * MINING_DAMAGE_PER_LEVEL)) * (float) (1.0 + itemBonus);
         event.setDamage(event.getDamage() * multiplier);
     }
 

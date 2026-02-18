@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.itemization.EffectiveItemStats;
 import dev.hytalemodding.hyrune.itemization.ItemInstanceMetadata;
+import dev.hytalemodding.hyrune.itemization.ItemStatDisplayFormatter;
 import dev.hytalemodding.hyrune.itemization.ItemizedStat;
 import dev.hytalemodding.hyrune.itemization.ItemStatResolution;
 import dev.hytalemodding.hyrune.itemization.ItemStatResolver;
@@ -65,7 +66,7 @@ public class ItemRollsCommand extends AbstractPlayerCommand {
             + ", version=" + metadata.getVersion()
             + ", source=" + metadata.getSource().name()
             + ", rarity=" + metadata.getRarity().name()
-            + ", catalyst=" + metadata.getCatalyst().name()
+            + ", prefix=" + (metadata.getPrefixRaw().isBlank() ? "none" : metadata.getPrefixRaw())
             + ", seed=" + metadata.getSeed()));
         ctx.sendMessage(Message.raw("[ItemRolls] scalars={rarityX=" + val(resolution.getRarityScalar())
             + ", keep=" + val(resolution.getDroppedPenaltyKeep())
@@ -88,7 +89,7 @@ public class ItemRollsCommand extends AbstractPlayerCommand {
             double base = resolution.getBaseSpecializedStats().get(stat);
             double resolved = resolution.getResolvedSpecializedStats().get(stat);
             ctx.sendMessage(Message.raw("[ItemRolls] " + stat.getDisplayName()
-                + " -> roll=" + formatRoll(stat, flatRoll, percentRoll)
+                + " -> roll=" + ItemStatDisplayFormatter.formatRoll(stat, flatRoll, percentRoll)
                 + ", base=" + val(base)
                 + ", effective=" + val(resolved)));
         }
@@ -102,36 +103,5 @@ public class ItemRollsCommand extends AbstractPlayerCommand {
         return String.format(Locale.US, "%.4f", value);
     }
 
-    private static String flat(double value) {
-        double abs = Math.abs(value);
-        if (abs >= 100.0) {
-            return String.format(Locale.US, "%+.0f", value);
-        }
-        if (abs >= 10.0) {
-            return String.format(Locale.US, "%+.1f", value);
-        }
-        if (abs >= 1.0) {
-            return String.format(Locale.US, "%+.2f", value);
-        }
-        return String.format(Locale.US, "%+.3f", value);
-    }
-
-    private static String formatRoll(ItemizedStat stat, double flatRoll, double percentRoll) {
-        boolean hasFlat = Math.abs(flatRoll) > 1e-9;
-        boolean hasPercent = Math.abs(percentRoll) > 1e-9;
-        if (hasFlat && hasPercent) {
-            if (preferPercentPrimary(stat)) {
-                return pct(percentRoll) + " + " + flat(flatRoll);
-            }
-            return flat(flatRoll) + " + " + pct(percentRoll);
-        }
-        if (hasPercent) {
-            return pct(percentRoll);
-        }
-        return flat(flatRoll);
-    }
-
-    private static boolean preferPercentPrimary(ItemizedStat stat) {
-        return stat != null && stat.isPercentPrimary();
-    }
 }
+

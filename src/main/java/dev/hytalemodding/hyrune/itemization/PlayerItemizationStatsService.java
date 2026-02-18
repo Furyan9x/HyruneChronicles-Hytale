@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import dev.hytalemodding.hyrune.config.HyruneConfig;
 import dev.hytalemodding.hyrune.config.HyruneConfigManager;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import java.util.Map;
 import java.util.UUID;
@@ -46,6 +47,9 @@ public final class PlayerItemizationStatsService {
         0.0,
         0.0,
         0.0,
+        0.0,
+        0.0,
+        0.0,
         0L
     );
 
@@ -61,7 +65,10 @@ public final class PlayerItemizationStatsService {
             return EMPTY;
         }
 
-        UUID uuid = player.getUuid();
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return EMPTY;
+        }
         long fingerprint = computeFingerprint(inventory);
         PlayerItemizationStats cached = CACHE.get(uuid);
         if (cached != null && cached.getEquipmentFingerprint() == fingerprint) {
@@ -76,6 +83,10 @@ public final class PlayerItemizationStatsService {
         }
         Inventory inventory = player.getInventory();
         if (inventory == null) {
+            return EMPTY;
+        }
+        UUID playerUuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (playerUuid == null) {
             return EMPTY;
         }
         return recompute(player, computeFingerprint(inventory));
@@ -102,6 +113,10 @@ public final class PlayerItemizationStatsService {
     private static PlayerItemizationStats recompute(Player player, long fingerprint) {
         Inventory inventory = player.getInventory();
         if (inventory == null) {
+            return EMPTY;
+        }
+        UUID playerUuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (playerUuid == null) {
             return EMPTY;
         }
 
@@ -135,6 +150,10 @@ public final class PlayerItemizationStatsService {
         ItemizedStatBlock totalSpecialized = ItemizedStatBlock.empty();
         totalSpecialized.addAll(heldSpecialized);
         totalSpecialized.addAll(armorSpecialized);
+        ItemizedStatBlock defensiveSpecialized = armorSpecialized.copy();
+        if (isShieldItem(inventory.getItemInHand())) {
+            addShieldDefensiveStats(defensiveSpecialized, heldSpecialized);
+        }
 
         double physicalDamageMultiplier = clamp(
             1.0
@@ -154,20 +173,20 @@ public final class PlayerItemizationStatsService {
         );
 
         double physicalDefenceReductionBonus = clamp(
-            (armorSpecialized.get(ItemizedStat.PHYSICAL_DEFENCE) * 0.004)
-                + (armorSpecialized.get(ItemizedStat.BLOCK_EFFICIENCY) * 0.010)
-                + (armorSpecialized.get(ItemizedStat.CRIT_REDUCTION) * 0.005)
-                + (armorSpecialized.get(ItemizedStat.MAX_HP) * 0.0008)
-                + (armorSpecialized.get(ItemizedStat.HP_REGEN) * 0.020),
+            (defensiveSpecialized.get(ItemizedStat.PHYSICAL_DEFENCE) * 0.004)
+                + (defensiveSpecialized.get(ItemizedStat.BLOCK_EFFICIENCY) * 0.010)
+                + (defensiveSpecialized.get(ItemizedStat.CRIT_REDUCTION) * 0.005)
+                + (defensiveSpecialized.get(ItemizedStat.MAX_HP) * 0.0008)
+                + (defensiveSpecialized.get(ItemizedStat.HP_REGEN) * 0.020),
             0.0,
             0.70
         );
         double magicalDefenceReductionBonus = clamp(
-            (armorSpecialized.get(ItemizedStat.MAGICAL_DEFENCE) * 0.004)
-                + (armorSpecialized.get(ItemizedStat.BLOCK_EFFICIENCY) * 0.006)
-                + (armorSpecialized.get(ItemizedStat.CRIT_REDUCTION) * 0.005)
-                + (armorSpecialized.get(ItemizedStat.MAX_HP) * 0.0008)
-                + (armorSpecialized.get(ItemizedStat.HP_REGEN) * 0.020),
+            (defensiveSpecialized.get(ItemizedStat.MAGICAL_DEFENCE) * 0.004)
+                + (defensiveSpecialized.get(ItemizedStat.BLOCK_EFFICIENCY) * 0.006)
+                + (defensiveSpecialized.get(ItemizedStat.CRIT_REDUCTION) * 0.005)
+                + (defensiveSpecialized.get(ItemizedStat.MAX_HP) * 0.0008)
+                + (defensiveSpecialized.get(ItemizedStat.HP_REGEN) * 0.020),
             0.0,
             0.70
         );
@@ -179,12 +198,15 @@ public final class PlayerItemizationStatsService {
         double moveSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.MOVEMENT_SPEED), -0.20, 0.60);
         double attackSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.ATTACK_SPEED), -0.20, 0.80);
         double castSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.CAST_SPEED), -0.20, 0.80);
+        double blockBreakSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.BLOCK_BREAK_SPEED), 0.0, 1.50);
+        double rareDropChanceBonus = clamp(totalSpecialized.get(ItemizedStat.RARE_DROP_CHANCE), 0.0, 0.75);
+        double doubleDropChanceBonus = clamp(totalSpecialized.get(ItemizedStat.DOUBLE_DROP_CHANCE), 0.0, 0.60);
         double manaRegenBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.MANA_REGEN));
-        double staminaRegenBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.STAMINA_REGEN));
+        double staminaRegenBonus = 0.0;
         double hpRegenBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.HP_REGEN));
         double maxHpBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.MAX_HP));
         double manaCostReduction = clamp(totalSpecialized.get(ItemizedStat.MANA_COST_REDUCTION), 0.0, 0.75);
-        double reflectDamage = Math.max(0.0, armorSpecialized.get(ItemizedStat.REFLECT_DAMAGE));
+        double reflectDamage = Math.max(0.0, defensiveSpecialized.get(ItemizedStat.REFLECT_DAMAGE));
 
         PlayerItemizationStats out = new PlayerItemizationStats(
             fingerprint,
@@ -207,6 +229,9 @@ public final class PlayerItemizationStatsService {
             moveSpeedBonus,
             attackSpeedBonus,
             castSpeedBonus,
+            blockBreakSpeedBonus,
+            rareDropChanceBonus,
+            doubleDropChanceBonus,
             manaRegenBonus,
             staminaRegenBonus,
             hpRegenBonus,
@@ -215,17 +240,16 @@ public final class PlayerItemizationStatsService {
             reflectDamage,
             System.currentTimeMillis()
         );
-        CACHE.put(player.getUuid(), out);
+        CACHE.put(playerUuid, out);
 
         HyruneConfig cfg = HyruneConfigManager.getConfig();
         if (cfg != null && cfg.itemizationDebugLogging) {
-            LOGGER.at(Level.INFO).log("[Itemization] Stat recompute player=" + player.getUuid()
-                + ", pDmgX=" + fmt(out.getPhysicalDamageMultiplier())
-                + ", mDmgX=" + fmt(out.getMagicalDamageMultiplier())
-                + ", pDefRed=" + fmt(out.getPhysicalDefenceReductionBonus())
-                + ", mDefRed=" + fmt(out.getMagicalDefenceReductionBonus())
-                + ", move=" + fmt(out.getItemUtilityMoveSpeedBonus())
-                + ", maxHp=" + fmt(out.getItemMaxHpBonus()));
+            LOGGER.at(Level.INFO).log("[Itemization][Stats] p=" + shortUuid(playerUuid)
+                + ", dmg=" + fmt(out.getPhysicalDamageMultiplier()) + "/" + fmt(out.getMagicalDamageMultiplier())
+                + ", def=" + fmt(out.getPhysicalDefenceReductionBonus()) + "/" + fmt(out.getMagicalDefenceReductionBonus())
+                + ", util(move/break/hp)=" + fmt(out.getItemUtilityMoveSpeedBonus())
+                + "/" + fmt(out.getItemBlockBreakSpeedBonus())
+                + "/" + fmt(out.getItemMaxHpBonus()));
         }
 
         return out;
@@ -261,8 +285,9 @@ public final class PlayerItemizationStatsService {
         }
         hash = hash * 31 + metadata.getVersion();
         hash = hash * 31 + safeHash(metadata.getRarityRaw());
-        hash = hash * 31 + safeHash(metadata.getCatalystRaw());
         hash = hash * 31 + metadata.getSeed();
+        hash = hash * 31 + metadata.getSocketCapacityRaw();
+        hash = hash * 31 + safeHash(metadata.getSocketedGemsJson());
         hash = hash * 31 + safeHash(metadata.getStatFlatRollsJson());
         hash = hash * 31 + safeHash(metadata.getStatPercentRollsJson());
         hash = hash * 31 + Double.doubleToLongBits(metadata.getDroppedPenalty());
@@ -289,4 +314,33 @@ public final class PlayerItemizationStatsService {
     private static int safeHash(String value) {
         return value == null ? 0 : value.hashCode();
     }
+
+    private static String shortUuid(UUID uuid) {
+        if (uuid == null) {
+            return "null";
+        }
+        String raw = uuid.toString();
+        return raw.length() <= 8 ? raw : raw.substring(0, 8);
+    }
+
+    private static boolean isShieldItem(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || stack.getItemId() == null) {
+            return false;
+        }
+        String id = stack.getItemId().toLowerCase(java.util.Locale.ROOT);
+        return id.contains("shield") || id.contains("buckler");
+    }
+
+    private static void addShieldDefensiveStats(ItemizedStatBlock destination, ItemizedStatBlock source) {
+        if (destination == null || source == null) {
+            return;
+        }
+        destination.add(ItemizedStat.PHYSICAL_DEFENCE, source.get(ItemizedStat.PHYSICAL_DEFENCE));
+        destination.add(ItemizedStat.MAGICAL_DEFENCE, source.get(ItemizedStat.MAGICAL_DEFENCE));
+        destination.add(ItemizedStat.BLOCK_EFFICIENCY, source.get(ItemizedStat.BLOCK_EFFICIENCY));
+        destination.add(ItemizedStat.MAX_HP, source.get(ItemizedStat.MAX_HP));
+        destination.add(ItemizedStat.HP_REGEN, source.get(ItemizedStat.HP_REGEN));
+        destination.add(ItemizedStat.REFLECT_DAMAGE, source.get(ItemizedStat.REFLECT_DAMAGE));
+    }
 }
+

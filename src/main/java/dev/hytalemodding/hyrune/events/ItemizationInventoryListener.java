@@ -11,6 +11,7 @@ import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.itemization.ItemRollCoordinator;
 import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.itemization.tooltip.HyruneDynamicTooltipService;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import java.util.Set;
 import java.util.UUID;
@@ -30,12 +31,12 @@ public class ItemizationInventoryListener {
             return;
         }
 
-        UUID uuid = player.getUuid();
-        if (!ACTIVE.add(uuid)) {
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
             return;
         }
-        if (HyruneConfigManager.getConfig().itemizationDebugLogging) {
-            LOGGER.at(Level.INFO).log("[Itemization] InventoryChange event player=" + uuid);
+        if (!ACTIVE.add(uuid)) {
+            return;
         }
 
         World world = player.getReference() != null ? player.getReference().getStore().getExternalData().getWorld() : null;
@@ -45,21 +46,37 @@ public class ItemizationInventoryListener {
         }
 
         world.execute(() -> {
+            long startedAt = System.currentTimeMillis();
             try {
-                ItemRollCoordinator.applyPendingCraftRolls(player);
+                int appliedStacks = ItemRollCoordinator.applyPendingCraftRolls(player);
                 PlayerItemizationStatsService.recompute(player);
-                SkillStatBonusApplier.apply(player.getPlayerRef());
-                SkillStatBonusApplier.applyMovementSpeed(player.getPlayerRef());
+                var playerRef = PlayerEntityAccess.getPlayerRef(player);
+                if (playerRef != null) {
+                    SkillStatBonusApplier.apply(playerRef);
+                    SkillStatBonusApplier.applyMovementSpeed(playerRef);
+                }
+                boolean refreshed = false;
                 HyruneDynamicTooltipService tooltipService = Hyrune.getDynamicTooltipService();
                 if (tooltipService != null) {
-                    boolean refreshed = tooltipService.invalidateAndRefreshPlayer(uuid);
-                    if (HyruneConfigManager.getConfig().dynamicTooltipCacheDebug) {
-                        LOGGER.at(Level.INFO).log("[Itemization] Dynamic tooltip invalidate+refresh player=" + uuid + ", refreshed=" + refreshed);
-                    }
+                    refreshed = tooltipService.invalidateAndRefreshPlayer(uuid);
+                }
+                if (HyruneConfigManager.getConfig().itemizationDebugLogging) {
+                    LOGGER.at(Level.INFO).log("[Itemization][Inventory] p=" + shortUuid(uuid)
+                        + ", rolled=" + appliedStacks
+                        + ", tooltipRefresh=" + refreshed
+                        + ", ms=" + Math.max(0, System.currentTimeMillis() - startedAt));
                 }
             } finally {
                 ACTIVE.remove(uuid);
             }
         });
+    }
+
+    private static String shortUuid(UUID uuid) {
+        if (uuid == null) {
+            return "null";
+        }
+        String raw = uuid.toString();
+        return raw.length() <= 8 ? raw : raw.substring(0, 8);
     }
 }

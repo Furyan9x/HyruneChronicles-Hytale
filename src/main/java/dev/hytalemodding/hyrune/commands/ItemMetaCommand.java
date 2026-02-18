@@ -59,9 +59,11 @@ public class ItemMetaCommand extends AbstractPlayerCommand {
             ctx.sendMessage(Message.raw("[ItemMeta] version=" + metadata.getVersion()
                 + ", source=" + metadata.getSource().name()
                 + ", rarity=" + metadata.getRarity().name()
-                + ", catalyst=" + metadata.getCatalyst().name()
+                + ", prefix=" + (metadata.getPrefixRaw().isBlank() ? "none" : metadata.getPrefixRaw())
+                + ", sockets=" + metadata.getSocketedGemCount() + "/" + metadata.getSocketCapacity()
                 + ", seed=" + metadata.getSeed()));
         }
         ctx.sendMessage(Message.raw("[ItemMeta] use /itemrolls (held-item specialized breakdown), /itemstats (equipped totals), /itemdiag (generation counters)."));
     }
 }
+

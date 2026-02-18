@@ -46,23 +46,21 @@ public class PlayerJoinListener {
      */
     public void onPlayerJoin(AddPlayerToWorldEvent event) {
         var holder = event.getHolder();
+        PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
         Player playerComp = holder.getComponent(Player.getComponentType());
 
-        if (playerComp != null) {
-            UUID uuid = playerComp.getUuid();
+        if (playerComp != null && playerRef != null) {
+            UUID uuid = playerRef.getUuid();
             service.load(uuid);
             slayerService.load(uuid);
             questManager.load(uuid);
             socialService.load(uuid);
             NameplateManager.update(uuid);
             SkillStatBonusApplier.apply(holder, uuid);
-            PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
             TradePackManager.sync(playerComp);
             PlayerItemizationStatsService.recompute(playerComp);
-            if (playerRef != null) {
-                SkillStatBonusApplier.apply(playerRef);
-                SkillStatBonusApplier.applyMovementSpeed(playerRef);
-            }
+            SkillStatBonusApplier.apply(playerRef);
+            SkillStatBonusApplier.applyMovementSpeed(playerRef);
         }
     }
 
@@ -79,12 +77,14 @@ public class PlayerJoinListener {
     }
 
     private void handlePlayerDataSave(Holder<EntityStore> holder) {
+        PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
         Player playerComp = holder.getComponent(Player.getComponentType());
 
-        if (playerComp != null) {
-            persistAll(playerComp.getUuid());
-            PlayerItemizationStatsService.clear(playerComp.getUuid());
-            safelyRun(playerComp.getUuid(), "TradePackManager", () -> TradePackManager.clear(playerComp.getUuid()));
+        if (playerComp != null && playerRef != null) {
+            UUID uuid = playerRef.getUuid();
+            persistAll(uuid);
+            PlayerItemizationStatsService.clear(uuid);
+            safelyRun(uuid, "TradePackManager", () -> TradePackManager.clear(uuid));
         }
     }
 

@@ -27,6 +27,7 @@ import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.registry.CombatRequirementRegistry;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -42,7 +43,8 @@ import static dev.hytalemodding.Hyrune.LOGGER;
  * ECS system for skill combat bonus.
  */
 public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damage> {
-    public static final float ATTACK_DAMAGE_PER_LEVEL = 0.02f;
+    public static final float STRENGTH_DAMAGE_PER_LEVEL = 0.02f;
+    public static final float ATTACK_DAMAGE_PER_LEVEL = STRENGTH_DAMAGE_PER_LEVEL;
     public static final float DEFENCE_DAMAGE_REDUCTION_PER_LEVEL = 0.30f / 99.0f;
     public static final float DEFENCE_DAMAGE_REDUCTION_CAP = 0.30f;
     public static final float RANGED_DAMAGE_PER_LEVEL = 0.03f;
@@ -118,7 +120,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
-        PlayerRef attackerPlayerRef = attacker.getPlayerRef();
+        PlayerRef attackerPlayerRef = PlayerEntityAccess.getPlayerRef(attacker);
         if (attackerPlayerRef == null) {
             return;
         }
@@ -134,17 +136,14 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         applyItemDamageBonus(attacker, damage, false);
 
         LevelingService service = Hyrune.getService();
-        int attackLevel = service.getSkillLevel(attackerPlayerRef.getUuid(), SkillType.ATTACK);
-        if (attackLevel <= 0) {
-            return;
+        int strengthLevel = service.getSkillLevel(attackerPlayerRef.getUuid(), SkillType.STRENGTH);
+        if (strengthLevel > 0) {
+            float multiplier = 1.0f + (strengthLevel * STRENGTH_DAMAGE_PER_LEVEL);
+            float before = damage.getAmount();
+            float after = before * multiplier;
+            damage.setAmount(after);
         }
 
-        float multiplier = 1.0f + (attackLevel * ATTACK_DAMAGE_PER_LEVEL);
-        float before = damage.getAmount();
-        float after = before * multiplier;
-        damage.setAmount(after);
-
-        applyStrengthCrit(attackerPlayerRef, damage, cause);
         applyItemCritBonus(attacker, damage, false);
     }
 
@@ -158,7 +157,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
-        PlayerRef victimRef = victim.getPlayerRef();
+        PlayerRef victimRef = PlayerEntityAccess.getPlayerRef(victim);
         if (victimRef == null) {
             return;
         }
@@ -175,33 +174,6 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         float reduction = clamp(skillReduction + itemReduction, -0.50f, 0.85f);
         float before = damage.getAmount();
         float after = before * (1.0f - reduction);
-        damage.setAmount(after);
-    }
-
-    private static void applyStrengthCrit(PlayerRef attackerPlayerRef, Damage damage, DamageCause cause) {
-        if (attackerPlayerRef == null) {
-            return;
-        }
-        if (isProjectileCause(cause)) {
-            return;
-        }
-
-        LevelingService service = Hyrune.getService();
-        int strengthLevel = service.getSkillLevel(attackerPlayerRef.getUuid(), SkillType.STRENGTH);
-        if (strengthLevel <= 0) {
-            return;
-        }
-
-        float chance = Math.min(STRENGTH_CRIT_CHANCE_CAP,
-            strengthLevel * STRENGTH_CRIT_CHANCE_PER_LEVEL);
-        if (ThreadLocalRandom.current().nextFloat() >= chance) {
-            return;
-        }
-
-        float multiplier = STRENGTH_CRIT_BASE_MULTIPLIER
-            + (strengthLevel * STRENGTH_CRIT_DAMAGE_BONUS_PER_LEVEL);
-        float before = damage.getAmount();
-        float after = before * multiplier;
         damage.setAmount(after);
     }
 
@@ -231,7 +203,7 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
-        PlayerRef attackerPlayerRef = attacker.getPlayerRef();
+        PlayerRef attackerPlayerRef = PlayerEntityAccess.getPlayerRef(attacker);
         if (attackerPlayerRef == null) {
             return;
         }
@@ -259,14 +231,12 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
 
         if (ranged) {
             applyRangedDamage(attackerPlayerRef, damage);
-            applyRangedCrit(attackerPlayerRef, damage);
             applyItemCritBonus(attacker, damage, false);
             return;
         }
 
         if (magic) {
             applyMagicDamage(attackerPlayerRef, damage);
-            applyMagicCrit(attackerPlayerRef, damage);
             applyItemCritBonus(attacker, damage, true);
         }
     }
@@ -290,42 +260,6 @@ public class SkillCombatBonusSystem extends EntityEventSystem<EntityStore, Damag
         }
 
         float multiplier = 1.0f + (level * MAGIC_DAMAGE_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * multiplier);
-    }
-
-    private static void applyRangedCrit(PlayerRef attackerPlayerRef, Damage damage) {
-        LevelingService service = Hyrune.getService();
-        int level = service.getSkillLevel(attackerPlayerRef.getUuid(), SkillType.RANGED);
-        if (level <= 0) {
-            return;
-        }
-
-        float chance = Math.min(RANGED_CRIT_CHANCE_CAP,
-            level * RANGED_CRIT_CHANCE_PER_LEVEL);
-        if (ThreadLocalRandom.current().nextFloat() >= chance) {
-            return;
-        }
-
-        float multiplier = RANGED_CRIT_BASE_MULTIPLIER
-            + (level * RANGED_CRIT_DAMAGE_BONUS_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * multiplier);
-    }
-
-    private static void applyMagicCrit(PlayerRef attackerPlayerRef, Damage damage) {
-        LevelingService service = Hyrune.getService();
-        int level = service.getSkillLevel(attackerPlayerRef.getUuid(), SkillType.MAGIC);
-        if (level <= 0) {
-            return;
-        }
-
-        float chance = Math.min(MAGIC_CRIT_CHANCE_CAP,
-            level * MAGIC_CRIT_CHANCE_PER_LEVEL);
-        if (ThreadLocalRandom.current().nextFloat() >= chance) {
-            return;
-        }
-
-        float multiplier = MAGIC_CRIT_BASE_MULTIPLIER
-            + (level * MAGIC_CRIT_DAMAGE_BONUS_PER_LEVEL);
         damage.setAmount(damage.getAmount() * multiplier);
     }
 

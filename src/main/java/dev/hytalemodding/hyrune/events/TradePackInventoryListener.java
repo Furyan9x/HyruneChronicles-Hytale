@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent;
 import com.hypixel.hytale.server.core.universe.world.World;
 import dev.hytalemodding.hyrune.tradepack.TradePackManager;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import java.util.Set;
 import java.util.UUID;
@@ -22,7 +23,10 @@ public class TradePackInventoryListener {
             return;
         }
 
-        UUID uuid = player.getUuid();
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return;
+        }
         if (!ACTIVE.add(uuid)) {
             return;
         }

@@ -11,19 +11,18 @@ import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.hyrune.itemization.CatalystAffinity;
-import dev.hytalemodding.hyrune.itemization.CatalystCatalog;
-import dev.hytalemodding.hyrune.ui.CatalystImbuePage;
+import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
+import dev.hytalemodding.hyrune.ui.GemSocketPage;
 
 import javax.annotation.Nonnull;
 
 /**
- * Debug command to open catalyst UI directly from held catalyst item.
+ * Debug command to open gem socket UI directly from held gem item.
  */
-public class CatalystUiCommand extends AbstractPlayerCommand {
-    public CatalystUiCommand() {
-        super("catalystui", "Open catalyst imbuement UI using held catalyst.");
-        this.addAliases("cui");
+public class GemUiCommand extends AbstractPlayerCommand {
+    public GemUiCommand() {
+        super("gemui", "Open gem socket UI using held gem.");
+        this.addAliases("cui", "gemui", "gui");
     }
 
     @Override
@@ -46,19 +45,18 @@ public class CatalystUiCommand extends AbstractPlayerCommand {
 
         ItemStack held = inventory.getItemInHand();
         if (held == null || held.isEmpty() || held.getItemId() == null) {
-            ctx.sendMessage(Message.raw("Hold a catalyst item and try again."));
+            ctx.sendMessage(Message.raw("Hold a gem item and try again."));
             return;
         }
 
         String heldId = held.getItemId();
-        CatalystAffinity affinity = CatalystCatalog.resolveAffinity(heldId);
-        if (affinity == CatalystAffinity.NONE) {
-            ctx.sendMessage(Message.raw("Held item is not recognized as a catalyst: " + heldId));
+        if (!GemSocketConfigHelper.isGemItemId(heldId)) {
+            ctx.sendMessage(Message.raw("Held item is not recognized as a gem: " + heldId));
             return;
         }
 
-        player.getPageManager().openCustomPage(ref, store, new CatalystImbuePage(playerRef, heldId, affinity));
-        ctx.sendMessage(Message.raw("Opened catalyst UI for " + heldId + " (" + affinity.name() + ")."));
+        player.getPageManager().openCustomPage(ref, store, new GemSocketPage(playerRef, heldId));
+        ctx.sendMessage(Message.raw("Opened gem socket UI for " + heldId + "."));
     }
 }
 

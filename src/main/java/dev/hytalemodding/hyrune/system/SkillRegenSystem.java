@@ -19,6 +19,7 @@ import dev.hytalemodding.hyrune.combat.CombatStateTracker;
 import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import javax.annotation.Nonnull;
 
@@ -52,7 +53,7 @@ public class SkillRegenSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        PlayerRef playerRef = player.getPlayerRef();
+        PlayerRef playerRef = PlayerEntityAccess.getPlayerRef(player);
         if (playerRef == null) {
             return;
         }

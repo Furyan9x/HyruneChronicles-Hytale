@@ -16,9 +16,8 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.hyrune.itemization.CatalystAffinity;
-import dev.hytalemodding.hyrune.itemization.CatalystApplicationService;
-import dev.hytalemodding.hyrune.itemization.CatalystNamingResolver;
+import dev.hytalemodding.hyrune.itemization.GemSocketApplicationService;
+import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
 import dev.hytalemodding.hyrune.itemization.ItemInstanceMetadata;
 
 import javax.annotation.Nonnull;
@@ -27,24 +26,22 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Catalyst application UI (Milestone 4 phase 1).
+ * Gem socket UI.
  */
-public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage.CatalystImbueData> {
-    private static final String UI_PATH = "Pages/CatalystImbue.ui";
-    private static final String ROW_UI = "Pages/catalyst_receiver_row.ui";
+public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSocketData> {
+    private static final String UI_PATH = "Pages/GemSocket.ui";
+    private static final String ROW_UI = "Pages/gem_receiver_row.ui";
 
     private static final String ACTION_CLOSE = "Close";
     private static final String ACTION_SELECT = "SelectReceiver";
-    private static final String ACTION_IMBUE = "Imbue";
+    private static final String ACTION_SOCKET = "Socket";
 
-    private final String catalystItemId;
-    private final CatalystAffinity catalystAffinity;
+    private final String gemItemId;
     private short selectedReceiverSlot = -1;
 
-    public CatalystImbuePage(@Nonnull PlayerRef playerRef, @Nonnull String catalystItemId, @Nonnull CatalystAffinity catalystAffinity) {
-        super(playerRef, CustomPageLifetime.CanDismiss, CatalystImbueData.CODEC);
-        this.catalystItemId = catalystItemId;
-        this.catalystAffinity = catalystAffinity;
+    public GemSocketPage(@Nonnull PlayerRef playerRef, @Nonnull String gemItemId) {
+        super(playerRef, CustomPageLifetime.CanDismiss, GemSocketData.CODEC);
+        this.gemItemId = gemItemId;
     }
 
     @Override
@@ -59,7 +56,7 @@ public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage
     @Override
     public void handleDataEvent(@Nonnull Ref<EntityStore> ref,
                                 @Nonnull Store<EntityStore> store,
-                                @Nonnull CatalystImbueData data) {
+                                @Nonnull GemSocketData data) {
         super.handleDataEvent(ref, store, data);
         if (data.button == null) {
             return;
@@ -73,15 +70,15 @@ public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage
                 this.selectedReceiverSlot = parseSlot(data.slot);
                 rebuild(ref, store);
                 return;
-            case ACTION_IMBUE:
-                handleImbue(ref, store);
+            case ACTION_SOCKET:
+                handleSocket(ref, store);
                 return;
             default:
                 return;
         }
     }
 
-    private void handleImbue(Ref<EntityStore> ref, Store<EntityStore> store) {
+    private void handleSocket(Ref<EntityStore> ref, Store<EntityStore> store) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
             return;
@@ -92,12 +89,7 @@ public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage
         }
 
         Inventory inventory = player.getInventory();
-        CatalystApplicationService.Result result = CatalystApplicationService.applyCatalystToSlot(
-            inventory,
-            selectedReceiverSlot,
-            catalystItemId,
-            catalystAffinity
-        );
+        GemSocketApplicationService.Result result = GemSocketApplicationService.applyGemToSlot(inventory, selectedReceiverSlot, gemItemId);
         this.playerRef.sendMessage(Message.raw(result.message()));
         if (result.success()) {
             this.close();
@@ -116,38 +108,39 @@ public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage
     private void render(Ref<EntityStore> ref, Store<EntityStore> store, UICommandBuilder cmd, UIEventBuilder evt) {
         Player player = store.getComponent(ref, Player.getComponentType());
         Inventory inventory = player != null ? player.getInventory() : null;
-        List<CatalystApplicationService.ReceiverEntry> entries = inventory == null
+        List<GemSocketApplicationService.ReceiverEntry> entries = inventory == null
             ? new ArrayList<>()
-            : CatalystApplicationService.findEligibleReceiverEntries(inventory);
+            : GemSocketApplicationService.findEligibleReceiverEntries(inventory);
 
-        cmd.set("#CatalystIcon.ItemId", catalystItemId);
-        cmd.set("#CatalystName.Text", catalystItemId);
-        cmd.set("#CatalystAffinity.Text", "Affinity: " + title(catalystAffinity.name()));
+        cmd.set("#GemIcon.ItemId", gemItemId);
+        cmd.set("#GemName.Text", "Gem: " + gemItemId);
+        cmd.set("#GemBonus.Text", "Gem Bonus: select a receiver");
 
-        CatalystApplicationService.ReceiverEntry selected = findEntry(entries, selectedReceiverSlot);
+        GemSocketApplicationService.ReceiverEntry selected = findEntry(entries, selectedReceiverSlot);
         if (selected == null) {
             cmd.set("#ReceiverPreviewName.Text", "Receiver: none");
-            cmd.set("#ReceiverPreviewCatalyst.Text", "Current Catalyst: none");
-            cmd.set("#ReceiverPreviewImbued.Text", "Imbued Name: -");
+            cmd.set("#ReceiverPreviewGem.Text", "Sockets: 0/0");
+            cmd.set("#ReceiverPreviewSocketed.Text", "After Socket: -");
         } else {
             ItemInstanceMetadata meta = selected.metadata();
-            String previewName = CatalystNamingResolver.resolveDisplayName(selected.stack().getItemId(), catalystAffinity);
             cmd.set("#ReceiverPreviewName.Text", "Receiver: " + selected.stack().getItemId());
-            cmd.set("#ReceiverPreviewCatalyst.Text", "Current Catalyst: " + title(meta.getCatalyst().name()));
-            cmd.set("#ReceiverPreviewImbued.Text", "Imbued Name: " + previewName);
+            cmd.set("#ReceiverPreviewGem.Text", "Sockets: " + meta.getSocketedGemCount() + "/" + meta.getSocketCapacity());
+            String bonusSummary = GemSocketConfigHelper.describeGemBonusForItem(gemItemId, selected.stack().getItemId());
+            cmd.set("#GemBonus.Text", "Gem Bonus: " + bonusSummary);
+            cmd.set("#ReceiverPreviewSocketed.Text", "After Socket: " + bonusSummary);
         }
 
         cmd.clear("#ReceiverList");
         cmd.set("#ReceiverEmpty.Visible", entries.isEmpty());
         int row = 0;
-        for (CatalystApplicationService.ReceiverEntry entry : entries) {
+        for (GemSocketApplicationService.ReceiverEntry entry : entries) {
             cmd.append("#ReceiverList", ROW_UI);
             String root = "#ReceiverList[" + row + "]";
 
             ItemInstanceMetadata meta = entry.metadata();
             cmd.set(root + " #ReceiverName.Text", entry.stack().getItemId());
             cmd.set(root + " #ReceiverRarity.Text", "Rarity: " + title(meta.getRarity().name()));
-            cmd.set(root + " #ReceiverCatalyst.Text", "Catalyst: " + title(meta.getCatalyst().name()));
+            cmd.set(root + " #ReceiverGem.Text", "Sockets: " + meta.getSocketedGemCount() + "/" + meta.getSocketCapacity());
             cmd.set(root + " #ReceiverButton.Text", entry.slot() == selectedReceiverSlot ? "Selected" : "Use");
 
             evt.addEventBinding(
@@ -159,17 +152,17 @@ public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage
             row++;
         }
 
-        evt.addEventBinding(CustomUIEventBindingType.Activating, "#CatalystClose",
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#GemClose",
             EventData.of("Button", ACTION_CLOSE), false);
-        evt.addEventBinding(CustomUIEventBindingType.Activating, "#ImbueButton",
-            EventData.of("Button", ACTION_IMBUE), false);
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#SocketButton",
+            EventData.of("Button", ACTION_SOCKET), false);
     }
 
-    private static CatalystApplicationService.ReceiverEntry findEntry(List<CatalystApplicationService.ReceiverEntry> entries, short slot) {
+    private static GemSocketApplicationService.ReceiverEntry findEntry(List<GemSocketApplicationService.ReceiverEntry> entries, short slot) {
         if (slot < 0) {
             return null;
         }
-        for (CatalystApplicationService.ReceiverEntry entry : entries) {
+        for (GemSocketApplicationService.ReceiverEntry entry : entries) {
             if (entry.slot() == slot) {
                 return entry;
             }
@@ -196,11 +189,11 @@ public class CatalystImbuePage extends InteractiveCustomUIPage<CatalystImbuePage
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
     }
 
-    public static class CatalystImbueData {
+    public static class GemSocketData {
         static final String KEY_BUTTON = "Button";
         static final String KEY_SLOT = "Slot";
 
-        public static final BuilderCodec<CatalystImbueData> CODEC = BuilderCodec.builder(CatalystImbueData.class, CatalystImbueData::new)
+        public static final BuilderCodec<GemSocketData> CODEC = BuilderCodec.builder(GemSocketData.class, GemSocketData::new)
             .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
             .addField(new KeyedCodec<>(KEY_SLOT, Codec.STRING), (d, s) -> d.slot = s, d -> d.slot)
             .build();

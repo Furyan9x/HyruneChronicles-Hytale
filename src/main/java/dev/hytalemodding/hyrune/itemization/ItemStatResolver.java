@@ -30,18 +30,23 @@ public final class ItemStatResolver {
 
         ItemizedStatBlock base = baseStatsForArchetype(archetype, tierScalar);
         ItemizedStatBlock resolved = ItemizedStatBlock.empty();
+        ItemizedStatBlock socketBonuses = metadata == null
+            ? ItemizedStatBlock.empty()
+            : GemSocketConfigHelper.socketBonusesForItem(itemId, metadata.getSocketedGems());
 
         ItemRarity rarity = metadata == null ? ItemRarity.COMMON : metadata.getRarity();
         double rarityScalar = ItemizationSpecializedStatConfigHelper.rarityScalar(rarity);
         double droppedKeep = 1.0 - clamp(metadata == null ? 0.0 : metadata.getDroppedPenalty(), 0.0, 1.0);
-        CatalystAffinity catalyst = metadata == null ? CatalystAffinity.NONE : metadata.getCatalyst();
 
         for (ItemizedStat stat : ItemizedStat.values()) {
-            double baseValue = base.get(stat);
+            // Avoid double-dipping against native item Health bonuses.
+            // Archetype MAX_HP bases are hidden from tooltip and stack on top of Hytale armor HP.
+            // We only want rolled/socketed MAX_HP to contribute through itemization.
+            double baseValue = stat == ItemizedStat.MAX_HP ? 0.0 : base.get(stat);
             double flatRoll = metadata == null ? 0.0 : metadata.getFlatStatRoll(stat);
             double percentRoll = metadata == null ? 0.0 : metadata.getPercentStatRoll(stat);
-            double catalystScalar = ItemizationSpecializedStatConfigHelper.catalystFamilyBias(catalyst, stat.getFamily());
-            double value = ((baseValue + flatRoll) * (1.0 + percentRoll)) * rarityScalar * catalystScalar * droppedKeep;
+            double socketFlat = socketBonuses.get(stat);
+            double value = ((baseValue + flatRoll + socketFlat) * (1.0 + percentRoll)) * rarityScalar * droppedKeep;
             if (value > 0.0) {
                 resolved.set(stat, value);
             }
@@ -104,10 +109,12 @@ public final class ItemStatResolver {
 
         double utility = 0.0;
         utility += stats.get(ItemizedStat.MANA_REGEN) * 15.0;
-        utility += stats.get(ItemizedStat.STAMINA_REGEN) * 15.0;
         utility += stats.get(ItemizedStat.MOVEMENT_SPEED) * 40.0;
         utility += stats.get(ItemizedStat.ATTACK_SPEED) * 30.0;
         utility += stats.get(ItemizedStat.CAST_SPEED) * 30.0;
+        utility += stats.get(ItemizedStat.BLOCK_BREAK_SPEED) * 35.0;
+        utility += stats.get(ItemizedStat.RARE_DROP_CHANCE) * 30.0;
+        utility += stats.get(ItemizedStat.DOUBLE_DROP_CHANCE) * 35.0;
 
         return new EffectiveItemStats(damage, defence, healing, utility);
     }

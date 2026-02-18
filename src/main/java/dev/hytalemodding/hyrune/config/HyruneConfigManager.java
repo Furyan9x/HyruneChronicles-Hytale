@@ -40,17 +40,7 @@ public final class HyruneConfigManager {
             writeConfig(defaults);
             config = defaults;
             LOGGER.at(Level.INFO).log("Gameplay config not found. Wrote defaults.");
-            LOGGER.at(Level.INFO).log("Gameplay toggles: durabilityDebugLogging=" + defaults.durabilityDebugLogging
-                + ", itemizationDebugLogging=" + defaults.itemizationDebugLogging
-                + ", enableDynamicItemTooltips=" + defaults.enableDynamicItemTooltips
-                + ", dynamicTooltipComposeDebug=" + defaults.dynamicTooltipComposeDebug
-                + ", dynamicTooltipMappingDebug=" + defaults.dynamicTooltipMappingDebug
-                + ", dynamicTooltipCacheDebug=" + defaults.dynamicTooltipCacheDebug
-                + ", itemizationEligiblePrefixes=" + defaults.itemizationEligiblePrefixes.size()
-                + ", itemizationExcludedPrefixes=" + defaults.itemizationExcludedPrefixes.size()
-                + ", itemizationExcludedIds=" + defaults.itemizationExcludedIds.size()
-                + ", itemizationRarityModelSources=" + defaults.itemizationRarityModel.baseWeightsBySource.size()
-                + ", enableAnimalHusbandryGating=" + defaults.enableAnimalHusbandryGating);
+            LOGGER.at(Level.INFO).log(summarizeConfig("Gameplay config defaults", defaults));
             return defaults;
         }
 
@@ -60,35 +50,41 @@ public final class HyruneConfigManager {
                 loaded = new HyruneConfig();
             }
             config = loaded;
-            LOGGER.at(Level.INFO).log("Gameplay config loaded. durabilityDebugLogging=" + loaded.durabilityDebugLogging
-                + ", itemizationDebugLogging=" + loaded.itemizationDebugLogging
-                + ", enableDynamicItemTooltips=" + loaded.enableDynamicItemTooltips
-                + ", dynamicTooltipComposeDebug=" + loaded.dynamicTooltipComposeDebug
-                + ", dynamicTooltipMappingDebug=" + loaded.dynamicTooltipMappingDebug
-                + ", dynamicTooltipCacheDebug=" + loaded.dynamicTooltipCacheDebug
-                + ", itemizationEligiblePrefixes=" + (loaded.itemizationEligiblePrefixes == null ? 0 : loaded.itemizationEligiblePrefixes.size())
-                + ", itemizationExcludedPrefixes=" + (loaded.itemizationExcludedPrefixes == null ? 0 : loaded.itemizationExcludedPrefixes.size())
-                + ", itemizationExcludedIds=" + (loaded.itemizationExcludedIds == null ? 0 : loaded.itemizationExcludedIds.size())
-                + ", itemizationRarityModelSources=" + (loaded.itemizationRarityModel == null || loaded.itemizationRarityModel.baseWeightsBySource == null ? 0 : loaded.itemizationRarityModel.baseWeightsBySource.size())
-                + ", enableAnimalHusbandryGating=" + loaded.enableAnimalHusbandryGating);
+            LOGGER.at(Level.INFO).log(summarizeConfig("Gameplay config loaded", loaded));
             return loaded;
         } catch (IOException e) {
             LOGGER.at(Level.WARNING).log("Failed to read gameplay config, using defaults: " + e.getMessage());
             HyruneConfig fallback = new HyruneConfig();
             config = fallback;
-            LOGGER.at(Level.INFO).log("Gameplay toggles: durabilityDebugLogging=" + fallback.durabilityDebugLogging
-                + ", itemizationDebugLogging=" + fallback.itemizationDebugLogging
-                + ", enableDynamicItemTooltips=" + fallback.enableDynamicItemTooltips
-                + ", dynamicTooltipComposeDebug=" + fallback.dynamicTooltipComposeDebug
-                + ", dynamicTooltipMappingDebug=" + fallback.dynamicTooltipMappingDebug
-                + ", dynamicTooltipCacheDebug=" + fallback.dynamicTooltipCacheDebug
-                + ", itemizationEligiblePrefixes=" + fallback.itemizationEligiblePrefixes.size()
-                + ", itemizationExcludedPrefixes=" + fallback.itemizationExcludedPrefixes.size()
-                + ", itemizationExcludedIds=" + fallback.itemizationExcludedIds.size()
-                + ", itemizationRarityModelSources=" + fallback.itemizationRarityModel.baseWeightsBySource.size()
-                + ", enableAnimalHusbandryGating=" + fallback.enableAnimalHusbandryGating);
+            LOGGER.at(Level.INFO).log(summarizeConfig("Gameplay config fallback", fallback));
             return fallback;
         }
+    }
+
+    private static String summarizeConfig(String label, HyruneConfig cfg) {
+        if (cfg == null) {
+            return label + ": <null>";
+        }
+        int eligiblePrefixes = cfg.itemizationEligiblePrefixes == null ? 0 : cfg.itemizationEligiblePrefixes.size();
+        int excludedPrefixes = cfg.itemizationExcludedPrefixes == null ? 0 : cfg.itemizationExcludedPrefixes.size();
+        int excludedIds = cfg.itemizationExcludedIds == null ? 0 : cfg.itemizationExcludedIds.size();
+        int raritySources = cfg.itemizationRarityModel == null || cfg.itemizationRarityModel.baseWeightsBySource == null
+            ? 0
+            : cfg.itemizationRarityModel.baseWeightsBySource.size();
+
+        return label
+            + ". debug={durability=" + cfg.durabilityDebugLogging
+            + ", itemization=" + cfg.itemizationDebugLogging
+            + ", tooltipCompose=" + cfg.dynamicTooltipComposeDebug
+            + ", tooltipMap=" + cfg.dynamicTooltipMappingDebug
+            + ", tooltipCache=" + cfg.dynamicTooltipCacheDebug
+            + "} features={dynamicTooltips=" + cfg.enableDynamicItemTooltips
+            + ", animalGating=" + cfg.enableAnimalHusbandryGating
+            + "} itemization={eligiblePrefixes=" + eligiblePrefixes
+            + ", excludedPrefixes=" + excludedPrefixes
+            + ", excludedIds=" + excludedIds
+            + ", raritySources=" + raritySources
+            + "}";
     }
 
     private static void ensureRootFolder() {

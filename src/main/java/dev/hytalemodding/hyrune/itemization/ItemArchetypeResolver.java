@@ -16,6 +16,9 @@ public final class ItemArchetypeResolver {
         String id = itemId.toLowerCase(Locale.ROOT);
 
         if (id.startsWith("weapon_")) {
+            if (isShieldWeaponId(id)) {
+                return ItemArchetype.WEAPON_SHIELD;
+            }
             if (isMagicWeaponId(id)) {
                 return ItemArchetype.WEAPON_MAGIC;
             }
@@ -25,8 +28,12 @@ public final class ItemArchetypeResolver {
             return ItemArchetype.WEAPON_MELEE;
         }
         if (id.startsWith("armor_")) {
-            if (containsAny(id, "robe", "cloth", "mage", "wizard")) {
+            if (containsAny(id, "robe", "cloth", "mage", "wizard", "wool", "linen", "silk", "cotton", "cindercloth", "shadoweave")) {
                 return ItemArchetype.ARMOR_MAGIC;
+            }
+            if (containsAny(id, "heavy", "plate", "mail", "steel", "iron", "copper", "bronze", "cobalt",
+                "thorium", "adamantite", "mithril", "onyxium", "prisma")) {
+                return ItemArchetype.ARMOR_HEAVY;
             }
             if (containsAny(id, "leather", "light")) {
                 return ItemArchetype.ARMOR_LIGHT;
@@ -45,6 +52,10 @@ public final class ItemArchetypeResolver {
 
     private static boolean isMagicWeaponId(String itemId) {
         return containsAny(itemId, "staff", "wand", "spellbook", "scepter", "grimoire");
+    }
+
+    private static boolean isShieldWeaponId(String itemId) {
+        return containsAny(itemId, "shield", "buckler");
     }
 
     private static boolean containsAny(String value, String... terms) {

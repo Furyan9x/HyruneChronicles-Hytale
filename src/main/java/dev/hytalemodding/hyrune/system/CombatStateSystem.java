@@ -11,6 +11,9 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.combat.CombatStateTracker;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
+
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +44,10 @@ public class CombatStateSystem extends EntityEventSystem<EntityStore, Damage> {
         var holder = EntityUtils.toHolder(index, archetypeChunk);
         Player victimPlayer = holder.getComponent(Player.getComponentType());
         if (victimPlayer != null) {
-            CombatStateTracker.markCombat(victimPlayer.getUuid());
+            UUID victimUuid = PlayerEntityAccess.getPlayerUuid(victimPlayer);
+            if (victimUuid != null) {
+                CombatStateTracker.markCombat(victimUuid);
+            }
         }
 
         // Attacker (if entity source is a player)
@@ -51,7 +57,10 @@ public class CombatStateSystem extends EntityEventSystem<EntityStore, Damage> {
             if (attackerRef != null && attackerRef.isValid()) {
                 Player attackerPlayer = store.getComponent(attackerRef, Player.getComponentType());
                 if (attackerPlayer != null) {
-                    CombatStateTracker.markCombat(attackerPlayer.getUuid());
+                    UUID attackerUuid = PlayerEntityAccess.getPlayerUuid(attackerPlayer);
+                    if (attackerUuid != null) {
+                        CombatStateTracker.markCombat(attackerUuid);
+                    }
                 }
             }
         }

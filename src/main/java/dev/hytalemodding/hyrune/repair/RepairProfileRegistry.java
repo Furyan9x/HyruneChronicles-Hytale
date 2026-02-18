@@ -13,7 +13,7 @@ public final class RepairProfileRegistry {
     private static final RepairProfile DEFAULT_PROFILE = RepairProfile
         .builder("Ingredient_Bar_Iron", "Ingredient_Leather_Light")
         .baseCosts(6, 4)
-        .rareCatalyst("Ingredient_Essence_Void", 1)
+        .rareGem("Ingredient_Essence_Void", 1)
         .build();
 
     static {
@@ -94,20 +94,20 @@ public final class RepairProfileRegistry {
                                                int priority,
                                                String primary,
                                                String secondary,
-                                               String catalyst,
+                                               String gem,
                                                int primaryCost,
                                                int secondaryCost,
-                                               int catalystCost) {
+                                               int gemCost) {
         RepairProfileDefinition def = new RepairProfileDefinition();
         def.keyword = keyword;
         def.matchType = matchType;
         def.priority = priority;
         def.primaryMaterial = primary;
         def.secondaryMaterial = secondary;
-        def.rareCatalystMaterial = catalyst;
+        def.rareGemMaterial = gem;
         def.primaryBaseCost = primaryCost;
         def.secondaryBaseCost = secondaryCost;
-        def.catalystBaseCost = catalystCost;
+        def.gemBaseCost = gemCost;
         return def;
     }
 
@@ -130,8 +130,8 @@ public final class RepairProfileRegistry {
                 .builder(definition.primaryMaterial, definition.secondaryMaterial)
                 .baseCosts(definition.primaryBaseCost, definition.secondaryBaseCost);
 
-            if (!isBlank(definition.rareCatalystMaterial)) {
-                builder.rareCatalyst(definition.rareCatalystMaterial, definition.catalystBaseCost);
+            if (!isBlank(definition.rareGemMaterial)) {
+                builder.rareGem(definition.rareGemMaterial, definition.gemBaseCost);
             }
 
             MatchType matchType = MatchType.parse(definition.matchType);
@@ -209,3 +209,4 @@ public final class RepairProfileRegistry {
         }
     }
 }
+

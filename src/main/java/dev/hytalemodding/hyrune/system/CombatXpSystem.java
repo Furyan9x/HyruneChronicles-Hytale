@@ -23,8 +23,10 @@ import dev.hytalemodding.hyrune.level.CombatXpStyle;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.slayer.SlayerService;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import javax.annotation.Nonnull;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -89,18 +91,22 @@ public class CombatXpSystem extends DeathSystems.OnDeathSystem {
 
         String weaponId = getHeldItemIdentifier(player);
         CombatCategory combatCategory = determineCombatCategory(weaponId);
+        UUID playerUuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (playerUuid == null) {
+            return;
+        }
 
         LevelingService service = LevelingService.get();
         if (service != null) {
             StringBuilder msg = new StringBuilder();
-            awardCombatXp(service, player.getUuid(), combatCategory, baseXp, msg);
+            awardCombatXp(service, playerUuid, combatCategory, baseXp, msg);
 
             long hpXp = Math.max(1, baseXp / CONSTITUTION_XP_DIVISOR);
-            service.addSkillXp(player.getUuid(), SkillType.CONSTITUTION, hpXp);
+            service.addSkillXp(playerUuid, SkillType.CONSTITUTION, hpXp);
 
             String victimId = getVictimIdentifier(victimRef, store);
             if (victimId != null) {
-                if (slayerService.onKill(player.getUuid(), victimId, baseXp)) {
+                if (slayerService.onKill(playerUuid, victimId, baseXp)) {
                     msg.append(" | +").append(baseXp).append(" Slayer XP");
                 }
             }

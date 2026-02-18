@@ -12,7 +12,6 @@ class ItemInstanceMetadataMigrationTest {
         ItemInstanceMetadata metadata = new ItemInstanceMetadata();
         metadata.setVersion(0);
         metadata.setRarity(ItemRarity.RARE);
-        metadata.setCatalyst(CatalystAffinity.FIRE);
         metadata.setSource(ItemRollSource.CRAFTED);
 
         ItemInstanceMetadata migrated = ItemInstanceMetadataMigration.migrateToCurrent(metadata);
@@ -20,7 +19,6 @@ class ItemInstanceMetadataMigrationTest {
         assertSame(metadata, migrated);
         assertEquals(ItemInstanceMetadata.CURRENT_SCHEMA_VERSION, migrated.getVersion());
         assertEquals(ItemRarity.RARE, migrated.getRarity());
-        assertEquals(CatalystAffinity.FIRE, migrated.getCatalyst());
         assertEquals(ItemRollSource.CRAFTED, migrated.getSource());
     }
 

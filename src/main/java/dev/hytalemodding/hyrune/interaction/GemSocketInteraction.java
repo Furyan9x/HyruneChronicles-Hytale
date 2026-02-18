@@ -11,21 +11,20 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHa
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.hyrune.itemization.CatalystAffinity;
-import dev.hytalemodding.hyrune.itemization.CatalystCatalog;
-import dev.hytalemodding.hyrune.ui.CatalystImbuePage;
+import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
+import dev.hytalemodding.hyrune.ui.GemSocketPage;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 /**
- * Custom item interaction for catalyst items.
+ * Named interaction alias for socketing gems into itemized gear.
  */
-public class CatalystImbueInteraction extends SimpleInstantInteraction {
-    public static final BuilderCodec<CatalystImbueInteraction> CODEC = BuilderCodec.builder(
-            CatalystImbueInteraction.class,
-            CatalystImbueInteraction::new,
+public class GemSocketInteraction extends SimpleInstantInteraction {
+    public static final BuilderCodec<GemSocketInteraction> CODEC = BuilderCodec.builder(
+            GemSocketInteraction.class,
+            GemSocketInteraction::new,
             SimpleInstantInteraction.CODEC
         )
-        .documentation("Opens the catalyst imbuement UI from catalyst items.")
+        .documentation("Opens the gem socketing UI from gem items.")
         .build();
 
     @Override
@@ -60,9 +59,8 @@ public class CatalystImbueInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        String catalystItemId = held.getItemId();
-        CatalystAffinity affinity = CatalystCatalog.resolveAffinity(catalystItemId);
-        if (affinity == CatalystAffinity.NONE) {
+        String gemItemId = held.getItemId();
+        if (!GemSocketConfigHelper.isGemItemId(gemItemId)) {
             interactionContext.getState().state = InteractionState.Failed;
             return;
         }
@@ -70,7 +68,7 @@ public class CatalystImbueInteraction extends SimpleInstantInteraction {
         player.getPageManager().openCustomPage(
             entityRef,
             commandBuffer.getStore(),
-            new CatalystImbuePage(playerRef, catalystItemId, affinity)
+            new GemSocketPage(playerRef, gemItemId)
         );
     }
 }

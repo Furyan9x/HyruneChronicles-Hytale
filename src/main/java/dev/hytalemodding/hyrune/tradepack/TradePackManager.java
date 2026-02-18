@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,10 @@ public final class TradePackManager {
             return;
         }
         boolean hasTradePack = TradePackUtils.hasTradePack(player);
-        UUID uuid = player.getUuid();
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return;
+        }
         boolean wasActive = ACTIVE.contains(uuid);
         if (hasTradePack == wasActive) {
             return;
@@ -43,7 +47,10 @@ public final class TradePackManager {
         }
 
         applyVisuals(player, hasTradePack);
-        SkillStatBonusApplier.applyMovementSpeed(player.getPlayerRef());
+        PlayerRef playerRef = PlayerEntityAccess.getPlayerRef(player);
+        if (playerRef != null) {
+            SkillStatBonusApplier.applyMovementSpeed(playerRef);
+        }
     }
 
 
@@ -54,7 +61,7 @@ public final class TradePackManager {
     }
 
     private static void applyVisuals(Player player, boolean hasTradePack) {
-        PlayerRef playerRef = player.getPlayerRef();
+        PlayerRef playerRef = PlayerEntityAccess.getPlayerRef(player);
         if (playerRef == null) {
             return;
         }
@@ -113,6 +120,8 @@ public final class TradePackManager {
             model.getGradientId(),
             model.getEyeHeight(),
             model.getCrouchOffset(),
+            model.getSittingOffset(),
+            model.getSleepingOffset(),
             model.getAnimationSetMap(),
             model.getCamera(),
             model.getLight(),

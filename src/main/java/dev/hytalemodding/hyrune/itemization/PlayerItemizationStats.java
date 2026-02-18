@@ -24,6 +24,9 @@ public final class PlayerItemizationStats {
     private final double itemUtilityMoveSpeedBonus;
     private final double itemAttackSpeedBonus;
     private final double itemCastSpeedBonus;
+    private final double itemBlockBreakSpeedBonus;
+    private final double itemRareDropChanceBonus;
+    private final double itemDoubleDropChanceBonus;
     private final double itemManaRegenBonusPerSecond;
     private final double itemStaminaRegenBonusPerSecond;
     private final double itemHpRegenBonusPerSecond;
@@ -52,6 +55,9 @@ public final class PlayerItemizationStats {
                                   double itemUtilityMoveSpeedBonus,
                                   double itemAttackSpeedBonus,
                                   double itemCastSpeedBonus,
+                                  double itemBlockBreakSpeedBonus,
+                                  double itemRareDropChanceBonus,
+                                  double itemDoubleDropChanceBonus,
                                   double itemManaRegenBonusPerSecond,
                                   double itemStaminaRegenBonusPerSecond,
                                   double itemHpRegenBonusPerSecond,
@@ -79,6 +85,9 @@ public final class PlayerItemizationStats {
         this.itemUtilityMoveSpeedBonus = itemUtilityMoveSpeedBonus;
         this.itemAttackSpeedBonus = itemAttackSpeedBonus;
         this.itemCastSpeedBonus = itemCastSpeedBonus;
+        this.itemBlockBreakSpeedBonus = itemBlockBreakSpeedBonus;
+        this.itemRareDropChanceBonus = itemRareDropChanceBonus;
+        this.itemDoubleDropChanceBonus = itemDoubleDropChanceBonus;
         this.itemManaRegenBonusPerSecond = itemManaRegenBonusPerSecond;
         this.itemStaminaRegenBonusPerSecond = itemStaminaRegenBonusPerSecond;
         this.itemHpRegenBonusPerSecond = itemHpRegenBonusPerSecond;
@@ -166,6 +175,18 @@ public final class PlayerItemizationStats {
 
     public double getItemCastSpeedBonus() {
         return itemCastSpeedBonus;
+    }
+
+    public double getItemBlockBreakSpeedBonus() {
+        return itemBlockBreakSpeedBonus;
+    }
+
+    public double getItemRareDropChanceBonus() {
+        return itemRareDropChanceBonus;
+    }
+
+    public double getItemDoubleDropChanceBonus() {
+        return itemDoubleDropChanceBonus;
     }
 
     public double getItemManaRegenBonusPerSecond() {

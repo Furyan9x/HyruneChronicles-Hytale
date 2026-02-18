@@ -15,6 +15,7 @@ import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.registry.CombatRequirementRegistry;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,10 @@ public class ArmorRequirementListener {
             return;
         }
 
-        UUID uuid = player.getUuid();
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return;
+        }
         if (!ACTIVE.add(uuid)) {
             return;
         }
@@ -67,15 +71,16 @@ public class ArmorRequirementListener {
             return;
         }
 
-        PlayerRef playerRef = player.getPlayerRef();
+        PlayerRef playerRef = PlayerEntityAccess.getPlayerRef(player);
         if (playerRef == null) {
             return;
         }
+        UUID playerUuid = playerRef.getUuid();
 
         LevelingService service = Hyrune.getService();
         int defenceLevel = service.getSkillLevel(playerRef.getUuid(), SkillType.DEFENCE);
 
-        ItemStack[] cached = getOrInitLastValidArmor(player.getUuid(), armor);
+        ItemStack[] cached = getOrInitLastValidArmor(playerUuid, armor);
         boolean warned = false;
         short capacity = armor.getCapacity();
         for (short slot = 0; slot < capacity; slot++) {
@@ -94,7 +99,7 @@ public class ArmorRequirementListener {
                     restorePreviousArmor(inventory, armor, slot, previous);
                 }
                 if (!warned) {
-                    sendArmorWarning(player, required);
+                    sendArmorWarning(player, playerUuid, required);
                     warned = true;
                 }
                 continue;
@@ -172,13 +177,13 @@ public class ArmorRequirementListener {
         }
     }
 
-    private void sendArmorWarning(Player player, int requiredLevel) {
+    private void sendArmorWarning(Player player, UUID playerUuid, int requiredLevel) {
         long now = System.currentTimeMillis();
-        Long last = LAST_ARMOR_WARNING.get(player.getUuid());
+        Long last = LAST_ARMOR_WARNING.get(playerUuid);
         if (last != null && now - last < ARMOR_WARNING_COOLDOWN_MS) {
             return;
         }
-        LAST_ARMOR_WARNING.put(player.getUuid(), now);
+        LAST_ARMOR_WARNING.put(playerUuid, now);
         player.sendMessage(Message.raw(
             "You need Defence level " + requiredLevel + " to equip this armor."
         ));

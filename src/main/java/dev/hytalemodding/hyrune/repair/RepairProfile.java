@@ -10,18 +10,18 @@ import java.util.List;
 public final class RepairProfile {
     private final String primaryMaterial;
     private final String secondaryMaterial;
-    private final String rareCatalystMaterial;
+    private final String rareGemMaterial;
     private final int primaryBaseCost;
     private final int secondaryBaseCost;
-    private final int catalystBaseCost;
+    private final int gemBaseCost;
 
     private RepairProfile(Builder builder) {
         this.primaryMaterial = builder.primaryMaterial;
         this.secondaryMaterial = builder.secondaryMaterial;
-        this.rareCatalystMaterial = builder.rareCatalystMaterial;
+        this.rareGemMaterial = builder.rareGemMaterial;
         this.primaryBaseCost = builder.primaryBaseCost;
         this.secondaryBaseCost = builder.secondaryBaseCost;
-        this.catalystBaseCost = builder.catalystBaseCost;
+        this.gemBaseCost = builder.gemBaseCost;
     }
 
     public List<RepairMaterialCost> buildCosts(double missingRatio, ItemRarity rarity) {
@@ -35,8 +35,8 @@ public final class RepairProfile {
         costs.add(new RepairMaterialCost(primaryMaterial, scale(primaryBaseCost, clampedMissing, rarityMultiplier)));
         costs.add(new RepairMaterialCost(secondaryMaterial, scale(secondaryBaseCost, clampedMissing, rarityMultiplier)));
 
-        if (rareCatalystMaterial != null && rarity != null && rarity.ordinal() >= ItemRarity.RARE.ordinal()) {
-            costs.add(new RepairMaterialCost(rareCatalystMaterial, scale(catalystBaseCost, clampedMissing, rarityMultiplier)));
+        if (rareGemMaterial != null && rarity != null && rarity.ordinal() >= ItemRarity.RARE.ordinal()) {
+            costs.add(new RepairMaterialCost(rareGemMaterial, scale(gemBaseCost, clampedMissing, rarityMultiplier)));
         }
         return costs;
     }
@@ -53,10 +53,10 @@ public final class RepairProfile {
     public static final class Builder {
         private final String primaryMaterial;
         private final String secondaryMaterial;
-        private String rareCatalystMaterial;
+        private String rareGemMaterial;
         private int primaryBaseCost = 6;
         private int secondaryBaseCost = 4;
-        private int catalystBaseCost = 1;
+        private int gemBaseCost = 1;
 
         private Builder(String primaryMaterial, String secondaryMaterial) {
             this.primaryMaterial = primaryMaterial;
@@ -69,9 +69,9 @@ public final class RepairProfile {
             return this;
         }
 
-        public Builder rareCatalyst(String materialItemId, int baseCost) {
-            this.rareCatalystMaterial = materialItemId;
-            this.catalystBaseCost = Math.max(1, baseCost);
+        public Builder rareGem(String materialItemId, int baseCost) {
+            this.rareGemMaterial = materialItemId;
+            this.gemBaseCost = Math.max(1, baseCost);
             return this;
         }
 
@@ -80,3 +80,4 @@ public final class RepairProfile {
         }
     }
 }
+

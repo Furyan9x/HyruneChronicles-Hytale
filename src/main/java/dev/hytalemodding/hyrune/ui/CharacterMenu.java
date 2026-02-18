@@ -10,6 +10,7 @@ import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.Anchor;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
@@ -36,6 +37,8 @@ import dev.hytalemodding.hyrune.playerdata.QuestStatus;
 import dev.hytalemodding.hyrune.social.SocialActionResult;
 import dev.hytalemodding.hyrune.social.SocialService;
 import dev.hytalemodding.hyrune.skills.SkillType;
+import dev.hytalemodding.hyrune.ui.attributes.CharacterAttributeComputationService;
+import dev.hytalemodding.hyrune.ui.attributes.CharacterAttributeComputationService.DetailCategory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -89,11 +92,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final String SERVER_PATCH_VERSION = "Hyrune v1.0.0";
     private static final String DEFAULT_EVENT_STATUS = "No event active";
     private static final String DEFAULT_EVENT_DESCRIPTION = "No event is currently active. Check back soon for announcements.";
-    private static final String ATTR_TOGGLE_ACTION = "ToggleAttributeCategory";
+    private static final String ATTR_DETAIL_SELECT_ACTION = "SelectAttributeDetailCategory";
     private static final String QUEST_REQ_TOGGLE_ACTION = "ToggleQuestRequirement";
-    private static final String ATTR_CATEGORY_COMBAT = "Combat";
-    private static final String ATTR_CATEGORY_GATHERING = "Gathering";
-    private static final String ATTR_CATEGORY_MISC = "Misc";
     private static final String REQ_CATEGORY_LEVEL = "Level";
     private static final String REQ_CATEGORY_ITEM = "Item";
     private static final String REQ_CATEGORY_QUEST = "Quest";
@@ -110,9 +110,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final int IGNORED_ROW_NAME_MAX_CHARS = 14;
 
     private String selectedTab = TAB_SKILLS;
-    private boolean combatExpanded = true;
-    private boolean gatheringExpanded = true;
-    private boolean miscExpanded = true;
+    private DetailCategory selectedAttrDetailCategory = DetailCategory.OFFENSE;
     private String selectedQuestId = null;
     private QuestListFilter currentQuestFilter = QuestListFilter.ALPHABETICAL;
     private boolean levelReqExpanded = true;
@@ -136,7 +134,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         this.applyTabState(commandBuilder, eventBuilder);
         this.populateServerInfo(commandBuilder);
         this.buildSkillGrid(commandBuilder, eventBuilder, uuid, levelingService);
-        this.buildAttributes(commandBuilder, eventBuilder, uuid, levelingService);
+        this.buildAttributes(commandBuilder, eventBuilder, ref, store, uuid, levelingService);
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnClose", EventData.of("Button", "Close"), false);
 
@@ -147,12 +145,12 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabSkillsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_SKILLS), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabFriendsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_FRIENDS), false);
 
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrCombatToggle",
-            EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_COMBAT), false);
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrGatheringToggle",
-            EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_GATHERING), false);
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#AttrMiscToggle",
-            EventData.of("Button", ATTR_TOGGLE_ACTION).append("Category", ATTR_CATEGORY_MISC), false);
+        bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailOffenseBtn", DetailCategory.OFFENSE);
+        bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailDefenseBtn", DetailCategory.DEFENSE);
+        bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailResourcesBtn", DetailCategory.RESOURCES);
+        bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailMobilityBtn", DetailCategory.MOBILITY);
+        bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailGatheringBtn", DetailCategory.GATHERING);
+        bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailHealingBtn", DetailCategory.HEALING);
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnAcceptQuest",
             EventData.of("Button", "AcceptQuest"), false);
@@ -268,7 +266,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                         this.buildCombatSettings(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
                     }
                     if (TAB_ATTRIBUTES.equals(this.selectedTab)) {
-                        this.buildAttributes(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
+                        this.buildAttributes(refreshCmd, refreshEvt, ref, store, this.playerRef.getUuid(), LevelingService.get());
                     }
                     if (TAB_FRIENDS.equals(this.selectedTab)) {
                         this.buildFriendsTab(refreshCmd, refreshEvt, this.playerRef.getUuid());
@@ -276,12 +274,12 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                     this.sendUpdate(refreshCmd, refreshEvt, false);
                 }
                 break;
-            case ATTR_TOGGLE_ACTION:
+            case ATTR_DETAIL_SELECT_ACTION:
                 if (data.Category != null) {
-                    toggleAttributeCategory(data.Category);
+                    this.selectedAttrDetailCategory = DetailCategory.fromIdOrDefault(data.Category, DetailCategory.OFFENSE);
                     UICommandBuilder refreshCmd = new UICommandBuilder();
                     UIEventBuilder refreshEvt = new UIEventBuilder();
-                    this.buildAttributes(refreshCmd, refreshEvt, this.playerRef.getUuid(), LevelingService.get());
+                    this.buildAttributes(refreshCmd, refreshEvt, ref, store, this.playerRef.getUuid(), LevelingService.get());
                     this.sendUpdate(refreshCmd, refreshEvt, false);
                 }
                 break;
@@ -1011,198 +1009,77 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         }
     }
 
+    private void bindAttributeDetailCategoryButton(UIEventBuilder eventBuilder, String target, DetailCategory category) {
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            target,
+            EventData.of("Button", ATTR_DETAIL_SELECT_ACTION).append(SkillMenuData.KEY_CATEGORY, category.getId()),
+            false
+        );
+    }
+
     private void buildAttributes(UICommandBuilder cmd,
                                  UIEventBuilder evt,
+                                 Ref<EntityStore> ref,
+                                 Store<EntityStore> store,
                                  UUID uuid,
                                  LevelingService service) {
-        cmd.set("#AttrCombatToggle.Text", combatExpanded ? "-" : "+");
-        cmd.set("#AttrGatheringToggle.Text", gatheringExpanded ? "-" : "+");
-        cmd.set("#AttrMiscToggle.Text", miscExpanded ? "-" : "+");
+        Player player = (ref == null || store == null) ? null : store.getComponent(ref, Player.getComponentType());
+        CharacterAttributeComputationService.AttributeModel model = CharacterAttributeComputationService.compute(
+            uuid,
+            player,
+            service,
+            this.selectedAttrDetailCategory,
+            movementSpeedMetersPerSecond(ref, store)
+        );
 
-        cmd.set("#AttrCombatContent.Visible", combatExpanded);
-        cmd.set("#AttrGatheringContent.Visible", gatheringExpanded);
-        cmd.set("#AttrMiscContent.Visible", miscExpanded);
+        cmd.set("#AttrDetailCategoryTitle.Text", model.detailHeader());
+        cmd.set("#AttrDetailHint.Text", model.detailHint());
 
-        cmd.clear("#AttrCombatContent");
-        cmd.clear("#AttrGatheringContent");
-        cmd.clear("#AttrMiscContent");
+        setDetailButtonLabel(cmd, "#AttrDetailOffenseBtn", DetailCategory.OFFENSE);
+        setDetailButtonLabel(cmd, "#AttrDetailDefenseBtn", DetailCategory.DEFENSE);
+        setDetailButtonLabel(cmd, "#AttrDetailResourcesBtn", DetailCategory.RESOURCES);
+        setDetailButtonLabel(cmd, "#AttrDetailMobilityBtn", DetailCategory.MOBILITY);
+        setDetailButtonLabel(cmd, "#AttrDetailGatheringBtn", DetailCategory.GATHERING);
+        setDetailButtonLabel(cmd, "#AttrDetailHealingBtn", DetailCategory.HEALING);
 
-        if (combatExpanded) {
-            int row = 0;
-            for (AttributeEntry entry : buildCombatAttributes(uuid, service)) {
-                appendAttributeRow(cmd, "#AttrCombatContent", row++, entry);
-            }
+        cmd.clear("#AttrOverviewContent");
+        cmd.clear("#AttrDetailContent");
+
+        int overviewRow = 0;
+        for (CharacterAttributeComputationService.AttributeRow row : model.overviewRows()) {
+            appendAttributeRow(cmd, "#AttrOverviewContent", overviewRow++, row);
         }
 
-        if (gatheringExpanded) {
-            int row = 0;
-            for (AttributeEntry entry : buildGatheringAttributes(uuid, service)) {
-                appendAttributeRow(cmd, "#AttrGatheringContent", row++, entry);
-            }
+        int detailRow = 0;
+        for (CharacterAttributeComputationService.AttributeRow row : model.detailRows()) {
+            appendAttributeRow(cmd, "#AttrDetailContent", detailRow++, row);
         }
+    }
 
-        if (miscExpanded) {
-            int row = 0;
-            for (AttributeEntry entry : buildMiscAttributes(uuid, service)) {
-                appendAttributeRow(cmd, "#AttrMiscContent", row++, entry);
-            }
+    private void setDetailButtonLabel(UICommandBuilder cmd, String buttonPath, DetailCategory category) {
+        cmd.set(buttonPath + ".Text", category.getDisplayName());
+    }
+
+    private Double movementSpeedMetersPerSecond(Ref<EntityStore> ref, Store<EntityStore> store) {
+        if (ref == null || store == null) {
+            return null;
         }
+        MovementManager movementManager = store.getComponent(ref, MovementManager.getComponentType());
+        if (movementManager == null || movementManager.getSettings() == null) {
+            return null;
+        }
+        return (double) movementManager.getSettings().baseSpeed;
     }
 
     private void appendAttributeRow(UICommandBuilder cmd,
                                     String container,
                                     int index,
-                                    AttributeEntry entry) {
+                                    CharacterAttributeComputationService.AttributeRow row) {
         cmd.append(container, ATTR_ROW_UI);
         String rowRoot = container + "[" + index + "]";
-        cmd.set(rowRoot + " #AttrLabel.Text", entry.label);
-        cmd.set(rowRoot + " #AttrValue.Text", entry.value);
-    }
-
-    private AttributeEntry[] buildCombatAttributes(UUID uuid, LevelingService service) {
-        int attack = service.getSkillLevel(uuid, SkillType.ATTACK);
-        int strength = service.getSkillLevel(uuid, SkillType.STRENGTH);
-        int defence = service.getSkillLevel(uuid, SkillType.DEFENCE);
-        int ranged = service.getSkillLevel(uuid, SkillType.RANGED);
-        int magic = service.getSkillLevel(uuid, SkillType.MAGIC);
-
-        double meleeDamageBonus = attack * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.ATTACK_DAMAGE_PER_LEVEL;
-        double meleeCritChance = Math.min(
-            dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.STRENGTH_CRIT_CHANCE_CAP,
-            strength * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.STRENGTH_CRIT_CHANCE_PER_LEVEL
-        );
-        double meleeCritMultiplier = dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.STRENGTH_CRIT_BASE_MULTIPLIER
-            + (strength * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.STRENGTH_CRIT_DAMAGE_BONUS_PER_LEVEL);
-        double damageReduction = Math.min(
-            dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.DEFENCE_DAMAGE_REDUCTION_CAP,
-            defence * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.DEFENCE_DAMAGE_REDUCTION_PER_LEVEL
-        );
-
-        double rangedDamageBonus = ranged * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.RANGED_DAMAGE_PER_LEVEL;
-        double rangedCritChance = Math.min(
-            dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.RANGED_CRIT_CHANCE_CAP,
-            ranged * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.RANGED_CRIT_CHANCE_PER_LEVEL
-        );
-        double rangedCritMultiplier = dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.RANGED_CRIT_BASE_MULTIPLIER
-            + (ranged * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.RANGED_CRIT_DAMAGE_BONUS_PER_LEVEL);
-
-        double magicDamageBonus = magic * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.MAGIC_DAMAGE_PER_LEVEL;
-        double magicCritChance = Math.min(
-            dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.MAGIC_CRIT_CHANCE_CAP,
-            magic * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.MAGIC_CRIT_CHANCE_PER_LEVEL
-        );
-        double magicCritMultiplier = dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.MAGIC_CRIT_BASE_MULTIPLIER
-            + (magic * dev.hytalemodding.hyrune.system.SkillCombatBonusSystem.MAGIC_CRIT_DAMAGE_BONUS_PER_LEVEL);
-
-        return new AttributeEntry[]{
-            new AttributeEntry("Melee damage bonus", formatBonusPercent(meleeDamageBonus)),
-            new AttributeEntry("Melee crit chance", formatPercent(meleeCritChance)),
-            new AttributeEntry("Melee crit multiplier", formatMultiplier(meleeCritMultiplier)),
-            new AttributeEntry("Damage reduction", formatPercent(damageReduction)),
-            new AttributeEntry("Ranged damage bonus", formatBonusPercent(rangedDamageBonus)),
-            new AttributeEntry("Ranged crit chance", formatPercent(rangedCritChance)),
-            new AttributeEntry("Ranged crit multiplier", formatMultiplier(rangedCritMultiplier)),
-            new AttributeEntry("Magic damage bonus", formatBonusPercent(magicDamageBonus)),
-            new AttributeEntry("Magic crit chance", formatPercent(magicCritChance)),
-            new AttributeEntry("Magic crit multiplier", formatMultiplier(magicCritMultiplier))
-        };
-    }
-
-    private AttributeEntry[] buildGatheringAttributes(UUID uuid, LevelingService service) {
-        int mining = service.getSkillLevel(uuid, SkillType.MINING);
-        int woodcutting = service.getSkillLevel(uuid, SkillType.WOODCUTTING);
-        int fishing = service.getSkillLevel(uuid, SkillType.FISHING);
-        int cooking = service.getSkillLevel(uuid, SkillType.COOKING);
-        int alchemy = service.getSkillLevel(uuid, SkillType.ALCHEMY);
-
-        double miningSpeed = mining * dev.hytalemodding.hyrune.system.MiningSpeedSystem.MINING_DAMAGE_PER_LEVEL;
-        double miningDurability = Math.min(
-            dev.hytalemodding.hyrune.system.MiningDurabilitySystem.MINING_DURABILITY_REDUCTION_CAP,
-            mining * dev.hytalemodding.hyrune.system.MiningDurabilitySystem.MINING_DURABILITY_REDUCTION_PER_LEVEL
-        );
-        double woodcuttingSpeed = woodcutting * dev.hytalemodding.hyrune.system.WoodcuttingSpeedSystem.WOODCUTTING_DAMAGE_PER_LEVEL;
-        double woodcuttingDurability = Math.min(
-            dev.hytalemodding.hyrune.system.WoodcuttingDurabilitySystem.WOODCUTTING_DURABILITY_REDUCTION_CAP,
-            woodcutting * dev.hytalemodding.hyrune.system.WoodcuttingDurabilitySystem.WOODCUTTING_DURABILITY_REDUCTION_PER_LEVEL
-        );
-        double fishingLevelRatio = Math.min(fishing, 99) / 99.0;
-        double fishingBiteSpeedBonus = fishingLevelRatio * FishingRegistry.BITE_SPEED_MAX_BONUS;
-        double fishingRareChance = FishingRegistry.BASE_RARE_CHANCE + (fishingLevelRatio * FishingRegistry.RARE_CHANCE_BONUS);
-        double sickleXpBonus = dev.hytalemodding.hyrune.system.FarmingHarvestPickupSystem.SICKLE_XP_BONUS - 1.0;
-        double cookingDoubleProc = Math.min(
-            dev.hytalemodding.hyrune.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_CAP,
-            cooking * dev.hytalemodding.hyrune.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_PER_LEVEL
-        );
-        double alchemyDoubleProc = Math.min(
-            dev.hytalemodding.hyrune.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_CAP,
-            alchemy * dev.hytalemodding.hyrune.system.TimedCraftingXpSystem.DOUBLE_PROC_CHANCE_PER_LEVEL
-        );
-
-        return new AttributeEntry[]{
-            new AttributeEntry("Mining speed bonus", formatBonusPercent(miningSpeed)),
-            new AttributeEntry("Mining durability reduction", formatPercent(miningDurability)),
-            new AttributeEntry("Woodcutting speed bonus", formatBonusPercent(woodcuttingSpeed)),
-            new AttributeEntry("Woodcutting durability reduction", formatPercent(woodcuttingDurability)),
-            new AttributeEntry("Fishing bite speed bonus", formatBonusPercent(fishingBiteSpeedBonus)),
-            new AttributeEntry("Fishing rare fish chance", formatPercent(fishingRareChance)),
-            new AttributeEntry("Farming sickle XP bonus", formatBonusPercent(sickleXpBonus)),
-            new AttributeEntry("Cooking double proc chance", formatPercent(cookingDoubleProc)),
-            new AttributeEntry("Alchemy double proc chance", formatPercent(alchemyDoubleProc))
-        };
-    }
-
-    private AttributeEntry[] buildMiscAttributes(UUID uuid, LevelingService service) {
-        int constitution = service.getSkillLevel(uuid, SkillType.CONSTITUTION);
-        int magic = service.getSkillLevel(uuid, SkillType.MAGIC);
-        int agility = service.getSkillLevel(uuid, SkillType.AGILITY);
-
-        double healthBonus = constitution * dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier.HEALTH_PER_CONSTITUTION;
-        double manaBonus = magic * dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier.MANA_MAX_PER_MAGIC;
-        double staminaBonus = agility * dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier.STAMINA_MAX_PER_AGILITY;
-        double manaRegen = magic * dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier.MANA_REGEN_PER_MAGIC;
-        double staminaRegen = agility * dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier.STAMINA_REGEN_PER_AGILITY;
-        double moveSpeedBonus = (agility / 99.0) * dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier.MOVEMENT_SPEED_BONUS_AT_99;
-
-        return new AttributeEntry[]{
-            new AttributeEntry("Max health bonus", formatFlat(healthBonus)),
-            new AttributeEntry("Max mana bonus", formatFlat(manaBonus)),
-            new AttributeEntry("Max stamina bonus", formatFlat(staminaBonus)),
-            new AttributeEntry("Mana regen per sec", formatFlat(manaRegen)),
-            new AttributeEntry("Stamina regen per sec", formatFlat(staminaRegen)),
-            new AttributeEntry("Movement speed bonus", formatBonusPercent(moveSpeedBonus))
-        };
-    }
-
-    private void toggleAttributeCategory(String category) {
-        switch (category) {
-            case ATTR_CATEGORY_COMBAT:
-                combatExpanded = !combatExpanded;
-                break;
-            case ATTR_CATEGORY_GATHERING:
-                gatheringExpanded = !gatheringExpanded;
-                break;
-            case ATTR_CATEGORY_MISC:
-                miscExpanded = !miscExpanded;
-                break;
-            default:
-                break;
-        }
-    }
-
-    private String formatPercent(double value) {
-        return String.format(java.util.Locale.US, "%.1f%%", value * 100.0);
-    }
-
-    private String formatBonusPercent(double value) {
-        return String.format(java.util.Locale.US, "+%.1f%%", value * 100.0);
-    }
-
-    private String formatMultiplier(double value) {
-        return String.format(java.util.Locale.US, "x%.2f", value);
-    }
-
-    private String formatFlat(double value) {
-        return String.format(java.util.Locale.US, "+%.2f", value);
+        cmd.set(rowRoot + " #AttrLabel.Text", row.label());
+        cmd.set(rowRoot + " #AttrValue.Text", row.value());
     }
 
 
@@ -1352,16 +1229,6 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 ", RangedCombatStyle='" + RangedCombatStyle + '\'' +
                 ", MagicCombatStyle='" + MagicCombatStyle + '\'' +
                 '}';
-        }
-    }
-
-    private static final class AttributeEntry {
-        private final String label;
-        private final String value;
-
-        private AttributeEntry(String label, String value) {
-            this.label = label;
-            this.value = value;
         }
     }
 

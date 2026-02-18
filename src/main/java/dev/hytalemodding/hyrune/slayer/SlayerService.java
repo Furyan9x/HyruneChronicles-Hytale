@@ -14,6 +14,7 @@ import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.npc.NpcLevelService;
 import dev.hytalemodding.hyrune.playerdata.SlayerPlayerData;
 import dev.hytalemodding.hyrune.skills.SkillType;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +77,12 @@ public class SlayerService {
             return false;
         }
 
-        SlayerPlayerData data = getPlayerData(player.getUuid());
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return false;
+        }
+
+        SlayerPlayerData data = getPlayerData(uuid);
         if (data.getSlayerPoints() < shopItem.cost()) {
             return false;
         }
@@ -164,7 +170,10 @@ public class SlayerService {
         if (player == null) {
             return null;
         }
-        UUID uuid = player.getUuid();
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return null;
+        }
         SlayerPlayerData data = getPlayerData(uuid);
         SlayerTaskAssignment assignment = normalizeAssignment(data);
         if (assignment == null || assignment.getState() != SlayerTaskState.COMPLETED) {

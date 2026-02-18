@@ -23,7 +23,7 @@ import dev.hytalemodding.hyrune.commands.ItemMetaCommand;
 import dev.hytalemodding.hyrune.commands.ItemRollsCommand;
 import dev.hytalemodding.hyrune.commands.ItemDiagCommand;
 import dev.hytalemodding.hyrune.commands.ItemStatsCommand;
-import dev.hytalemodding.hyrune.commands.CatalystUiCommand;
+import dev.hytalemodding.hyrune.commands.GemUiCommand;
 import dev.hytalemodding.hyrune.component.GameModeDataComponent;
 import dev.hytalemodding.hyrune.database.JsonLevelRepository;
 import dev.hytalemodding.hyrune.database.JsonQuestRepository;
@@ -36,15 +36,14 @@ import dev.hytalemodding.hyrune.events.LevelingVisualsListener;
 import dev.hytalemodding.hyrune.events.FarmingHarvestListener;
 import dev.hytalemodding.hyrune.events.FarmingRequirementListener;
 import dev.hytalemodding.hyrune.events.ItemizationInventoryListener;
-import dev.hytalemodding.hyrune.itemization.tooltip.DynamicTooltipLevelUpListener;
 import dev.hytalemodding.hyrune.itemization.tooltip.HyruneDynamicTooltipService;
 import dev.hytalemodding.hyrune.registry.HyruneComponents;
 import dev.hytalemodding.hyrune.registry.HyruneDialogue;
 import dev.hytalemodding.hyrune.registry.HyruneSystems;
 import dev.hytalemodding.hyrune.component.FishingBobberComponent;
 import dev.hytalemodding.hyrune.interaction.FishingInteraction;
+import dev.hytalemodding.hyrune.interaction.GemSocketInteraction;
 import dev.hytalemodding.hyrune.interaction.RepairBenchInteraction;
-import dev.hytalemodding.hyrune.interaction.CatalystImbueInteraction;
 import dev.hytalemodding.hyrune.events.PlayerJoinListener;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.level.formulas.LevelFormula;
@@ -143,7 +142,11 @@ public class Hyrune extends JavaPlugin {
 
         this.service.registerLevelUpListener(new LevelingVisualsListener());
         this.service.registerLevelUpListener(new SkillStatBonusListener());
-        this.service.registerLevelUpListener(new DynamicTooltipLevelUpListener());
+        this.service.registerLevelUpListener((uuid, newLevel, source) -> {
+            if (uuid != null) {
+                Hyrune.refreshDynamicTooltipsForPlayer(uuid);
+            }
+        });
 
         registerCommands();
 
@@ -190,9 +193,9 @@ public class Hyrune extends JavaPlugin {
             RepairBenchInteraction.CODEC
         );
         this.getCodecRegistry(Interaction.CODEC).register(
-            "HyruneCatalystImbue",
-            CatalystImbueInteraction.class,
-            CatalystImbueInteraction.CODEC
+            "HyruneGemSocket",
+            GemSocketInteraction.class,
+            GemSocketInteraction.CODEC
         );
     }
 
@@ -208,7 +211,7 @@ public class Hyrune extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new ItemRollsCommand());
         this.getCommandRegistry().registerCommand(new ItemStatsCommand());
         this.getCommandRegistry().registerCommand(new ItemDiagCommand());
-        this.getCommandRegistry().registerCommand(new CatalystUiCommand());
+        this.getCommandRegistry().registerCommand(new GemUiCommand());
     }
 
     @Override
@@ -306,3 +309,4 @@ public class Hyrune extends JavaPlugin {
         return HyruneComponents.GAMEMODE_DATA;
     }
 }
+

@@ -7,13 +7,17 @@ import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
+import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
 import dev.hytalemodding.hyrune.ui.SocialMenuPage;
+import dev.hytalemodding.hyrune.ui.GemSocketPage;
 
 /**
  * Opens the Social Menu when a player presses the interaction key on another player.
@@ -45,16 +49,33 @@ public class SocialInteractionWatcher implements PlayerPacketWatcher {
             return;
         }
 
-        world.execute(() -> openSocialMenu(sender, universe));
+        world.execute(() -> handlePickInteraction(sender, universe));
     }
 
-    private void openSocialMenu(PlayerRef sender, Universe universe) {
+    private void handlePickInteraction(PlayerRef sender, Universe universe) {
         Ref<EntityStore> senderRef = sender.getReference();
         if (senderRef == null || !senderRef.isValid()) {
             return;
         }
 
         Store<EntityStore> senderStore = senderRef.getStore();
+        Player senderPlayer = senderStore.getComponent(senderRef, Player.getComponentType());
+        if (senderPlayer == null) {
+            return;
+        }
+
+        if (openGemSocketUiIfHoldingGem(sender, senderRef, senderStore, senderPlayer)) {
+            return;
+        }
+
+        openSocialMenu(sender, universe, senderRef, senderStore, senderPlayer);
+    }
+
+    private void openSocialMenu(PlayerRef sender,
+                                Universe universe,
+                                Ref<EntityStore> senderRef,
+                                Store<EntityStore> senderStore,
+                                Player senderPlayer) {
         Ref<EntityStore> targetEntityRef = TargetUtil.getTargetEntity(senderRef, senderStore);
         if (targetEntityRef == null || !targetEntityRef.isValid()) {
             return;
@@ -69,11 +90,29 @@ public class SocialInteractionWatcher implements PlayerPacketWatcher {
             return;
         }
 
-        Player senderPlayer = senderStore.getComponent(senderRef, Player.getComponentType());
-        if (senderPlayer == null) {
-            return;
+        senderPlayer.getPageManager().openCustomPage(senderRef, senderStore, new SocialMenuPage(sender, targetPlayerRef));
+    }
+
+    private boolean openGemSocketUiIfHoldingGem(PlayerRef sender,
+                                                 Ref<EntityStore> senderRef,
+                                                 Store<EntityStore> senderStore,
+                                                 Player senderPlayer) {
+        Inventory inventory = senderPlayer.getInventory();
+        if (inventory == null) {
+            return false;
         }
 
-        senderPlayer.getPageManager().openCustomPage(senderRef, senderStore, new SocialMenuPage(sender, targetPlayerRef));
+        ItemStack held = inventory.getItemInHand();
+        if (held == null || held.isEmpty() || held.getItemId() == null) {
+            return false;
+        }
+
+        String heldItemId = held.getItemId();
+        if (!GemSocketConfigHelper.isGemItemId(heldItemId)) {
+            return false;
+        }
+
+        senderPlayer.getPageManager().openCustomPage(senderRef, senderStore, new GemSocketPage(sender, heldItemId));
+        return true;
     }
 }

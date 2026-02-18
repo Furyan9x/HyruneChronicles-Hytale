@@ -31,7 +31,7 @@ Group {
           Style: @RowSub;
         }
 
-        Label #ReceiverCatalyst {
+        Label #ReceiverGem {
           Anchor: (Width: 180, Height: 20);
           Style: @RowSub;
         }
@@ -52,4 +52,5 @@ Group {
     }
   }
 }
+
 

@@ -19,7 +19,7 @@ public final class DurabilityPolicy {
             return 0d;
         }
         ItemRarity effectiveRarity = rarity == null ? ItemRarity.COMMON : rarity;
-        double bonus = effectiveRarity.ordinal() * RARITY_STEP_MAX_DURABILITY_BONUS;
+        double bonus = Math.max(0d, effectiveRarity.getMaxDurabilityBonus());
         return baseMaxDurability * (1.0 + bonus);
     }
 

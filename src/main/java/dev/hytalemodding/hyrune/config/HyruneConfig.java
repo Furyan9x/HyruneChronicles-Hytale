@@ -19,29 +19,36 @@ public class HyruneConfig {
     }
 
     public static class ItemizationSpecializedStatsConfig {
-        public double flatRollMinScalar = 0.10;
-        public double flatRollMaxScalar = 0.45;
-        public double percentRollMin = 0.03;
-        public double percentRollMax = 0.16;
-        public double percentRollTierInfluence = 0.55;
-        public double hybridFlatScalar = 0.80;
-        public double hybridPercentScalar = 0.80;
+        public double flatRollMinScalar = 0.20;
+        public double flatRollMaxScalar = 0.80;
+        public double percentRollMin = 0.02;
+        public double percentRollMax = 0.14;
+        public double percentRollTierInfluence = 0.12;
+        public double durabilityTierInfluence = 1.00;
         public Map<String, Double> rollTypeWeights = defaultRollTypeWeights();
+        public Map<String, String> rollTypeConstraintByStat = defaultRollTypeConstraintByStat();
         public Map<String, Double> tierScalarByKeyword = defaultTierScalarByKeyword();
         public RarityScalarConfig rarityScalar = new RarityScalarConfig();
         public Map<String, Integer> statsPerRarity = defaultStatsPerRarity();
         public Map<String, Double> baseStatWeights = defaultBaseStatWeights();
         public Map<String, List<String>> poolByArchetype = defaultPoolByArchetype();
-        public Map<String, Map<String, Double>> catalystFamilyWeightBias = defaultCatalystFamilyWeightBias();
+        public Map<String, List<String>> poolByPrefix = defaultPoolByPrefix();
+        public Map<Integer, Double> prefixPriorityWeightByRank = defaultPrefixPriorityWeightByRank();
         public Map<String, Map<String, Double>> baseStatsByArchetype = defaultBaseStatsByArchetype();
+        public int uiDisplayFlatDecimals = 0;
+        public int uiDisplayPercentDecimals = 1;
     }
 
-    public static class CatalystConfig {
-        public boolean allowOverwrite = true;
-        public boolean enableReimbueCost = true;
-        public int reimbueCurrencyCost = 250;
-        public String reimbueCurrencyName = "Gold";
-        public boolean enforceCurrencyBalance = false;
+    public static class PrefixConfig {
+        public List<String> rollableWords = defaultPrefixWords();
+    }
+
+    public static class GemSocketConfig {
+        public boolean enabled = true;
+        public double maxHpPerSocketedGem = 1.0;
+        public Map<String, Integer> socketsPerRarity = defaultSocketsPerRarity();
+        public List<String> gemItemIds = defaultGemItemIds();
+        public Map<String, Map<String, Map<String, Double>>> bonusesByGemPatternAndArchetype = defaultGemBonusesByPatternAndArchetype();
     }
 
     public static class RarityWeights {
@@ -78,7 +85,8 @@ public class HyruneConfig {
     public Map<String, Integer> farmingSeedLevelRequirements = defaultSeedRequirements();
     public Map<String, Integer> farmingAnimalLevelRequirements = defaultAnimalRequirements();
     public Map<String, String> npcNameOverrides = new LinkedHashMap<>();
-    public CatalystConfig catalyst = new CatalystConfig();
+    public PrefixConfig prefixes = new PrefixConfig();
+    public GemSocketConfig gemSockets = new GemSocketConfig();
 
     private static Map<String, Integer> defaultSeedRequirements() {
         Map<String, Integer> defaults = new LinkedHashMap<>();
@@ -170,35 +178,175 @@ public class HyruneConfig {
         return defaults;
     }
 
+    private static Map<String, Integer> defaultSocketsPerRarity() {
+        Map<String, Integer> defaults = new LinkedHashMap<>();
+        defaults.put("COMMON", 1);
+        defaults.put("UNCOMMON", 1);
+        defaults.put("RARE", 2);
+        defaults.put("EPIC", 2);
+        defaults.put("VOCATIONAL", 2);
+        defaults.put("LEGENDARY", 3);
+        defaults.put("MYTHIC", 3);
+        return defaults;
+    }
+
+    private static List<String> defaultGemItemIds() {
+        return List.of(
+            "Rock_Gem_*"
+        );
+    }
+
+    private static List<String> defaultPrefixWords() {
+        return List.of(
+            "Flame",
+            "Desert",
+            "Ember",
+            "Blaze",
+            "Wave",
+            "Ocean",
+            "Tide",
+            "Gale",
+            "Squall",
+            "Zephyr",
+            "Stone",
+            "Crag",
+            "Root"
+        );
+    }
+
+    private static Map<Integer, Double> defaultPrefixPriorityWeightByRank() {
+        Map<Integer, Double> out = new LinkedHashMap<>();
+        out.put(1, 1.50);
+        out.put(2, 1.25);
+        out.put(3, 1.00);
+        out.put(4, 0.80);
+        out.put(5, 0.65);
+        out.put(6, 0.55);
+        return out;
+    }
+
+    private static Map<String, Map<String, Map<String, Double>>> defaultGemBonusesByPatternAndArchetype() {
+        Map<String, Map<String, Map<String, Double>>> out = new LinkedHashMap<>();
+        out.put("Rock_Gem_Ruby", archetypeBonusMap(
+            "weapon_melee", statMap("physical_damage", 1.25),
+            "weapon_ranged", statMap("physical_damage", 1.10),
+            "weapon_magic", statMap("crit_bonus", 0.02),
+            "armor_heavy", statMap("max_hp", 1.25),
+            "armor_light", statMap("attack_speed", 0.01),
+            "armor_magic", statMap("healing_power", 0.03),
+            "tool", statMap("block_break_speed", 0.02),
+            "generic", statMap("max_hp", 1.0)
+        ));
+        out.put("Rock_Gem_Sapphire", archetypeBonusMap(
+            "weapon_melee", statMap("physical_crit_chance", 0.01),
+            "weapon_ranged", statMap("physical_crit_chance", 0.012),
+            "weapon_magic", statMap("magical_damage", 1.20),
+            "armor_heavy", statMap("magical_defence", 0.9),
+            "armor_light", statMap("movement_speed", 0.01),
+            "armor_magic", statMap("mana_regen", 0.02),
+            "tool", statMap("rare_drop_chance", 0.01),
+            "generic", statMap("mana_regen", 0.01)
+        ));
+        out.put("Rock_Gem_Emerald", archetypeBonusMap(
+            "weapon_melee", statMap("max_hp", 0.8),
+            "weapon_ranged", statMap("movement_speed", 0.01),
+            "weapon_magic", statMap("mana_cost_reduction", 0.01),
+            "armor_heavy", statMap("physical_defence", 1.0),
+            "armor_light", statMap("hp_regen", 0.05),
+            "armor_magic", statMap("healing_power", 0.04),
+            "tool", statMap("double_drop_chance", 0.01),
+            "generic", statMap("max_hp", 1.0)
+        ));
+        out.put("Rock_Gem_Diamond", archetypeBonusMap(
+            "weapon_melee", statMap("crit_bonus", 0.02),
+            "weapon_ranged", statMap("physical_penetration", 0.01),
+            "weapon_magic", statMap("magical_penetration", 0.01),
+            "armor_heavy", statMap("physical_defence", 1.2),
+            "armor_light", statMap("magical_defence", 1.0),
+            "armor_magic", statMap("magical_defence", 1.2),
+            "tool", statMap("block_break_speed", 0.02),
+            "generic", statMap("max_hp", 1.0)
+        ));
+        out.put("Rock_Gem_Topaz", archetypeBonusMap(
+            "weapon_melee", statMap("attack_speed", 0.015),
+            "weapon_ranged", statMap("attack_speed", 0.015),
+            "weapon_magic", statMap("cast_speed", 0.015),
+            "armor_heavy", statMap("crit_reduction", 0.01),
+            "armor_light", statMap("movement_speed", 0.012),
+            "armor_magic", statMap("mana_cost_reduction", 0.01),
+            "tool", statMap("block_break_speed", 0.03),
+            "generic", statMap("max_hp", 1.0)
+        ));
+        out.put("Rock_Gem_Voidstone", archetypeBonusMap(
+            "weapon_melee", statMap("physical_penetration", 0.012),
+            "weapon_ranged", statMap("physical_penetration", 0.012),
+            "weapon_magic", statMap("magical_penetration", 0.012),
+            "armor_heavy", statMap("reflect_damage", 0.01),
+            "armor_light", statMap("crit_reduction", 0.01),
+            "armor_magic", statMap("crit_reduction", 0.01),
+            "tool", statMap("rare_drop_chance", 0.012),
+            "generic", statMap("max_hp", 1.0)
+        ));
+        out.put("Rock_Gem_Zephyr", archetypeBonusMap(
+            "weapon_melee", statMap("movement_speed", 0.01),
+            "weapon_ranged", statMap("movement_speed", 0.012),
+            "weapon_magic", statMap("cast_speed", 0.012),
+            "armor_heavy", statMap("hp_regen", 0.05),
+            "armor_light", statMap("movement_speed", 0.015),
+            "armor_magic", statMap("mana_regen", 0.02),
+            "tool", statMap("double_drop_chance", 0.015),
+            "generic", statMap("movement_speed", 0.01)
+        ));
+        return out;
+    }
+
+    private static Map<String, Map<String, Double>> archetypeBonusMap(Object... kv) {
+        Map<String, Map<String, Double>> out = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < kv.length; i += 2) {
+            String key = (String) kv[i];
+            @SuppressWarnings("unchecked")
+            Map<String, Double> value = (Map<String, Double>) kv[i + 1];
+            out.put(key, value);
+        }
+        return out;
+    }
+
     private static Map<String, Double> defaultRollTypeWeights() {
         Map<String, Double> out = new LinkedHashMap<>();
-        out.put("flat", 0.45);
-        out.put("percent", 0.35);
-        out.put("hybrid", 0.20);
+        out.put("flat", 0.55);
+        out.put("percent", 0.45);
+        return out;
+    }
+
+    private static Map<String, String> defaultRollTypeConstraintByStat() {
+        Map<String, String> out = new LinkedHashMap<>();
+        out.put("movement_speed", "percent_only");
+        out.put("crit_chance", "percent_only");
         return out;
     }
 
     private static Map<String, Double> defaultTierScalarByKeyword() {
         Map<String, Double> out = new LinkedHashMap<>();
-        out.put("crude", 0.70);
-        out.put("copper", 0.85);
-        out.put("bronze", 0.95);
-        out.put("iron", 1.00);
-        out.put("steel", 1.15);
-        out.put("wool", 0.82);
-        out.put("linen", 0.95);
-        out.put("leather", 1.00);
-        out.put("silver", 1.25);
-        out.put("silk", 1.20);
-        out.put("raven", 1.35);
-        out.put("gold", 1.35);
-        out.put("shadoweave", 1.60);
-        out.put("cobalt", 1.55);
-        out.put("thorium", 1.75);
-        out.put("adamantite", 2.00);
-        out.put("mithril", 2.25);
-        out.put("onyxium", 2.50);
-        out.put("prisma", 2.85);
+        // Combat Tiers (15% increase per tier)
+    out.put("crude", 1.00);      // Baseline
+    out.put("copper", 1.15);     
+    out.put("bronze", 1.32);     
+    out.put("iron", 1.52);       
+    out.put("steel", 1.75);      
+    out.put("cobalt", 2.01);     
+    out.put("thorium", 2.31);    
+    out.put("adamantite", 2.66); 
+    out.put("mithril", 3.05);    
+    out.put("onyxium", 3.51);    
+    out.put("prisma", 4.04);     
+
+    // Vocational / Cloth / Leather Tiers (Matching the power curve)
+    out.put("wool", 1.00);
+    out.put("linen", 1.32);      // Equivalent to Bronze
+    out.put("leather", 1.52);    // Equivalent to Iron
+    out.put("silk", 2.01);       // Equivalent to Cobalt
+    out.put("shadoweave", 3.05); // Equivalent to Mithril
+    out.put("raven", 4.04);      // Equivalent to Prisma
         return out;
     }
 
@@ -223,24 +371,58 @@ public class HyruneConfig {
         weights.put("healing_crit_bonus", 0.45);
         weights.put("mana_cost_reduction", 0.55);
         weights.put("mana_regen", 0.80);
-        weights.put("stamina_regen", 0.80);
         weights.put("movement_speed", 0.65);
         weights.put("attack_speed", 0.55);
         weights.put("cast_speed", 0.55);
+        weights.put("block_break_speed", 0.90);
+        weights.put("rare_drop_chance", 0.45);
+        weights.put("double_drop_chance", 0.40);
         return weights;
     }
 
+    private static Map<String, List<String>> defaultPoolByPrefix() {
+    Map<String, List<String>> out = new LinkedHashMap<>();
+
+    // MELEE FOCUS
+    out.put("Flame", List.of("physical_damage", "physical_crit_chance", "crit_bonus", "attack_speed"));
+    out.put("Blaze", List.of("attack_speed", "physical_crit_chance", "physical_damage", "crit_bonus"));
+    out.put("Desert", List.of("physical_defence", "max_hp", "block_efficiency", "reflect_damage"));
+    out.put("Ember", List.of("physical_crit_chance", "attack_speed", "physical_damage", "crit_bonus"));
+
+    // MAGIC FOCUS
+    out.put("Wave", List.of("magical_damage", "magical_crit_chance", "cast_speed", "mana_regen"));
+    out.put("Ocean", List.of("healing_power", "mana_regen", "mana_cost_reduction", "healing_crit_chance"));
+    out.put("Tide", List.of("magical_damage", "magical_penetration", "mana_regen", "max_hp"));
+
+    // RANGED / UTILITY FOCUS
+    out.put("Gale", List.of("physical_damage", "physical_penetration", "movement_speed", "attack_speed"));
+    out.put("Squall", List.of("physical_crit_chance", "attack_speed", "movement_speed", "crit_bonus"));
+    out.put("Zephyr", List.of("movement_speed", "attack_speed", "cast_speed", "mana_regen"));
+
+    // TANK / SURVIVABILITY
+    out.put("Stone", List.of("physical_defence", "magical_defence", "max_hp", "crit_reduction"));
+    out.put("Crag", List.of("physical_defence", "block_efficiency", "reflect_damage", "hp_regen"));
+    out.put("Root", List.of("max_hp", "hp_regen", "magical_defence", "physical_defence"));
+
+    return out;
+}
+
     private static Map<String, List<String>> defaultPoolByArchetype() {
         Map<String, List<String>> pools = new LinkedHashMap<>();
+        pools.put("weapon_shield", List.of(
+            "block_efficiency",
+            "physical_defence",
+            "max_hp",
+            "reflect_damage"
+        ));
         pools.put("weapon_melee", List.of(
             "physical_damage",
             "physical_crit_chance",
             "crit_bonus",
             "physical_penetration",
             "attack_speed",
-            "stamina_regen",
             "max_hp",
-            "crit_reduction"
+            "movement_speed"
         ));
         pools.put("weapon_ranged", List.of(
             "physical_damage",
@@ -248,9 +430,8 @@ public class HyruneConfig {
             "crit_bonus",
             "physical_penetration",
             "attack_speed",
-            "stamina_regen",
             "movement_speed",
-            "crit_reduction"
+            "max_hp"
         ));
         pools.put("weapon_magic", List.of(
             "magical_damage",
@@ -264,13 +445,11 @@ public class HyruneConfig {
         ));
         pools.put("armor_heavy", List.of(
             "physical_defence",
-            "magical_defence",
             "max_hp",
-            "block_efficiency",
             "crit_reduction",
             "reflect_damage",
             "hp_regen",
-            "stamina_regen"
+            "magical_defence"
         ));
         pools.put("armor_light", List.of(
             "physical_defence",
@@ -278,7 +457,6 @@ public class HyruneConfig {
             "crit_reduction",
             "movement_speed",
             "attack_speed",
-            "stamina_regen",
             "max_hp",
             "hp_regen"
         ));
@@ -293,10 +471,10 @@ public class HyruneConfig {
             "max_hp"
         ));
         pools.put("tool", List.of(
-            "stamina_regen",
             "movement_speed",
-            "attack_speed",
-            "mana_regen"
+            "block_break_speed",
+            "rare_drop_chance",
+            "double_drop_chance"
         ));
         pools.put("generic", List.of(
             "physical_damage",
@@ -305,108 +483,71 @@ public class HyruneConfig {
             "magical_defence",
             "max_hp",
             "mana_regen",
-            "stamina_regen",
             "movement_speed"
         ));
         return pools;
     }
 
-    private static Map<String, Map<String, Double>> defaultCatalystFamilyWeightBias() {
-        Map<String, Map<String, Double>> out = new LinkedHashMap<>();
-
-        Map<String, Double> none = new LinkedHashMap<>();
-        none.put("offense_physical", 1.0);
-        none.put("offense_magical", 1.0);
-        none.put("defense_physical", 1.0);
-        none.put("defense_magical", 1.0);
-        none.put("defense_core", 1.0);
-        none.put("healing", 1.0);
-        none.put("utility", 1.0);
-        out.put("NONE", none);
-
-        Map<String, Double> fire = new LinkedHashMap<>(none);
-        fire.put("offense_physical", 1.25);
-        fire.put("offense_magical", 1.10);
-        fire.put("defense_physical", 0.90);
-        fire.put("healing", 0.90);
-        out.put("FIRE", fire);
-
-        Map<String, Double> water = new LinkedHashMap<>(none);
-        water.put("healing", 1.30);
-        water.put("utility", 1.15);
-        water.put("offense_physical", 0.90);
-        out.put("WATER", water);
-
-        Map<String, Double> air = new LinkedHashMap<>(none);
-        air.put("utility", 1.30);
-        air.put("offense_magical", 1.10);
-        air.put("defense_core", 0.92);
-        out.put("AIR", air);
-
-        Map<String, Double> earth = new LinkedHashMap<>(none);
-        earth.put("defense_physical", 1.25);
-        earth.put("defense_magical", 1.10);
-        earth.put("offense_physical", 0.95);
-        out.put("EARTH", earth);
-
-        return out;
-    }
-
     private static Map<String, Map<String, Double>> defaultBaseStatsByArchetype() {
         Map<String, Map<String, Double>> bases = new LinkedHashMap<>();
+        bases.put("weapon_shield", statMap(
+            "physical_defence", 12.0,
+            "block_efficiency", 0.07,
+            "max_hp", 20.0
+        ));
         bases.put("weapon_melee", statMap(
-            "physical_damage", 8.0,
-            "physical_crit_chance", 0.03,
-            "crit_bonus", 0.18,
-            "physical_penetration", 0.04,
-            "attack_speed", 0.03
-        ));
-        bases.put("weapon_ranged", statMap(
-            "physical_damage", 7.0,
-            "physical_crit_chance", 0.04,
-            "crit_bonus", 0.16,
+            "physical_damage", 15.0,
+            "physical_crit_chance", 0.02,
+            "crit_bonus", 0.12,
             "physical_penetration", 0.03,
-            "attack_speed", 0.04,
-            "movement_speed", 0.01
-        ));
-        bases.put("weapon_magic", statMap(
-            "magical_damage", 7.0,
-            "magical_crit_chance", 0.04,
-            "crit_bonus", 0.16,
-            "magical_penetration", 0.04,
-            "cast_speed", 0.04,
-            "mana_regen", 0.03
-        ));
-        bases.put("armor_heavy", statMap(
-            "physical_defence", 7.0,
-            "magical_defence", 4.0,
-            "max_hp", 10.0,
-            "crit_reduction", 0.03,
-            "block_efficiency", 0.04
-        ));
-        bases.put("armor_light", statMap(
-            "physical_defence", 5.0,
-            "magical_defence", 5.0,
-            "max_hp", 7.0,
-            "movement_speed", 0.02,
             "attack_speed", 0.02
         ));
+        bases.put("weapon_ranged", statMap(
+            "physical_damage", 13.0,
+            "physical_crit_chance", 0.025,
+            "crit_bonus", 0.11,
+            "physical_penetration", 0.025,
+            "attack_speed", 0.025,
+            "movement_speed", 0.008
+        ));
+        bases.put("weapon_magic", statMap(
+            "magical_damage", 13.0,
+            "magical_crit_chance", 0.025,
+            "crit_bonus", 0.11,
+            "magical_penetration", 0.03,
+            "cast_speed", 0.025,
+            "mana_regen", 0.05
+        ));
+        bases.put("armor_heavy", statMap(
+            "physical_defence", 14.0,
+            "magical_defence", 6.0,
+            "max_hp", 22.0,
+            "crit_reduction", 0.03
+        ));
+        bases.put("armor_light", statMap(
+            "physical_defence", 10.0,
+            "magical_defence", 10.0,
+            "max_hp", 16.0,
+            "movement_speed", 0.012,
+            "attack_speed", 0.015,
+            "crit_reduction", 0.02
+        ));
         bases.put("armor_magic", statMap(
-            "physical_defence", 4.0,
-            "magical_defence", 7.0,
-            "max_hp", 6.0,
-            "mana_regen", 0.04,
-            "cast_speed", 0.03,
-            "healing_power", 0.05
+            "physical_defence", 6.0,
+            "magical_defence", 14.0,
+            "max_hp", 14.0,
+            "mana_regen", 0.06,
+            "cast_speed", 0.02,
+            "healing_power", 0.08
         ));
         bases.put("tool", statMap(
-            "stamina_regen", 0.05,
-            "movement_speed", 0.01
+            "movement_speed", 0.005,
+            "block_break_speed", 0.03
         ));
         bases.put("generic", statMap(
-            "physical_damage", 2.0,
-            "physical_defence", 2.0,
-            "max_hp", 2.0
+            "physical_damage", 4.0,
+            "physical_defence", 4.0,
+            "max_hp", 6.0
         ));
         return bases;
     }

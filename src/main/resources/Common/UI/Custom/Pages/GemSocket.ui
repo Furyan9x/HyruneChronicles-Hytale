@@ -12,11 +12,11 @@ $C.@DecoratedContainer {
     Anchor: (Top: 0, Left: 0, Right: 0, Height: 50);
 
     Label {
-      Text: "Catalyst Imbuement";
+      Text: "Gem Socketing";
       Style: @TitleText;
       Anchor: (Full: 0);
     }
-    TextButton #CatalystClose {
+    TextButton #GemClose {
       Anchor: (Right: 4, Top: 8, Width: 24, Height: 24);
       Text: "X";
       Style: $C.@HeaderTextButtonStyle;
@@ -28,7 +28,7 @@ $C.@DecoratedContainer {
     Padding: (Top: 56, Left: 20, Right: 20, Bottom: 20);
 
     Label {
-      Text: "Insert catalyst is auto-filled from your hand. Select a receiver item and click Imbue.";
+      Text: "Held gem is auto-filled from your hand. Select a receiver item and click Socket.";
       Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
       Anchor: (Height: 28, Left: 0, Right: 0);
     }
@@ -41,19 +41,19 @@ $C.@DecoratedContainer {
       Background: #000000(0.35);
       Padding: (Left: 12, Right: 12);
 
-      ItemIcon #CatalystIcon {
+      ItemIcon #GemIcon {
         Anchor: (Width: 28, Height: 28);
         Padding: (Top: 8);
       }
 
       Group { Anchor: (Width: 10); }
 
-      Label #CatalystName {
+      Label #GemName {
         Anchor: (Width: 260, Height: 44);
         Style: @ValueText;
       }
 
-      Label #CatalystAffinity {
+      Label #GemBonus {
         Anchor: (Width: 180, Height: 44);
         Style: @ValueText;
       }
@@ -79,14 +79,14 @@ $C.@DecoratedContainer {
         Anchor: (Height: 20, Left: 0, Right: 0);
       }
 
-      Label #ReceiverPreviewCatalyst {
-        Text: "Current Catalyst: none";
+      Label #ReceiverPreviewGem {
+        Text: "Sockets: 0/0";
         Style: @ValueText;
         Anchor: (Height: 20, Left: 0, Right: 0);
       }
 
-      Label #ReceiverPreviewImbued {
-        Text: "Imbued Name: -";
+      Label #ReceiverPreviewSocketed {
+        Text: "After Socket: -";
         Style: @ValueText;
         Anchor: (Height: 20, Left: 0, Right: 0);
       }
@@ -119,9 +119,9 @@ $C.@DecoratedContainer {
       LayoutMode: Center;
       Anchor: (Left: 0, Right: 0, Height: 42);
 
-      TextButton #ImbueButton {
+      TextButton #SocketButton {
         Anchor: (Width: 220, Height: 34);
-        Text: "Imbue";
+        Text: "Socket Gem";
         Style: $C.@DefaultTextButtonStyle;
       }
     }

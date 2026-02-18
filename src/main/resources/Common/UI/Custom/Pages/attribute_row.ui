@@ -5,15 +5,15 @@ $C = "../Common.ui";
 
 Group {
   LayoutMode: Left;
-  Anchor: (Height: 18);
+  Anchor: (Height: 21);
 
   Label #AttrLabel {
-    Anchor: (Width: 260, Height: 18);
+    Anchor: (Width: 190, Height: 21);
     Style: @AttrLabelStyle;
   }
   Group { FlexWeight: 1; }
   Label #AttrValue {
-    Anchor: (Width: 120, Height: 18);
+    Anchor: (Width: 96, Height: 21);
     Style: @AttrValueStyle;
   }
 }

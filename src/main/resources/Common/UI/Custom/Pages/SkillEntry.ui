@@ -611,80 +611,99 @@ $C.@PageOverlay {
 
       // --- ATTRIBUTES TAB ---
       Group #TabAttributes {
-        LayoutMode: Top;
+        LayoutMode: Left;
+        Anchor: (Left: 0, Right: 0, Height: 450);
         Visible: false;
 
-        Group #AttributesScroll {
-          LayoutMode: TopScrolling;
-          Anchor: (Left: 0, Right: 0, Height: 420);
-          Padding: (Right: 6);
+        Group #AttrOverviewPanel {
+          LayoutMode: Top;
+          Anchor: (Width: 300, Height: 450);
+          Background: #000000(0.25);
+          Padding: (Top: 10, Left: 10, Right: 10, Bottom: 10);
 
-          Group #AttrCombatCategory {
-            LayoutMode: Top;
+          Label {
+            Text: "OVERVIEW";
+            Anchor: (Height: 16);
+            Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+          }
+          Group { Anchor: (Height: 8); }
+
+          Group #AttrOverviewScroll {
+            LayoutMode: TopScrolling;
             Anchor: (Left: 0, Right: 0);
+            FlexWeight: 1;
+            Padding: (Right: 6);
 
-            Group #AttrCombatHeader {
-              LayoutMode: Left;
-              Anchor: (Height: 24, Left: 0, Right: 0);
-              Background: #000000(0.25);
-              Padding: (Left: 8, Right: 2);
-
-              Label #AttrCombatTitle { Text: "Combat"; Style: @AttrHeaderStyle; }
-              Group { FlexWeight: 1; }
-              TextButton #AttrCombatToggle { Anchor: (Width: 20, Height: 18, Top: -1); Text: "-"; }
-            }
-
-            Group #AttrCombatContent {
+            Group #AttrOverviewContent {
               LayoutMode: Top;
-              Anchor: (Left: 8, Right: 8);
-              Padding: (Top: 6, Bottom: 6);
+              Anchor: (Left: 0, Right: 0);
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10); }
+
+        Group #AttrDetailsPanel {
+          LayoutMode: Top;
+          Anchor: (Height: 450);
+          FlexWeight: 1;
+          Background: #000000(0.25);
+          Padding: (Top: 10, Left: 10, Right: 10, Bottom: 10);
+
+          Group #AttrDetailHeader {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Left: 0, Right: 0);
+            Label {
+              Text: "DETAILS";
+              Style: (FontSize: 10, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+            }
+            Group { FlexWeight: 1; }
+            Label #AttrDetailCategoryTitle {
+              Text: "Offense";
+              Style: (FontSize: 12, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
             }
           }
           Group { Anchor: (Height: 8); }
 
-          Group #AttrGatheringCategory {
-            LayoutMode: Top;
+          Group #AttrDetailCategoryButtonsRow1 {
+            LayoutMode: Left;
+            Anchor: (Height: 30, Left: 0, Right: 0);
+            TextButton #AttrDetailOffenseBtn { Anchor: (Width: 108, Height: 28); Text: "Offense"; Style: $C.@DefaultTextButtonStyle; }
+            Group { Anchor: (Width: 6); }
+            TextButton #AttrDetailDefenseBtn { Anchor: (Width: 108, Height: 28); Text: "Defense"; Style: $C.@DefaultTextButtonStyle; }
+            Group { Anchor: (Width: 6); }
+            TextButton #AttrDetailResourcesBtn { Anchor: (Width: 108, Height: 28); Text: "Resources"; Style: $C.@DefaultTextButtonStyle; }
+          }
+          Group { Anchor: (Height: 6); }
+
+          Group #AttrDetailCategoryButtonsRow2 {
+            LayoutMode: Left;
+            Anchor: (Height: 30, Left: 0, Right: 0);
+            TextButton #AttrDetailMobilityBtn { Anchor: (Width: 108, Height: 28); Text: "Mobility"; Style: $C.@DefaultTextButtonStyle; }
+            Group { Anchor: (Width: 6); }
+            TextButton #AttrDetailGatheringBtn { Anchor: (Width: 108, Height: 28); Text: "Gathering"; Style: $C.@DefaultTextButtonStyle; }
+            Group { Anchor: (Width: 6); }
+            TextButton #AttrDetailHealingBtn { Anchor: (Width: 108, Height: 28); Text: "Healing"; Style: $C.@DefaultTextButtonStyle; }
+          }
+          Group { Anchor: (Height: 10); }
+
+          Group #AttrDetailsScroll {
+            LayoutMode: TopScrolling;
             Anchor: (Left: 0, Right: 0);
+            FlexWeight: 1;
+            Padding: (Right: 6);
 
-            Group #AttrGatheringHeader {
-              LayoutMode: Left;
-              Anchor: (Height: 24, Left: 0, Right: 0);
-              Background: #000000(0.25);
-              Padding: (Left: 8, Right: 2);
-
-              Label #AttrGatheringTitle { Text: "Gathering + Crafting"; Style: @AttrHeaderStyle; }
-              Group { FlexWeight: 1; }
-              TextButton #AttrGatheringToggle { Anchor: (Width: 20, Height: 18, Top: -1); Text: "-"; }
-            }
-
-            Group #AttrGatheringContent {
+            Group #AttrDetailContent {
               LayoutMode: Top;
-              Anchor: (Left: 8, Right: 8);
-              Padding: (Top: 6, Bottom: 6);
+              Anchor: (Left: 0, Right: 0);
             }
           }
           Group { Anchor: (Height: 8); }
 
-          Group #AttrMiscCategory {
-            LayoutMode: Top;
-            Anchor: (Left: 0, Right: 0);
-
-            Group #AttrMiscHeader {
-              LayoutMode: Left;
-              Anchor: (Height: 24, Left: 0, Right: 0);
-              Background: #000000(0.25);
-              Padding: (Left: 8, Right: 2);
-
-              Label #AttrMiscTitle { Text: "Miscellaneous"; Style: @AttrHeaderStyle; }
-              Group { FlexWeight: 1; }
-              TextButton #AttrMiscToggle { Anchor: (Width: 20, Height: 18, Top: -1); Text: "-"; }
-            }
-
-            Group #AttrMiscContent {
-              LayoutMode: Top;
-              Anchor: (Left: 8, Right: 8);
-              Padding: (Top: 6, Bottom: 6);
-            }
+          Label #AttrDetailHint {
+            Text: "Select a detail category.";
+            Anchor: (Height: 28, Left: 0, Right: 0);
+            Style: (FontSize: 10, TextColor: #9fb0c5, Wrap: true);
           }
         }
       }

@@ -9,8 +9,9 @@ public class RepairProfileDefinition {
     public int priority = 0;
     public String primaryMaterial;
     public String secondaryMaterial;
-    public String rareCatalystMaterial;
+    public String rareGemMaterial;
     public int primaryBaseCost = 6;
     public int secondaryBaseCost = 4;
-    public int catalystBaseCost = 1;
+    public int gemBaseCost = 1;
 }
+

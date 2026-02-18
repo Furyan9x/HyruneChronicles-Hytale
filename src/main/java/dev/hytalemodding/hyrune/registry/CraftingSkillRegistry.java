@@ -75,6 +75,12 @@ public final class CraftingSkillRegistry {
                 keywordRule("leather", 1, 20)
         ));
         rules.add(new SkillRuleSet(
+                SkillType.ARMORSMITHING,
+                new HashMap<>(),
+                keywordRule("armor", 1, 20, "shield")
+        ));
+
+        rules.add(new SkillRuleSet(
                 SkillType.ARCHITECT,
                 new HashMap<>(),
                 keywordRule("furniture", 1, 20, "deco", "bookshelf", "smooth", "bolt", "wool", "petals", "wall", "cauldron", "wood", "brick", "roof", "beam", "half", "stairs", "bench", "tool", "trap")
@@ -94,12 +100,7 @@ public final class CraftingSkillRegistry {
                 new HashMap<>(),
                 keywordRule("fertilizer", 1, 20, "coop", "hoe", "capture", "shears", "bucket", "watering", "feedbag", "seeds", "sapling", "life_essence")
         ));
-        rules.add(new SkillRuleSet(
-                SkillType.ARMORSMITHING,
-                new HashMap<>(),
-                keywordRule("armor", 1, 20, "shield")
-        ));
-
+    
         RULES = Collections.unmodifiableList(rules);
 
         MATERIAL_MULTIPLIERS.put("crude", 0.8);

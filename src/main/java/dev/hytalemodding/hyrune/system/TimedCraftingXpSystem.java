@@ -22,9 +22,8 @@ import com.hypixel.hytale.builtin.crafting.window.BenchWindow;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import dev.hytalemodding.hyrune.config.HyruneConfigManager;
-import dev.hytalemodding.hyrune.itemization.ItemGenerationContext;
 import dev.hytalemodding.hyrune.itemization.ItemGenerationService;
+import dev.hytalemodding.hyrune.itemization.ItemRarityRollModel;
 import dev.hytalemodding.hyrune.itemization.ItemRollCoordinator;
 import dev.hytalemodding.hyrune.itemization.ItemRollSource;
 import dev.hytalemodding.hyrune.level.LevelingService;
@@ -44,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Level;
 
 /**
  * ECS system for timed crafting xp.
@@ -207,10 +205,6 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
                 benchTier
             );
             ItemRollCoordinator.applyPendingCraftRolls(player);
-            if (HyruneConfigManager.getConfig().itemizationDebugLogging) {
-                dev.hytalemodding.Hyrune.LOGGER.at(Level.INFO).log("[Itemization] TimedCraft queued+applied player="
-                    + uuid + ", item=" + outputItemId + ", qty=" + quantity);
-            }
         }
     }
 
@@ -276,7 +270,7 @@ public class TimedCraftingXpSystem extends EntityTickingSystem<EntityStore> {
         ItemStack extra = ItemGenerationService.rollIfEligible(
             new ItemStack(baseStack.getItemId(), extraQuantity),
             ItemRollSource.CRAFTED,
-            ItemGenerationContext.of("timed_craft_double_proc")
+            ItemRarityRollModel.GenerationContext.of("timed_craft_double_proc")
         );
         var transaction = storage.addItemStack(extra);
         ItemStack remainder = transaction.getRemainder();

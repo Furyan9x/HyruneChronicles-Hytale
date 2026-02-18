@@ -25,7 +25,7 @@ public final class ItemRarityRollModel {
     private ItemRarityRollModel() {
     }
 
-    public static Result roll(ItemRollSource source, String itemId, ItemGenerationContext context, ThreadLocalRandom random) {
+    public static Result roll(ItemRollSource source, GenerationContext context, ThreadLocalRandom random) {
         HyruneConfig cfg = HyruneConfigManager.getConfig();
         HyruneConfig.ItemizationRarityModelConfig model = cfg.itemizationRarityModel == null
             ? new HyruneConfig.ItemizationRarityModelConfig()
@@ -54,7 +54,7 @@ public final class ItemRarityRollModel {
         return new Result(rolled, debug);
     }
 
-    private static double computeProfessionBonus(HyruneConfig.ItemizationRarityModelConfig model, ItemGenerationContext context) {
+    private static double computeProfessionBonus(HyruneConfig.ItemizationRarityModelConfig model, GenerationContext context) {
         if (context == null || context.professionSkill() == null || context.professionLevel() == null) {
             return 0.0;
         }
@@ -68,7 +68,7 @@ public final class ItemRarityRollModel {
         return perLevel * effectiveLevel;
     }
 
-    private static double computeBenchBonus(HyruneConfig.ItemizationRarityModelConfig model, ItemGenerationContext context) {
+    private static double computeBenchBonus(HyruneConfig.ItemizationRarityModelConfig model, GenerationContext context) {
         if (context == null || context.benchTier() == null || model.benchTierBonus == null) {
             return 0.0;
         }
@@ -139,5 +139,30 @@ public final class ItemRarityRollModel {
     }
 
     public record Result(ItemRarity rarity, Map<String, Double> debug) {
+    }
+
+    /**
+     * Non-gameplay context for rarity roll modifiers and diagnostics.
+     */
+    public record GenerationContext(
+        String reason,
+        String actorId,
+        String triggerId,
+        String professionSkill,
+        Integer professionLevel,
+        Integer benchTier
+    ) {
+        public static GenerationContext of(String reason) {
+            return new GenerationContext(reason, null, null, null, null, null);
+        }
+
+        public static GenerationContext crafting(String reason,
+                                                 String actorId,
+                                                 String triggerId,
+                                                 String professionSkill,
+                                                 Integer professionLevel,
+                                                 Integer benchTier) {
+            return new GenerationContext(reason, actorId, triggerId, professionSkill, professionLevel, benchTier);
+        }
     }
 }

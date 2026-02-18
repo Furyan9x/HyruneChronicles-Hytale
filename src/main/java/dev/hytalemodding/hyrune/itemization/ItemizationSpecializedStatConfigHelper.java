@@ -5,10 +5,12 @@ import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.repair.ItemRarity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Central helper for specialized stat configuration lookups.
@@ -16,8 +18,13 @@ import java.util.Map;
 public final class ItemizationSpecializedStatConfigHelper {
     public enum RollType {
         FLAT,
-        PERCENT,
-        HYBRID
+        PERCENT
+    }
+
+    public enum RollConstraint {
+        FLAT_ONLY,
+        PERCENT_ONLY,
+        EITHER
     }
 
     private ItemizationSpecializedStatConfigHelper() {
@@ -39,16 +46,12 @@ public final class ItemizationSpecializedStatConfigHelper {
         return config().percentRollMax;
     }
 
-    public static double hybridFlatScalar() {
-        return config().hybridFlatScalar;
-    }
-
-    public static double hybridPercentScalar() {
-        return config().hybridPercentScalar;
-    }
-
     public static double percentRollTierInfluence() {
         return config().percentRollTierInfluence;
+    }
+
+    public static double durabilityTierInfluence() {
+        return clamp(config().durabilityTierInfluence, 0.0, 1.0);
     }
 
     public static int statsForRarity(ItemRarity rarity) {
@@ -101,11 +104,104 @@ public final class ItemizationSpecializedStatConfigHelper {
         List<ItemizedStat> out = new ArrayList<>();
         for (String id : raw) {
             ItemizedStat stat = ItemizedStat.fromId(id);
+            if (stat != null && isStatAllowedForArchetype(archetype, stat) && !out.contains(stat)) {
+                out.add(stat);
+            }
+        }
+        return out;
+    }
+
+    public static List<ItemizedStat> poolForPrefix(String prefixWord) {
+        if (prefixWord == null || prefixWord.isBlank()) {
+            return List.of();
+        }
+        HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
+        Map<String, List<String>> pools = cfg.poolByPrefix;
+        if (pools == null || pools.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> raw = null;
+        String normalizedPrefix = prefixWord.trim();
+        for (Map.Entry<String, List<String>> entry : pools.entrySet()) {
+            if (entry.getKey() == null) {
+                continue;
+            }
+            if (entry.getKey().trim().equalsIgnoreCase(normalizedPrefix)) {
+                raw = entry.getValue();
+                break;
+            }
+        }
+        if (raw == null || raw.isEmpty()) {
+            return List.of();
+        }
+
+        List<ItemizedStat> out = new ArrayList<>();
+        for (String id : raw) {
+            ItemizedStat stat = ItemizedStat.fromId(id);
             if (stat != null && !out.contains(stat)) {
                 out.add(stat);
             }
         }
         return out;
+    }
+
+    public static List<ItemizedStat> intersectPools(ItemArchetype archetype, String prefixWord) {
+        List<ItemizedStat> archetypePool = poolForArchetype(archetype);
+        if (archetypePool.isEmpty()) {
+            return List.of();
+        }
+        List<ItemizedStat> prefixPool = poolForPrefix(prefixWord);
+        if (prefixPool.isEmpty()) {
+            return new ArrayList<>(archetypePool);
+        }
+        Set<ItemizedStat> prefixSet = new HashSet<>(prefixPool);
+        List<ItemizedStat> out = new ArrayList<>();
+        for (ItemizedStat stat : archetypePool) {
+            if (prefixSet.contains(stat)) {
+                out.add(stat);
+            }
+        }
+        return out;
+    }
+
+    public static double prefixPriorityWeight(String prefixWord, ItemizedStat stat) {
+        if (prefixWord == null || prefixWord.isBlank() || stat == null) {
+            return 1.0;
+        }
+        List<ItemizedStat> prefixPool = poolForPrefix(prefixWord);
+        if (prefixPool.isEmpty()) {
+            return 1.0;
+        }
+        int rank = indexOf(prefixPool, stat) + 1;
+        if (rank <= 0) {
+            return 1.0;
+        }
+        HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
+        Map<Integer, Double> rankWeights = cfg.prefixPriorityWeightByRank;
+        if (rankWeights == null || rankWeights.isEmpty()) {
+            return 1.0;
+        }
+        Double direct = rankWeights.get(rank);
+        if (direct != null) {
+            return Math.max(0.0, direct);
+        }
+        int maxKnownRank = -1;
+        double maxKnownWeight = 1.0;
+        for (Map.Entry<Integer, Double> entry : rankWeights.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                continue;
+            }
+            int key = entry.getKey();
+            if (key <= 0) {
+                continue;
+            }
+            if (key > maxKnownRank) {
+                maxKnownRank = key;
+                maxKnownWeight = Math.max(0.0, entry.getValue());
+            }
+        }
+        return maxKnownRank > 0 ? maxKnownWeight : 1.0;
     }
 
     public static Map<ItemizedStat, Double> baseStatsForArchetype(ItemArchetype archetype) {
@@ -128,6 +224,9 @@ public final class ItemizationSpecializedStatConfigHelper {
             if (stat == null || entry.getValue() == null) {
                 continue;
             }
+            if (!isStatAllowedForArchetype(archetype, stat)) {
+                continue;
+            }
             out.put(stat, Math.max(0.0, entry.getValue()));
         }
         return out;
@@ -145,26 +244,6 @@ public final class ItemizationSpecializedStatConfigHelper {
         return raw == null ? 1.0 : Math.max(0.0, raw);
     }
 
-    public static double catalystFamilyBias(CatalystAffinity catalyst, ItemizedStatFamily family) {
-        if (family == null) {
-            return 1.0;
-        }
-        HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
-        if (cfg.catalystFamilyWeightBias == null || cfg.catalystFamilyWeightBias.isEmpty()) {
-            return 1.0;
-        }
-        String catalystKey = catalyst == null ? CatalystAffinity.NONE.name() : catalyst.name();
-        Map<String, Double> familyMap = cfg.catalystFamilyWeightBias.get(catalystKey);
-        if ((familyMap == null || familyMap.isEmpty()) && catalyst != CatalystAffinity.NONE) {
-            familyMap = cfg.catalystFamilyWeightBias.get(CatalystAffinity.NONE.name());
-        }
-        if (familyMap == null || familyMap.isEmpty()) {
-            return 1.0;
-        }
-        Double bias = familyMap.get(family.getId());
-        return bias == null ? 1.0 : Math.max(0.0, bias);
-    }
-
     public static double rollTypeWeight(RollType type) {
         HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
         if (cfg.rollTypeWeights == null || cfg.rollTypeWeights.isEmpty() || type == null) {
@@ -173,10 +252,25 @@ public final class ItemizationSpecializedStatConfigHelper {
         String key = switch (type) {
             case FLAT -> "flat";
             case PERCENT -> "percent";
-            case HYBRID -> "hybrid";
         };
         Double raw = cfg.rollTypeWeights.get(key);
         return raw == null ? 1.0 : Math.max(0.0, raw);
+    }
+
+    public static RollConstraint rollConstraintForStat(ItemizedStat stat) {
+        if (stat == null) {
+            return RollConstraint.EITHER;
+        }
+        String raw = configuredRollConstraintValue(stat);
+        if (raw == null) {
+            return RollConstraint.EITHER;
+        }
+        String normalized = raw.trim().toLowerCase(Locale.ROOT);
+        return switch (normalized) {
+            case "flat_only", "flat", "flat-only" -> RollConstraint.FLAT_ONLY;
+            case "percent_only", "percent", "percent-only", "pct_only", "pct" -> RollConstraint.PERCENT_ONLY;
+            default -> RollConstraint.EITHER;
+        };
     }
 
     public static double baseValueForArchetypeStat(ItemArchetype archetype, ItemizedStat stat) {
@@ -215,10 +309,22 @@ public final class ItemizationSpecializedStatConfigHelper {
         return clamp(best, 0.25, 5.0);
     }
 
+    public static int uiDisplayFlatDecimals() {
+        return clampInt(config().uiDisplayFlatDecimals, 0, 3);
+    }
+
+    public static int uiDisplayPercentDecimals() {
+        return clampInt(config().uiDisplayPercentDecimals, 0, 3);
+    }
+
     private static double clamp(double value, double min, double max) {
         if (Double.isNaN(value)) {
             return min;
         }
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static int clampInt(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }
 
@@ -228,6 +334,80 @@ public final class ItemizationSpecializedStatConfigHelper {
             return new HyruneConfig.ItemizationSpecializedStatsConfig();
         }
         return cfg.itemizationSpecializedStats;
+    }
+
+    private static boolean isStatAllowedForArchetype(ItemArchetype archetype, ItemizedStat stat) {
+        if (stat == null) {
+            return false;
+        }
+        ItemArchetype resolvedArchetype = archetype == null ? ItemArchetype.GENERIC : archetype;
+        if (stat == ItemizedStat.CRIT_REDUCTION) {
+            return isArmorArchetype(resolvedArchetype);
+        }
+        if (stat == ItemizedStat.BLOCK_EFFICIENCY) {
+            return resolvedArchetype == ItemArchetype.WEAPON_SHIELD;
+        }
+        if (stat == ItemizedStat.BLOCK_BREAK_SPEED
+            || stat == ItemizedStat.RARE_DROP_CHANCE
+            || stat == ItemizedStat.DOUBLE_DROP_CHANCE) {
+            return resolvedArchetype == ItemArchetype.TOOL;
+        }
+        return true;
+    }
+
+    private static boolean isArmorArchetype(ItemArchetype archetype) {
+        return archetype == ItemArchetype.ARMOR_HEAVY
+            || archetype == ItemArchetype.ARMOR_LIGHT
+            || archetype == ItemArchetype.ARMOR_MAGIC;
+    }
+
+    private static String configuredRollConstraintValue(ItemizedStat stat) {
+        HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
+        Map<String, String> map = cfg.rollTypeConstraintByStat;
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+
+        String exact = findConstraintValue(map, stat.getId());
+        if (exact != null) {
+            return exact;
+        }
+
+        // Convenience alias for all crit-chance stats.
+        if (stat.getId().endsWith("_crit_chance")) {
+            String critAlias = findConstraintValue(map, "crit_chance");
+            if (critAlias != null) {
+                return critAlias;
+            }
+        }
+        return null;
+    }
+
+    private static int indexOf(List<ItemizedStat> values, ItemizedStat target) {
+        if (values == null || values.isEmpty() || target == null) {
+            return -1;
+        }
+        for (int i = 0; i < values.size(); i++) {
+            if (values.get(i) == target) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static String findConstraintValue(Map<String, String> map, String key) {
+        if (map == null || map.isEmpty() || key == null || key.isBlank()) {
+            return null;
+        }
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                continue;
+            }
+            if (entry.getKey().trim().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
 }

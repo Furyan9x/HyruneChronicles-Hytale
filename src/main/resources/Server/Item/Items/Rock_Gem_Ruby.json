@@ -1,0 +1,12 @@
+{
+    "Interactions": {
+        "Pick": {
+            "Interactions": [
+                {
+                    "Type": "HyruneGemSocket",
+                    "CancelOnItemChange": true
+                }
+            ]
+        }
+    }
+}

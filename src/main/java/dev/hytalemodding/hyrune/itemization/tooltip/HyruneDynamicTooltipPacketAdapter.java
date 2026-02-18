@@ -3,7 +3,7 @@ package dev.hytalemodding.hyrune.itemization.tooltip;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.ComponentUpdate;
 import com.hypixel.hytale.protocol.EntityUpdate;
-import com.hypixel.hytale.protocol.Equipment;
+import com.hypixel.hytale.protocol.EquipmentUpdate;
 import com.hypixel.hytale.protocol.InventorySection;
 import com.hypixel.hytale.protocol.ItemBase;
 import com.hypixel.hytale.protocol.ItemWithAllMetadata;
@@ -438,6 +438,8 @@ public final class HyruneDynamicTooltipPacketAdapter {
             virtualItems.put(mapped, virtualBase);
             String baseDescription = virtualItemRegistry.getOriginalDescription(baseItemId, language);
             translations.put(HyruneVirtualItemRegistry.getVirtualDescriptionKey(mapped), baseDescription);
+            String baseName = virtualItemRegistry.getOriginalName(baseItemId, language);
+            translations.put(HyruneVirtualItemRegistry.getVirtualNameKey(mapped), baseName);
         }
         return mapped;
     }
@@ -458,14 +460,14 @@ public final class HyruneDynamicTooltipPacketAdapter {
             }
 
             for (ComponentUpdate update : entityUpdate.updates) {
-                if (update != null && update.equipment != null) {
-                    processEquipmentUpdate(playerRef, update.equipment);
+                if (update instanceof EquipmentUpdate equipmentUpdate) {
+                    processEquipmentUpdate(playerRef, equipmentUpdate);
                 }
             }
         }
     }
 
-    private void processEquipmentUpdate(PlayerRef playerRef, Equipment equipment) {
+    private void processEquipmentUpdate(PlayerRef playerRef, EquipmentUpdate equipment) {
         UUID playerUuid = playerRef.getUuid();
 
         if (equipment.rightHandItemId != null && !HyruneVirtualItemRegistry.isVirtualId(equipment.rightHandItemId)) {
@@ -558,6 +560,9 @@ public final class HyruneDynamicTooltipPacketAdapter {
             String baseDescription = virtualItemRegistry.getOriginalDescription(item.itemId, language);
             String fullDescription = composed.buildDescription(baseDescription);
             translations.put(HyruneVirtualItemRegistry.getVirtualDescriptionKey(virtualId), fullDescription);
+            String baseName = virtualItemRegistry.getOriginalName(item.itemId, language);
+            String resolvedName = composed.getDisplayNameOverride() == null ? baseName : composed.getDisplayNameOverride();
+            translations.put(HyruneVirtualItemRegistry.getVirtualNameKey(virtualId), resolvedName);
 
             ItemWithAllMetadata clone = item.clone();
             clone.itemId = virtualId;
@@ -566,7 +571,7 @@ public final class HyruneDynamicTooltipPacketAdapter {
             if (slotKey != null) {
                 virtualItemRegistry.trackSlotVirtualId(playerUuid, slotKey, virtualId);
             }
-            logMapping("mapped " + item.itemId + " -> " + virtualId + " slot=" + slotKey);
+            //logMapping("mapped " + item.itemId + " -> " + virtualId + " slot=" + slotKey);
         }
     }
 

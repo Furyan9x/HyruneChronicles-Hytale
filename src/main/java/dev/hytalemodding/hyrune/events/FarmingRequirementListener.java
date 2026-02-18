@@ -10,6 +10,7 @@ import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.registry.FarmingRequirementRegistry;
 import dev.hytalemodding.hyrune.skills.SkillType;
+import dev.hytalemodding.hyrune.util.PlayerEntityAccess;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -67,7 +68,8 @@ public class FarmingRequirementListener {
     }
 
     private int getFarmingLevel(Player player) {
-        if (player == null || player.getPlayerRef() == null) {
+        var playerRef = PlayerEntityAccess.getPlayerRef(player);
+        if (playerRef == null) {
             return 1;
         }
 
@@ -76,7 +78,7 @@ public class FarmingRequirementListener {
             return 1;
         }
 
-        return service.getSkillLevel(player.getPlayerRef().getUuid(), SkillType.FARMING);
+        return service.getSkillLevel(playerRef.getUuid(), SkillType.FARMING);
     }
 
     @Nullable
@@ -91,11 +93,17 @@ public class FarmingRequirementListener {
                 return roleName;
             }
         }
-        return target.getLegacyDisplayName();
+        if (target instanceof Player playerTarget) {
+            return playerTarget.getDisplayName();
+        }
+        return target.getClass().getSimpleName();
     }
 
     private void sendRateLimitedMessage(Player player, String message) {
-        UUID uuid = player.getUuid();
+        UUID uuid = PlayerEntityAccess.getPlayerUuid(player);
+        if (uuid == null) {
+            return;
+        }
         long now = System.currentTimeMillis();
         Long last = LAST_WARNING_MS.get(uuid);
         if (last != null && now - last < WARNING_COOLDOWN_MS) {

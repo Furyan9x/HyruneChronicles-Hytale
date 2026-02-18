@@ -4,13 +4,16 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.config.HyruneConfig;
 import dev.hytalemodding.hyrune.config.HyruneConfigManager;
-import dev.hytalemodding.hyrune.itemization.CatalystAffinity;
+import dev.hytalemodding.hyrune.itemization.ItemPrefixService;
 import dev.hytalemodding.hyrune.itemization.ItemArchetype;
+import dev.hytalemodding.hyrune.itemization.ItemStatDisplayFormatter;
 import dev.hytalemodding.hyrune.itemization.ItemInstanceMetadata;
+import dev.hytalemodding.hyrune.itemization.ItemInstanceMetadataMigration;
 import dev.hytalemodding.hyrune.itemization.ItemStatResolution;
 import dev.hytalemodding.hyrune.itemization.ItemStatResolver;
 import dev.hytalemodding.hyrune.itemization.ItemizedStat;
 import dev.hytalemodding.hyrune.itemization.ItemizedStatBlock;
+import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.repair.ItemRarity;
 import dev.hytalemodding.hyrune.skills.SkillType;
@@ -29,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Level;
 
 /**
@@ -37,10 +41,15 @@ import java.util.logging.Level;
 public final class HyruneDynamicTooltipComposer {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final int STATE_CACHE_MAX = 4096;
-    private static final ComposedTooltip EMPTY_SENTINEL = new ComposedTooltip(List.of(), ItemRarity.COMMON, "");
+    private static final long COMPOSE_SUMMARY_INTERVAL_MS = 5000L;
+    private static final ComposedTooltip EMPTY_SENTINEL = new ComposedTooltip(List.of(), ItemRarity.COMMON, "", null);
 
     private final ConcurrentHashMap<String, ComposedTooltip> itemStateCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ComposedTooltip> composedCache = new ConcurrentHashMap<>();
+    private final LongAdder composeHits = new LongAdder();
+    private final LongAdder composeMisses = new LongAdder();
+    private final LongAdder parseFailures = new LongAdder();
+    private volatile long lastComposeSummaryMs = 0L;
 
     @Nullable
     public ComposedTooltip compose(@Nullable UUID playerUuid, String itemId, String metadataJson) {
@@ -52,11 +61,11 @@ public final class HyruneDynamicTooltipComposer {
         String stateKey = playerKey + "|" + itemId + "|" + shortHash(metadataJson);
         ComposedTooltip cached = itemStateCache.get(stateKey);
         if (cached != null) {
-            logCompose("compose-hit stateKey=" + stateKey);
+            noteCompose(true);
             return cached == EMPTY_SENTINEL ? null : cached;
         }
 
-        logCompose("compose-miss stateKey=" + stateKey);
+        noteCompose(false);
 
         ItemInstanceMetadata metadata = parseMetadata(metadataJson);
         if (metadata == null) {
@@ -88,8 +97,10 @@ public final class HyruneDynamicTooltipComposer {
     private ItemInstanceMetadata parseMetadata(String metadataJson) {
         try {
             BsonDocument doc = BsonDocument.parse(metadataJson);
-            return ItemInstanceMetadata.KEYED_CODEC.getOrNull(doc);
+            ItemInstanceMetadata metadata = ItemInstanceMetadata.KEYED_CODEC.getOrNull(doc);
+            return ItemInstanceMetadataMigration.migrateToCurrent(metadata);
         } catch (Exception ex) {
+            parseFailures.increment();
             HyruneConfig cfg = HyruneConfigManager.getConfig();
             if (cfg.dynamicTooltipComposeDebug) {
                 LOGGER.at(Level.INFO).log("[DynamicTooltip] metadata-parse-failed: " + ex.getMessage());
@@ -103,17 +114,20 @@ public final class HyruneDynamicTooltipComposer {
                                          String combinedHash,
                                          ItemInstanceMetadata metadata) {
         ItemRarity rarity = metadata.getRarity();
-        CatalystAffinity catalyst = metadata.getCatalyst();
         ItemRarity resolvedRarity = rarity == null ? ItemRarity.COMMON : rarity;
+        String displayNameOverride = ItemPrefixService.resolveDisplayName(itemId, metadata.getPrefixRaw());
 
         List<String> lines = new ArrayList<>(10);
         lines.add("<color is=\"" + rarityColor(rarity) + "\"><i>" + rarityLabel(rarity) + "</i></color>");
+        lines.add("<color is=\"#8AD7FF\">Sockets: " + metadata.getSocketedGemCount() + "/" + metadata.getSocketCapacity() + "</color>");
+        for (String gemLine : GemSocketConfigHelper.describeSocketedGemLinesForItem(itemId, metadata.getSocketedGems())) {
+            lines.add("<color is=\"#8AD7FF\">" + gemLine + "</color>");
+        }
         String weaponDamageLine = buildWeaponDamageLine(playerUuid, itemId, metadata);
         if (weaponDamageLine != null) {
             lines.add(weaponDamageLine);
         }
         lines.add("<color is=\"#505050\">----------------</color>");
-        lines.add("<color is=\"" + catalystColor(catalyst) + "\">Catalyst: " + catalystLabel(catalyst) + "</color>");
         for (String rollLine : buildRollLines(metadata)) {
             lines.add("<color is=\"#1EFF00\">" + rollLine + "</color>");
         }
@@ -121,7 +135,7 @@ public final class HyruneDynamicTooltipComposer {
             lines.add("<color is=\"#D08A8A\">Drop Penalty: -" + pct(metadata.getDroppedPenalty()) + "</color>");
         }
 
-        return new ComposedTooltip(lines, resolvedRarity, combinedHash);
+        return new ComposedTooltip(lines, resolvedRarity, combinedHash, displayNameOverride);
     }
 
     private static String buildStableInput(@Nullable UUID playerUuid, String itemId, ItemInstanceMetadata metadata) {
@@ -129,8 +143,10 @@ public final class HyruneDynamicTooltipComposer {
         return itemId
             + "|player=" + (playerUuid == null ? "no-player" : playerUuid)
             + "|r=" + metadata.getRarity().name()
-            + "|c=" + metadata.getCatalyst().name()
+            + "|prefix=" + metadata.getPrefixRaw()
             + "|s=" + metadata.getSource().name()
+            + "|sockets=" + metadata.getSocketCapacity()
+            + ":" + metadata.getSocketedGemsJson()
             + "|flat=" + metadata.getStatFlatRollsJson()
             + "|pct=" + metadata.getStatPercentRollsJson()
             + "|skill=" + skill.skillType().name()
@@ -163,7 +179,7 @@ public final class HyruneDynamicTooltipComposer {
             RollLineData entry = entries.get(i);
             ItemizedStat stat = ItemizedStat.fromId(entry.statId());
             String label = stat != null ? stat.getDisplayName() : entry.statId();
-            out.add(label + ": " + formatRoll(stat, entry.flatRoll(), entry.percentRoll()));
+            out.add(label + ": " + ItemStatDisplayFormatter.formatRoll(stat, entry.flatRoll(), entry.percentRoll()));
         }
         if (entries.size() > limit) {
             out.add("... +" + (entries.size() - limit) + " more rolled stats");
@@ -189,25 +205,6 @@ public final class HyruneDynamicTooltipComposer {
             }
             merged.put(statId, new RollLineData(statId, flatValue, percentValue));
         }
-    }
-
-    private static String formatRoll(ItemizedStat stat, double flatValue, double percentValue) {
-        boolean hasFlat = Math.abs(flatValue) > 1e-9;
-        boolean hasPercent = Math.abs(percentValue) > 1e-9;
-        if (hasFlat && hasPercent) {
-            if (preferPercentPrimary(stat)) {
-                return pct(percentValue) + " + " + flat(flatValue);
-            }
-            return flat(flatValue) + " + " + pct(percentValue);
-        }
-        if (hasPercent) {
-            return pct(percentValue);
-        }
-        return flat(flatValue);
-    }
-
-    private static boolean preferPercentPrimary(ItemizedStat stat) {
-        return stat != null && stat.isPercentPrimary();
     }
 
     private static double rollSortKey(double flat, double percent) {
@@ -269,8 +266,8 @@ public final class HyruneDynamicTooltipComposer {
     }
 
     private static SkillContext resolveSkillContext(@Nullable UUID playerUuid, String itemId) {
-        SkillType skill = SkillType.ATTACK;
-        float perLevel = SkillCombatBonusSystem.ATTACK_DAMAGE_PER_LEVEL;
+        SkillType skill = SkillType.STRENGTH;
+        float perLevel = SkillCombatBonusSystem.STRENGTH_DAMAGE_PER_LEVEL;
         String normalized = itemId == null ? "" : itemId.toLowerCase(Locale.ROOT);
         if (SkillCombatBonusSystem.isRangedWeapon(normalized)) {
             skill = SkillType.RANGED;
@@ -292,10 +289,6 @@ public final class HyruneDynamicTooltipComposer {
         return new SkillContext(skill, level, multiplier);
     }
 
-    private static String flat(double value) {
-        return signedNumber(value);
-    }
-
     private static String pct(double value) {
         return String.format(Locale.US, "%.2f%%", value * 100.0d);
     }
@@ -312,20 +305,6 @@ public final class HyruneDynamicTooltipComposer {
             return String.format(Locale.US, "%.2f", value);
         }
         return String.format(Locale.US, "%.3f", value);
-    }
-
-    private static String signedNumber(double value) {
-        double abs = Math.abs(value);
-        if (abs >= 100.0) {
-            return String.format(Locale.US, "%+.0f", value);
-        }
-        if (abs >= 10.0) {
-            return String.format(Locale.US, "%+.1f", value);
-        }
-        if (abs >= 1.0) {
-            return String.format(Locale.US, "%+.2f", value);
-        }
-        return String.format(Locale.US, "%+.3f", value);
     }
 
     private static double clamp(double value, double min, double max) {
@@ -347,32 +326,6 @@ public final class HyruneDynamicTooltipComposer {
             case LEGENDARY -> "Legendary";
             case MYTHIC -> "Mythic";
             case COMMON -> "Common";
-        };
-    }
-
-    private static String catalystLabel(CatalystAffinity affinity) {
-        if (affinity == null) {
-            return "None";
-        }
-        return switch (affinity) {
-            case WATER -> "Water";
-            case FIRE -> "Fire";
-            case AIR -> "Air";
-            case EARTH -> "Earth";
-            case NONE -> "None";
-        };
-    }
-
-    private static String catalystColor(CatalystAffinity affinity) {
-        if (affinity == null) {
-            return "#A7C7FF";
-        }
-        return switch (affinity) {
-            case FIRE -> "#FF8A70";
-            case WATER -> "#70C6FF";
-            case AIR -> "#B9F0FF";
-            case EARTH -> "#9AD28A";
-            case NONE -> "#A7C7FF";
         };
     }
 
@@ -419,15 +372,50 @@ public final class HyruneDynamicTooltipComposer {
         }
     }
 
+    private void noteCompose(boolean hit) {
+        if (hit) {
+            composeHits.increment();
+        } else {
+            composeMisses.increment();
+        }
+
+        HyruneConfig cfg = HyruneConfigManager.getConfig();
+        if (cfg == null || !cfg.dynamicTooltipComposeDebug) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - lastComposeSummaryMs < COMPOSE_SUMMARY_INTERVAL_MS) {
+            return;
+        }
+        synchronized (this) {
+            now = System.currentTimeMillis();
+            if (now - lastComposeSummaryMs < COMPOSE_SUMMARY_INTERVAL_MS) {
+                return;
+            }
+            long hits = composeHits.sumThenReset();
+            long misses = composeMisses.sumThenReset();
+            long parseFails = parseFailures.sumThenReset();
+            lastComposeSummaryMs = now;
+            logCompose("compose-summary hits=" + hits
+                + ", misses=" + misses
+                + ", parseFails=" + parseFails
+                + ", stateCache=" + itemStateCache.size()
+                + ", composedCache=" + composedCache.size());
+        }
+    }
+
     public static final class ComposedTooltip {
         private final List<String> additiveLines;
         private final ItemRarity rarity;
         private final String combinedHash;
+        private final String displayNameOverride;
 
-        private ComposedTooltip(List<String> additiveLines, ItemRarity rarity, String combinedHash) {
+        private ComposedTooltip(List<String> additiveLines, ItemRarity rarity, String combinedHash, @Nullable String displayNameOverride) {
             this.additiveLines = List.copyOf(additiveLines);
             this.rarity = rarity;
             this.combinedHash = combinedHash;
+            this.displayNameOverride = (displayNameOverride == null || displayNameOverride.isBlank()) ? null : displayNameOverride;
         }
 
         public ItemRarity getRarity() {
@@ -436,6 +424,11 @@ public final class HyruneDynamicTooltipComposer {
 
         public String getCombinedHash() {
             return combinedHash;
+        }
+
+        @Nullable
+        public String getDisplayNameOverride() {
+            return displayNameOverride;
         }
 
         public String buildDescription(String baseDescription) {
@@ -465,3 +458,4 @@ public final class HyruneDynamicTooltipComposer {
     private record SkillContext(SkillType skillType, int skillLevel, double multiplier) {
     }
 }
+

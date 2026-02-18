@@ -24,8 +24,9 @@ Thumbs.db
 *.swo
 
 # Local runtime/dev-only assets
-codex/
+.codex/
 libs/
+lib/
 hyrune_data/
 hytaleserver/
 

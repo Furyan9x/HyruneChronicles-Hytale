@@ -8,7 +8,9 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import dev.hytalemodding.hyrune.repair.ItemRarity;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -17,13 +19,15 @@ import java.util.Map;
  */
 public class ItemInstanceMetadata {
     public static final String KEY = "HyruneItemInstance";
-    public static final int CURRENT_SCHEMA_VERSION = 3;
+    public static final int CURRENT_SCHEMA_VERSION = 6;
     public static final BuilderCodec<ItemInstanceMetadata> CODEC = BuilderCodec.builder(ItemInstanceMetadata.class, ItemInstanceMetadata::new)
         .append(new KeyedCodec<>("Version", Codec.LONG), ItemInstanceMetadata::setVersion, ItemInstanceMetadata::getVersion).add()
         .append(new KeyedCodec<>("Rarity", Codec.STRING), ItemInstanceMetadata::setRarityRaw, ItemInstanceMetadata::getRarityRaw).add()
-        .append(new KeyedCodec<>("Catalyst", Codec.STRING), ItemInstanceMetadata::setCatalystRaw, ItemInstanceMetadata::getCatalystRaw).add()
+        .append(new KeyedCodec<>("Prefix", Codec.STRING), ItemInstanceMetadata::setPrefixRaw, ItemInstanceMetadata::getPrefixRaw).add()
         .append(new KeyedCodec<>("Source", Codec.STRING), ItemInstanceMetadata::setSourceRaw, ItemInstanceMetadata::getSourceRaw).add()
         .append(new KeyedCodec<>("Seed", Codec.LONG), ItemInstanceMetadata::setSeed, ItemInstanceMetadata::getSeed).add()
+        .append(new KeyedCodec<>("SocketCapacity", Codec.LONG), ItemInstanceMetadata::setSocketCapacityRaw, ItemInstanceMetadata::getSocketCapacityRaw).add()
+        .append(new KeyedCodec<>("SocketedGems", Codec.STRING), ItemInstanceMetadata::setSocketedGemsJson, ItemInstanceMetadata::getSocketedGemsJson).add()
         .append(new KeyedCodec<>("StatFlatRolls", Codec.STRING), ItemInstanceMetadata::setStatFlatRollsJson, ItemInstanceMetadata::getStatFlatRollsJson).add()
         .append(new KeyedCodec<>("StatPercentRolls", Codec.STRING), ItemInstanceMetadata::setStatPercentRollsJson, ItemInstanceMetadata::getStatPercentRollsJson).add()
         .append(new KeyedCodec<>("DroppedPenalty", Codec.DOUBLE), ItemInstanceMetadata::setDroppedPenalty, ItemInstanceMetadata::getDroppedPenalty).add()
@@ -33,18 +37,23 @@ public class ItemInstanceMetadata {
     private static final Gson GSON = new Gson();
     private static final Type MAP_TYPE = new TypeToken<Map<String, Double>>() {
     }.getType();
+    private static final Type LIST_TYPE = new TypeToken<List<String>>() {
+    }.getType();
 
     private long version;
     private String rarityRaw = ItemRarity.COMMON.name();
-    private String catalystRaw = CatalystAffinity.NONE.name();
+    private String prefixRaw = "";
     private String sourceRaw = ItemRollSource.CRAFTED.name();
     private long seed = 0L;
+    private long socketCapacityRaw = 0L;
+    private String socketedGemsJson = "[]";
     private String statFlatRollsJson = "{}";
     private String statPercentRollsJson = "{}";
     private double droppedPenalty;
 
     private transient Map<String, Double> statFlatRollCache;
     private transient Map<String, Double> statPercentRollCache;
+    private transient List<String> socketedGemsCache;
 
     public long getVersion() {
         return version;
@@ -64,14 +73,6 @@ public class ItemInstanceMetadata {
 
     public void setRarity(ItemRarity rarity) {
         this.rarityRaw = rarity == null ? ItemRarity.COMMON.name() : rarity.name();
-    }
-
-    public CatalystAffinity getCatalyst() {
-        return CatalystAffinity.fromString(catalystRaw);
-    }
-
-    public void setCatalyst(CatalystAffinity catalyst) {
-        this.catalystRaw = catalyst == null ? CatalystAffinity.NONE.name() : catalyst.name();
     }
 
     public ItemRollSource getSource() {
@@ -94,12 +95,12 @@ public class ItemInstanceMetadata {
         this.rarityRaw = rarityRaw;
     }
 
-    public String getCatalystRaw() {
-        return catalystRaw;
+    public String getPrefixRaw() {
+        return prefixRaw == null ? "" : prefixRaw;
     }
 
-    public void setCatalystRaw(String catalystRaw) {
-        this.catalystRaw = catalystRaw;
+    public void setPrefixRaw(String prefixRaw) {
+        this.prefixRaw = prefixRaw == null ? "" : prefixRaw.trim();
     }
 
     public String getSourceRaw() {
@@ -116,6 +117,63 @@ public class ItemInstanceMetadata {
 
     public void setSeed(long seed) {
         this.seed = seed;
+    }
+
+    public int getSocketCapacity() {
+        return Math.max(0, (int) socketCapacityRaw);
+    }
+
+    public void setSocketCapacity(int socketCapacity) {
+        this.socketCapacityRaw = Math.max(0, socketCapacity);
+    }
+
+    public long getSocketCapacityRaw() {
+        return socketCapacityRaw;
+    }
+
+    public void setSocketCapacityRaw(long socketCapacityRaw) {
+        this.socketCapacityRaw = Math.max(0L, socketCapacityRaw);
+    }
+
+    public String getSocketedGemsJson() {
+        return socketedGemsJson;
+    }
+
+    public void setSocketedGemsJson(String socketedGemsJson) {
+        this.socketedGemsJson = (socketedGemsJson == null || socketedGemsJson.isBlank()) ? "[]" : socketedGemsJson;
+        this.socketedGemsCache = null;
+    }
+
+    public List<String> getSocketedGems() {
+        return new ArrayList<>(loadSocketedGemsCache());
+    }
+
+    public int getSocketedGemCount() {
+        return loadSocketedGemsCache().size();
+    }
+
+    public int getOpenSocketCount() {
+        return Math.max(0, getSocketCapacity() - getSocketedGemCount());
+    }
+
+    public void setSocketedGems(List<String> socketedGems) {
+        List<String> sanitized = sanitizeSocketedGems(socketedGems);
+        this.socketedGemsCache = sanitized;
+        this.socketedGemsJson = GSON.toJson(sanitized, LIST_TYPE);
+    }
+
+    public boolean addSocketedGem(String gemItemId) {
+        String normalized = normalizeGemItemId(gemItemId);
+        if (normalized == null) {
+            return false;
+        }
+        if (getSocketedGemCount() >= getSocketCapacity()) {
+            return false;
+        }
+        List<String> mutable = new ArrayList<>(loadSocketedGemsCache());
+        mutable.add(normalized);
+        setSocketedGems(mutable);
+        return true;
     }
 
     public String getStatFlatRollsJson() {
@@ -214,6 +272,15 @@ public class ItemInstanceMetadata {
         return statPercentRollCache;
     }
 
+    private List<String> loadSocketedGemsCache() {
+        if (socketedGemsCache != null) {
+            return socketedGemsCache;
+        }
+        List<String> parsed = parseSocketedGemsJson(socketedGemsJson);
+        socketedGemsCache = sanitizeSocketedGems(parsed);
+        return socketedGemsCache;
+    }
+
     private static void updateMapRoll(Map<String, Double> map, ItemizedStat stat, double value) {
         double safe = sanitizeRoll(value);
         if (Math.abs(safe) <= 1e-9) {
@@ -232,6 +299,18 @@ public class ItemInstanceMetadata {
             return parsed == null ? new LinkedHashMap<>() : parsed;
         } catch (RuntimeException ignored) {
             return new LinkedHashMap<>();
+        }
+    }
+
+    private static List<String> parseSocketedGemsJson(String json) {
+        if (json == null || json.isBlank()) {
+            return new ArrayList<>();
+        }
+        try {
+            List<String> parsed = GSON.fromJson(json, LIST_TYPE);
+            return parsed == null ? new ArrayList<>() : parsed;
+        } catch (RuntimeException ignored) {
+            return new ArrayList<>();
         }
     }
 
@@ -261,6 +340,27 @@ public class ItemInstanceMetadata {
         return raw.trim().toLowerCase(Locale.ROOT);
     }
 
+    private static List<String> sanitizeSocketedGems(List<String> input) {
+        List<String> out = new ArrayList<>();
+        if (input == null) {
+            return out;
+        }
+        for (String gemItemId : input) {
+            String normalized = normalizeGemItemId(gemItemId);
+            if (normalized != null) {
+                out.add(normalized);
+            }
+        }
+        return out;
+    }
+
+    private static String normalizeGemItemId(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        return raw.trim();
+    }
+
     private static double sanitizeRoll(Double value) {
         if (value == null || Double.isNaN(value) || Double.isInfinite(value)) {
             return 0.0;
@@ -268,3 +368,4 @@ public class ItemInstanceMetadata {
         return value;
     }
 }
+

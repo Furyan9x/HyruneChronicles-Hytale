@@ -1,4 +1,4 @@
-﻿interactionHints.talk = Press [{key}] to talk
+interactionHints.talk = Press [{key}] to talk
 items.Weapon_Staff_Wizard.name = Novice Staff
 items.Pack_Assembly_Bench.name = Pack Assembly Bench
 items.Pack_Assembly_Bench.description = "A workbench for assembling Trade Packs
