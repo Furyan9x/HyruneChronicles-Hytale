@@ -1,95 +1,73 @@
 {
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Armor_Cloth_Cotton_Head.name"
-                              },
-    "Parent":  "Armor_Iron_Head",
-    "Quality":  "Common",
-    "ItemLevel":  25,
-    "Icon":  "Icons/ItemsGenerated/Armor_Cloth_Cotton_Head.png",
-    "IconProperties":  {
-                           "Rotation":  [
-                                            22.5,
-                                            45,
-                                            22.5
-                                        ],
-                           "Scale":  0.45,
-                           "Translation":  [
-                                               -0.6,
-                                               -5.4
-                                           ]
-                       },
-    "Model":  "Items/Armors/Cotton/Head.blockymodel",
-    "Texture":  "Items/Armors/Cotton/Head_Texture.png",
-    "Recipe":  {
-                   "TimeSeconds":  2,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Bolt_Cotton",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  3
-                                 },
-                                 {
-                                     "ItemId":  null,
-                                     "ResourceTypeId":  "Wood_Trunk",
-                                     "Quantity":  2
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Bar_Thorium",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  2
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Id":  "Arcanebench",
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Arcane_Armor_Head"
-                                                               ]
-                                            }
-                                        ]
-               },
-    "Armor":  {
-                  "ArmorSlot":  "Head",
-                  "BaseDamageResistance":  0,
-                  "CosmeticsToHide":  [
-                                          "EarAccessory",
-                                          "Ear",
-                                          "Haircut",
-                                          "HeadAccessory"
-                                      ],
-                  "StatModifiers":  {
-                                        "Health":  [
-                                                       {
-                                                           "Amount":  9,
-                                                           "CalculationType":  "Additive"
-                                                       }
-                                                   ]
-                                    },
-                  "DamageResistance":  {
-                                           "Physical":  [
-                                                            {
-                                                                "Amount":  0.05,
-                                                                "CalculationType":  "Multiplicative"
-                                                            }
-                                                        ],
-                                           "Projectile":  [
-                                                              {
-                                                                  "Amount":  0.05,
-                                                                  "CalculationType":  "Multiplicative"
-                                                              }
-                                                          ]
-                                       }
-              },
-    "Tags":  {
-                 "Type":  [
-                              "Armor"
-                          ],
-                 "Family":  [
-                                "Cloth_Cotton"
-                            ]
-             },
-    "MaxDurability":  120,
-    "ItemSoundSetId":  "ISS_Armor_Cloth"
+  "TranslationProperties": {
+    "Name": "server.items.Armor_Cloth_Cotton_Head.name"
+  },
+  "Parent": "Armor_Iron_Head",
+  "Quality": "Common",
+  "ItemLevel": 25,
+  "Icon": "Icons/ItemsGenerated/Armor_Cloth_Cotton_Head.png",
+  "IconProperties": {
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Scale": 0.45,
+    "Translation": [
+      -0.6,
+      -5.4
+    ]
+  },
+  "Model": "Items/Armors/Cotton/Head.blockymodel",
+  "Texture": "Items/Armors/Cotton/Head_Texture.png",
+  "Recipe": {
+    "TimeSeconds": 2,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Bolt_Cotton",
+        "ResourceTypeId": null,
+        "Quantity": 3
+      },
+      {
+        "ItemId": null,
+        "ResourceTypeId": "Wood_Trunk",
+        "Quantity": 2
+      },
+      {
+        "ItemId": "Ingredient_Bar_Thorium",
+        "ResourceTypeId": null,
+        "Quantity": 2
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Armor_Head"
+        ]
+      }
+    ]
+  },
+  "Armor": {
+    "ArmorSlot": "Head",
+    "BaseDamageResistance": 0,
+    "CosmeticsToHide": [
+      "EarAccessory",
+      "Ear",
+      "Haircut",
+      "HeadAccessory"
+    ]
+  },
+  "Tags": {
+    "Type": [
+      "Armor"
+    ],
+    "Family": [
+      "Cloth_Cotton"
+    ]
+  },
+  "MaxDurability": 120,
+  "ItemSoundSetId": "ISS_Armor_Cloth"
 }

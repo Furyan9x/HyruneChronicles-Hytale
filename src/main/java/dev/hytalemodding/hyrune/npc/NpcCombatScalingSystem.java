@@ -10,7 +10,6 @@ import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.dependency.SystemGroupDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageCause;
@@ -83,11 +82,11 @@ public class NpcCombatScalingSystem extends EntityEventSystem<EntityStore, Damag
             return;
         }
 
-        float reduction = Math.min(SkillCombatBonusSystem.DEFENCE_DAMAGE_REDUCTION_CAP,
-            level * SkillCombatBonusSystem.DEFENCE_DAMAGE_REDUCTION_PER_LEVEL);
+        CombatStyle style = resolveCombatStyle(damage, store);
+        NpcLevelService.NpcCombatStats combatStats = levelService.resolveCombatStats(npcLevel, style);
+        float reduction = (float) combatStats.defenceReduction();
         float afterDefence = damage.getAmount() * (1.0f - reduction);
 
-        CombatStyle style = resolveCombatStyle(damage, store);
         CombatStyle weakness = npcLevel.getWeakness() != null
             ? npcLevel.getWeakness()
             : levelService.resolveWeakness(levelService.getConfig().getDefaultWeakness());
@@ -128,63 +127,20 @@ public class NpcCombatScalingSystem extends EntityEventSystem<EntityStore, Damag
         }
 
         CombatStyle style = resolveCombatStyle(damage, store);
-        switch (style) {
-            case RANGED:
-                applyRanged(level, damage);
-                break;
-            case MAGIC:
-                applyMagic(level, damage);
-                break;
-            case MELEE:
-            default:
-                applyMelee(level, damage);
-                break;
-        }
+        NpcLevelService.NpcCombatStats combatStats = levelService.resolveCombatStats(npcLevel, style);
+        applyOutgoing(combatStats, damage);
     }
 
-    private static void applyMelee(int level, Damage damage) {
-        float multiplier = 1.0f + (level * SkillCombatBonusSystem.ATTACK_DAMAGE_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * multiplier);
-
-        float chance = Math.min(SkillCombatBonusSystem.STRENGTH_CRIT_CHANCE_CAP,
-            level * SkillCombatBonusSystem.STRENGTH_CRIT_CHANCE_PER_LEVEL);
-        if (ThreadLocalRandom.current().nextFloat() >= chance) {
+    private static void applyOutgoing(NpcLevelService.NpcCombatStats stats, Damage damage) {
+        if (stats == null || damage == null) {
             return;
         }
 
-        float critMultiplier = SkillCombatBonusSystem.STRENGTH_CRIT_BASE_MULTIPLIER
-            + (level * SkillCombatBonusSystem.STRENGTH_CRIT_DAMAGE_BONUS_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * critMultiplier);
-    }
-
-    private static void applyRanged(int level, Damage damage) {
-        float multiplier = 1.0f + (level * SkillCombatBonusSystem.RANGED_DAMAGE_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * multiplier);
-
-        float chance = Math.min(SkillCombatBonusSystem.RANGED_CRIT_CHANCE_CAP,
-            level * SkillCombatBonusSystem.RANGED_CRIT_CHANCE_PER_LEVEL);
-        if (ThreadLocalRandom.current().nextFloat() >= chance) {
+        damage.setAmount((float) (damage.getAmount() * stats.damageMultiplier()));
+        if (ThreadLocalRandom.current().nextDouble() >= stats.critChance()) {
             return;
         }
-
-        float critMultiplier = SkillCombatBonusSystem.RANGED_CRIT_BASE_MULTIPLIER
-            + (level * SkillCombatBonusSystem.RANGED_CRIT_DAMAGE_BONUS_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * critMultiplier);
-    }
-
-    private static void applyMagic(int level, Damage damage) {
-        float multiplier = 1.0f + (level * SkillCombatBonusSystem.MAGIC_DAMAGE_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * multiplier);
-
-        float chance = Math.min(SkillCombatBonusSystem.MAGIC_CRIT_CHANCE_CAP,
-            level * SkillCombatBonusSystem.MAGIC_CRIT_CHANCE_PER_LEVEL);
-        if (ThreadLocalRandom.current().nextFloat() >= chance) {
-            return;
-        }
-
-        float critMultiplier = SkillCombatBonusSystem.MAGIC_CRIT_BASE_MULTIPLIER
-            + (level * SkillCombatBonusSystem.MAGIC_CRIT_DAMAGE_BONUS_PER_LEVEL);
-        damage.setAmount(damage.getAmount() * critMultiplier);
+        damage.setAmount((float) (damage.getAmount() * stats.critMultiplier()));
     }
 
     private CombatStyle resolveCombatStyle(Damage damage, Store<EntityStore> store) {

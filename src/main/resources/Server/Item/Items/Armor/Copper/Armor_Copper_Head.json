@@ -1,84 +1,62 @@
 {
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Armor_Copper_Head.name"
-                              },
-    "Parent":  "Armor_Iron_Head",
-    "ItemLevel":  10,
-    "Icon":  "Icons/ItemsGenerated/Armor_Copper_Head.png",
-    "Model":  "Items/Armors/Copper/Head.blockymodel",
-    "Texture":  "Items/Armors/Copper/Head_Texture.png",
-    "Recipe":  {
-                   "TimeSeconds":  3,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Bar_Copper",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  6
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Fibre",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  2
-                                 },
-                                 {
-                                     "ItemId":  null,
-                                     "ResourceTypeId":  "Rubble",
-                                     "Quantity":  2
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Id":  "Armor_Bench",
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Armor_Head"
-                                                               ]
-                                            }
-                                        ]
-               },
-    "Armor":  {
-                  "ArmorSlot":  "Head",
-                  "BaseDamageResistance":  0,
-                  "CosmeticsToHide":  [
-                                          "EarAccessory",
-                                          "Ear",
-                                          "Haircut",
-                                          "HeadAccessory"
-                                      ],
-                  "DamageResistance":  {
-                                           "Physical":  [
-                                                            {
-                                                                "Amount":  0.036,
-                                                                "CalculationType":  "Multiplicative"
-                                                            }
-                                                        ],
-                                           "Projectile":  [
-                                                              {
-                                                                  "Amount":  0.036,
-                                                                  "CalculationType":  "Multiplicative"
-                                                              }
-                                                          ]
-                                       },
-                  "StatModifiers":  {
-                                        "Health":  [
-                                                       {
-                                                           "Amount":  5,
-                                                           "CalculationType":  "Additive"
-                                                       }
-                                                   ]
-                                    }
-              },
-    "MaxDurability":  80,
-    "Tags":  {
-                 "Type":  [
-                              "Armor"
-                          ],
-                 "Family":  [
-                                "Copper"
-                            ]
-             },
-    "ItemSoundSetId":  "ISS_Armor_Heavy",
-    "DurabilityLossOnHit":  0.5,
-    "Quality":  "Common"
+  "TranslationProperties": {
+    "Name": "server.items.Armor_Copper_Head.name"
+  },
+  "Parent": "Armor_Iron_Head",
+  "ItemLevel": 10,
+  "Icon": "Icons/ItemsGenerated/Armor_Copper_Head.png",
+  "Model": "Items/Armors/Copper/Head.blockymodel",
+  "Texture": "Items/Armors/Copper/Head_Texture.png",
+  "Recipe": {
+    "TimeSeconds": 3,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Bar_Copper",
+        "ResourceTypeId": null,
+        "Quantity": 6
+      },
+      {
+        "ItemId": "Ingredient_Fibre",
+        "ResourceTypeId": null,
+        "Quantity": 2
+      },
+      {
+        "ItemId": null,
+        "ResourceTypeId": "Rubble",
+        "Quantity": 2
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Armor_Bench",
+        "Type": "Crafting",
+        "Categories": [
+          "Armor_Head"
+        ]
+      }
+    ]
+  },
+  "Armor": {
+    "ArmorSlot": "Head",
+    "BaseDamageResistance": 0,
+    "CosmeticsToHide": [
+      "EarAccessory",
+      "Ear",
+      "Haircut",
+      "HeadAccessory"
+    ]
+  },
+  "MaxDurability": 80,
+  "Tags": {
+    "Type": [
+      "Armor"
+    ],
+    "Family": [
+      "Copper"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Armor_Heavy",
+  "DurabilityLossOnHit": 0.5,
+  "Quality": "Common"
 }

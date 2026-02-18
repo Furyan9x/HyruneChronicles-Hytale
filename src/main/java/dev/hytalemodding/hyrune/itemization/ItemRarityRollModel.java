@@ -134,6 +134,16 @@ public final class ItemRarityRollModel {
         return ItemRarity.COMMON;
     }
 
+    public static double rollStatMultiplierFlat(ItemRarity rarity) {
+        return ItemizationSpecializedStatConfigHelper.rollStatRarityMultiplier(rarity);
+    }
+
+    public static double rollStatMultiplierPercent(ItemRarity rarity) {
+        double flatMultiplier = rollStatMultiplierFlat(rarity);
+        // Diminishing return on percent-based rolls for high rarities.
+        return 1.0 + ((flatMultiplier - 1.0) * 0.5);
+    }
+
     private static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
     }

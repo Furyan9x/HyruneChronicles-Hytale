@@ -1,11 +1,12 @@
 package dev.hytalemodding.hyrune.itemization.tooltip;
 
 import com.hypixel.hytale.logger.HytaleLogger;
-import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.config.HyruneConfig;
 import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.itemization.ItemPrefixService;
 import dev.hytalemodding.hyrune.itemization.ItemArchetype;
+import dev.hytalemodding.hyrune.itemization.ItemArchetypeResolver;
+import dev.hytalemodding.hyrune.itemization.ItemizationSpecializedStatConfigHelper;
 import dev.hytalemodding.hyrune.itemization.ItemStatDisplayFormatter;
 import dev.hytalemodding.hyrune.itemization.ItemInstanceMetadata;
 import dev.hytalemodding.hyrune.itemization.ItemInstanceMetadataMigration;
@@ -14,10 +15,8 @@ import dev.hytalemodding.hyrune.itemization.ItemStatResolver;
 import dev.hytalemodding.hyrune.itemization.ItemizedStat;
 import dev.hytalemodding.hyrune.itemization.ItemizedStatBlock;
 import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
-import dev.hytalemodding.hyrune.level.LevelingService;
+import dev.hytalemodding.hyrune.itemization.ItemRarityRollModel;
 import dev.hytalemodding.hyrune.repair.ItemRarity;
-import dev.hytalemodding.hyrune.skills.SkillType;
-import dev.hytalemodding.hyrune.system.SkillCombatBonusSystem;
 import org.bson.BsonDocument;
 
 import javax.annotation.Nullable;
@@ -75,7 +74,7 @@ public final class HyruneDynamicTooltipComposer {
 
         String stableInput = buildStableInput(playerUuid, itemId, metadata);
         String combinedHash = shortHash(stableInput);
-        ComposedTooltip composed = composedCache.computeIfAbsent(combinedHash, hash -> buildTooltip(playerUuid, itemId, hash, metadata));
+        ComposedTooltip composed = composedCache.computeIfAbsent(combinedHash, hash -> buildTooltip(itemId, hash, metadata));
         cacheState(stateKey, composed);
         return composed;
     }
@@ -109,8 +108,7 @@ public final class HyruneDynamicTooltipComposer {
         }
     }
 
-    private ComposedTooltip buildTooltip(@Nullable UUID playerUuid,
-                                         String itemId,
+    private ComposedTooltip buildTooltip(String itemId,
                                          String combinedHash,
                                          ItemInstanceMetadata metadata) {
         ItemRarity rarity = metadata.getRarity();
@@ -118,17 +116,16 @@ public final class HyruneDynamicTooltipComposer {
         String displayNameOverride = ItemPrefixService.resolveDisplayName(itemId, metadata.getPrefixRaw());
 
         List<String> lines = new ArrayList<>(10);
-        lines.add("<color is=\"" + rarityColor(rarity) + "\"><i>" + rarityLabel(rarity) + "</i></color>");
+        for (String baseLine : buildBaseStatLines(itemId, metadata)) {
+            lines.add(baseLine);
+        }
+        lines.add("<color is=\"#505050\">----------------</color>");
         lines.add("<color is=\"#8AD7FF\">Sockets: " + metadata.getSocketedGemCount() + "/" + metadata.getSocketCapacity() + "</color>");
         for (String gemLine : GemSocketConfigHelper.describeSocketedGemLinesForItem(itemId, metadata.getSocketedGems())) {
             lines.add("<color is=\"#8AD7FF\">" + gemLine + "</color>");
         }
-        String weaponDamageLine = buildWeaponDamageLine(playerUuid, itemId, metadata);
-        if (weaponDamageLine != null) {
-            lines.add(weaponDamageLine);
-        }
         lines.add("<color is=\"#505050\">----------------</color>");
-        for (String rollLine : buildRollLines(metadata)) {
+        for (String rollLine : buildRollLines(itemId, metadata)) {
             lines.add("<color is=\"#1EFF00\">" + rollLine + "</color>");
         }
         if (metadata.getDroppedPenalty() > 0d) {
@@ -139,7 +136,6 @@ public final class HyruneDynamicTooltipComposer {
     }
 
     private static String buildStableInput(@Nullable UUID playerUuid, String itemId, ItemInstanceMetadata metadata) {
-        SkillContext skill = resolveSkillContext(playerUuid, itemId);
         return itemId
             + "|player=" + (playerUuid == null ? "no-player" : playerUuid)
             + "|r=" + metadata.getRarity().name()
@@ -149,17 +145,15 @@ public final class HyruneDynamicTooltipComposer {
             + ":" + metadata.getSocketedGemsJson()
             + "|flat=" + metadata.getStatFlatRollsJson()
             + "|pct=" + metadata.getStatPercentRollsJson()
-            + "|skill=" + skill.skillType().name()
-            + ":" + skill.skillLevel()
-            + ":" + fmt(skill.multiplier())
             + "|dp=" + fmt(metadata.getDroppedPenalty());
     }
 
-    private static List<String> buildRollLines(ItemInstanceMetadata metadata) {
+    private static List<String> buildRollLines(String itemId, ItemInstanceMetadata metadata) {
         List<String> out = new ArrayList<>();
         if (metadata == null) {
             return out;
         }
+        ItemArchetype archetype = ItemArchetypeResolver.resolve(itemId);
         Map<String, Double> flatRolls = metadata.getStatFlatRollsRaw();
         Map<String, Double> percentRolls = metadata.getStatPercentRollsRaw();
         if (flatRolls.isEmpty() && percentRolls.isEmpty()) {
@@ -176,13 +170,38 @@ public final class HyruneDynamicTooltipComposer {
 
         int limit = Math.min(6, entries.size());
         for (int i = 0; i < limit; i++) {
-            RollLineData entry = entries.get(i);
+            RollLineData entry = sanitizeRollLine(entries.get(i));
             ItemizedStat stat = ItemizedStat.fromId(entry.statId());
             String label = stat != null ? stat.getDisplayName() : entry.statId();
-            out.add(label + ": " + ItemStatDisplayFormatter.formatRoll(stat, entry.flatRoll(), entry.percentRoll()));
+            out.add(label + ": "
+                + ItemStatDisplayFormatter.formatRoll(stat, entry.flatRoll(), entry.percentRoll())
+                + formatRangeSuffix(itemId, archetype, metadata.getRarity(), entry));
         }
         if (entries.size() > limit) {
             out.add("... +" + (entries.size() - limit) + " more rolled stats");
+        }
+        return out;
+    }
+
+    private static List<String> buildBaseStatLines(String itemId, ItemInstanceMetadata metadata) {
+        List<String> out = new ArrayList<>();
+        ItemStatResolution resolution = ItemStatResolver.resolveDetailed(itemId, metadata);
+        ItemizedStatBlock base = resolution.getBaseSpecializedStats();
+
+        String weaponDamageLine = buildWeaponDamageLine(resolution);
+        if (weaponDamageLine != null) {
+            out.add(baseLine("Weapon Damage", weaponDamageLine));
+        }
+
+        List<Map.Entry<ItemizedStat, Double>> entries = new ArrayList<>(base.asMap().entrySet());
+        entries.sort(Comparator.comparingDouble((Map.Entry<ItemizedStat, Double> e) -> Math.abs(e.getValue())).reversed());
+        for (Map.Entry<ItemizedStat, Double> entry : entries) {
+            ItemizedStat stat = entry.getKey();
+            double value = entry.getValue() == null ? 0.0 : entry.getValue();
+            if (stat == null || value <= 0.0 || stat == ItemizedStat.PHYSICAL_DAMAGE || stat == ItemizedStat.MAGICAL_DAMAGE) {
+                continue;
+            }
+            out.add(baseLine(stat.getDisplayName(), ItemStatDisplayFormatter.formatRoll(stat, value, 0.0)));
         }
         return out;
     }
@@ -223,70 +242,23 @@ public final class HyruneDynamicTooltipComposer {
     }
 
     @Nullable
-    private static String buildWeaponDamageLine(@Nullable UUID playerUuid, String itemId, ItemInstanceMetadata metadata) {
-        if (itemId == null || itemId.isBlank() || metadata == null) {
+    private static String buildWeaponDamageLine(ItemStatResolution resolution) {
+        if (resolution == null) {
             return null;
         }
-        ItemStatResolution resolution = ItemStatResolver.resolveDetailed(itemId, metadata);
         ItemArchetype archetype = resolution.getArchetype();
         if (archetype == null || !archetype.getId().startsWith("weapon_")) {
             return null;
         }
 
-        ItemizedStatBlock stats = resolution.getResolvedSpecializedStats();
+        ItemizedStatBlock stats = resolution.getBaseSpecializedStats();
         double physical = Math.max(0.0, stats.get(ItemizedStat.PHYSICAL_DAMAGE));
         double magical = Math.max(0.0, stats.get(ItemizedStat.MAGICAL_DAMAGE));
         double baseDamage = physical + magical;
         if (baseDamage <= 0.0) {
             return null;
         }
-
-        double critChance = clamp(
-            stats.get(ItemizedStat.PHYSICAL_CRIT_CHANCE) + stats.get(ItemizedStat.MAGICAL_CRIT_CHANCE),
-            0.0,
-            0.80
-        );
-        double critMultiplier = Math.max(1.0, 1.5 + stats.get(ItemizedStat.CRIT_BONUS));
-        double penetration = clamp(
-            stats.get(ItemizedStat.PHYSICAL_PENETRATION) + stats.get(ItemizedStat.MAGICAL_PENETRATION),
-            0.0,
-            2.0
-        );
-        double speed = Math.max(0.0, stats.get(ItemizedStat.ATTACK_SPEED) + stats.get(ItemizedStat.CAST_SPEED));
-
-        double expectedDamage = baseDamage;
-        expectedDamage *= 1.0 + (critChance * (critMultiplier - 1.0));
-        expectedDamage *= 1.0 + (penetration * 0.35);
-        expectedDamage *= 1.0 + (speed * 0.60);
-        SkillContext skill = resolveSkillContext(playerUuid, itemId);
-        double finalDamage = expectedDamage * skill.multiplier();
-
-        return "<color is=\"#B8860B\">Weapon Damage:</color> <color is=\"#FFD700\">"
-            + number(baseDamage) + " -> " + number(finalDamage) + "</color>";
-    }
-
-    private static SkillContext resolveSkillContext(@Nullable UUID playerUuid, String itemId) {
-        SkillType skill = SkillType.STRENGTH;
-        float perLevel = SkillCombatBonusSystem.STRENGTH_DAMAGE_PER_LEVEL;
-        String normalized = itemId == null ? "" : itemId.toLowerCase(Locale.ROOT);
-        if (SkillCombatBonusSystem.isRangedWeapon(normalized)) {
-            skill = SkillType.RANGED;
-            perLevel = SkillCombatBonusSystem.RANGED_DAMAGE_PER_LEVEL;
-        } else if (SkillCombatBonusSystem.isMagicWeapon(normalized)) {
-            skill = SkillType.MAGIC;
-            perLevel = SkillCombatBonusSystem.MAGIC_DAMAGE_PER_LEVEL;
-        }
-
-        int level = 1;
-        if (playerUuid != null) {
-            LevelingService service = Hyrune.getService();
-            if (service != null) {
-                level = Math.max(1, service.getSkillLevel(playerUuid, skill));
-            }
-        }
-
-        double multiplier = 1.0 + (level * perLevel);
-        return new SkillContext(skill, level, multiplier);
+        return number(baseDamage);
     }
 
     private static String pct(double value) {
@@ -307,41 +279,102 @@ public final class HyruneDynamicTooltipComposer {
         return String.format(Locale.US, "%.3f", value);
     }
 
-    private static double clamp(double value, double min, double max) {
-        if (Double.isNaN(value)) {
-            return min;
+    private static String formatRangeSuffix(String itemId, ItemArchetype archetype, ItemRarity rarity, RollLineData entry) {
+        ItemizedStat stat = ItemizedStat.fromId(entry.statId());
+        if (stat == null) {
+            return "";
         }
-        return Math.max(min, Math.min(max, value));
+        boolean hasFlat = Math.abs(entry.flatRoll()) > 1e-9;
+        boolean hasPercent = Math.abs(entry.percentRoll()) > 1e-9;
+        if (!hasFlat && !hasPercent) {
+            return "";
+        }
+        if (hasFlat && !hasPercent) {
+            return " <color is=\"#7A7A7A\">[" + flatRange(stat, itemId, archetype, rarity) + "]</color>";
+        }
+        if (hasPercent && !hasFlat) {
+            return " <color is=\"#7A7A7A\">[" + percentRange(stat, itemId, rarity) + "]</color>";
+        }
+        return "";
     }
 
-    private static String rarityLabel(ItemRarity rarity) {
-        if (rarity == null) {
-            return "Common";
+    private static RollLineData sanitizeRollLine(RollLineData entry) {
+        if (entry == null) {
+            return null;
         }
-        return switch (rarity) {
-            case UNCOMMON -> "Uncommon";
-            case RARE -> "Rare";
-            case EPIC -> "Epic";
-            case VOCATIONAL -> "Vocational";
-            case LEGENDARY -> "Legendary";
-            case MYTHIC -> "Mythic";
-            case COMMON -> "Common";
+        ItemizedStat stat = ItemizedStat.fromId(entry.statId());
+        if (stat == null) {
+            return entry;
+        }
+        boolean hasFlat = Math.abs(entry.flatRoll()) > 1e-9;
+        boolean hasPercent = Math.abs(entry.percentRoll()) > 1e-9;
+        if (!(hasFlat && hasPercent)) {
+            return entry;
+        }
+
+        ItemizationSpecializedStatConfigHelper.RollConstraint constraint =
+            ItemizationSpecializedStatConfigHelper.rollConstraintForStat(stat);
+        return switch (constraint) {
+            case FLAT_ONLY -> new RollLineData(entry.statId(), entry.flatRoll(), 0.0);
+            case PERCENT_ONLY -> new RollLineData(entry.statId(), 0.0, entry.percentRoll());
+            case EITHER -> {
+                if (Math.abs(entry.percentRoll()) >= Math.abs(entry.flatRoll())) {
+                    yield new RollLineData(entry.statId(), 0.0, entry.percentRoll());
+                }
+                yield new RollLineData(entry.statId(), entry.flatRoll(), 0.0);
+            }
         };
     }
 
-    private static String rarityColor(ItemRarity rarity) {
-        if (rarity == null) {
-            return "#C8C8C8";
+    private static String flatRange(ItemizedStat stat, String itemId, ItemArchetype archetype, ItemRarity rarity) {
+        double base = ItemizationSpecializedStatConfigHelper.baseValueForArchetypeStat(archetype, stat);
+        double tierScalar = ItemizationSpecializedStatConfigHelper.tierScalar(itemId);
+        double rarityRollMultiplier = ItemRarityRollModel.rollStatMultiplierFlat(rarity);
+        double min = round4(base * ItemizationSpecializedStatConfigHelper.flatRollMinScalar() * tierScalar * rarityRollMultiplier);
+        double max = round4(base * ItemizationSpecializedStatConfigHelper.flatRollMaxScalar() * tierScalar * rarityRollMultiplier);
+        double minFloor = ItemizationSpecializedStatConfigHelper.scaledFlatRollMinimumFloor(stat, tierScalar) * rarityRollMultiplier;
+        min = Math.max(minFloor, min);
+        max = Math.max(minFloor, max);
+        if (min > max) {
+            double t = min;
+            min = max;
+            max = t;
         }
-        return switch (rarity) {
-            case UNCOMMON -> "#7CFF9E";
-            case RARE -> "#70D8FF";
-            case EPIC -> "#CFA8FF";
-            case VOCATIONAL -> "#8AF0C8";
-            case LEGENDARY -> "#FFD46B";
-            case MYTHIC -> "#E41E3D";
-            case COMMON -> "#C8C8C8";
-        };
+        return stripPlus(ItemStatDisplayFormatter.formatFlat(stat, min))
+            + "-"
+            + stripPlus(ItemStatDisplayFormatter.formatFlat(stat, max));
+    }
+
+    private static String percentRange(ItemizedStat stat, String itemId, ItemRarity rarity) {
+        double tierScalar = ItemizationSpecializedStatConfigHelper.tierScalar(itemId);
+        ItemizationSpecializedStatConfigHelper.PercentRollDefinition definition =
+            ItemizationSpecializedStatConfigHelper.percentRollDefinition(stat);
+        double rarityRollMultiplier = ItemRarityRollModel.rollStatMultiplierPercent(rarity);
+        double min = round4(definition.baseMin() * (1.0 + (Math.max(0.0, tierScalar) * definition.scalingWeight())) * rarityRollMultiplier);
+        double max = round4(definition.baseMax() * (1.0 + (Math.max(0.0, tierScalar) * definition.scalingWeight())) * rarityRollMultiplier);
+        if (min > max) {
+            double t = min;
+            min = max;
+            max = t;
+        }
+        String minStr = stripPlus(ItemStatDisplayFormatter.formatPercent(min)).replace("%", "");
+        String maxStr = stripPlus(ItemStatDisplayFormatter.formatPercent(max)).replace("%", "");
+        return minStr + "%-" + maxStr + "%";
+    }
+
+    private static String stripPlus(String text) {
+        if (text == null || text.isBlank()) {
+            return text;
+        }
+        return text.startsWith("+") ? text.substring(1) : text;
+    }
+
+    private static String baseLine(String label, String value) {
+        return "<color is=\"#8A8A8A\">" + label + ":</color> <color is=\"#FFFFFF\">" + value + "</color>";
+    }
+
+    private static double round4(double value) {
+        return Math.round(value * 10000.0) / 10000.0;
     }
 
     private static String shortHash(String input) {
@@ -455,7 +488,5 @@ public final class HyruneDynamicTooltipComposer {
     private record RollLineData(String statId, double flatRoll, double percentRoll) {
     }
 
-    private record SkillContext(SkillType skillType, int skillLevel, double multiplier) {
-    }
 }
 

@@ -10,6 +10,7 @@ public class NpcLevelComponent implements Component<EntityStore> {
     private int level;
     private String groupId;
     private CombatStyle weakness;
+    private String archetypeId;
     private boolean elite;
     private String baseName;
     private String lastDisplayKey;
@@ -17,10 +18,16 @@ public class NpcLevelComponent implements Component<EntityStore> {
     public NpcLevelComponent() {
     }
 
-    public NpcLevelComponent(int level, String groupId, CombatStyle weakness, boolean elite, String baseName) {
+    public NpcLevelComponent(int level,
+                             String groupId,
+                             CombatStyle weakness,
+                             String archetypeId,
+                             boolean elite,
+                             String baseName) {
         this.level = level;
         this.groupId = groupId;
         this.weakness = weakness;
+        this.archetypeId = archetypeId;
         this.elite = elite;
         this.baseName = baseName;
     }
@@ -47,6 +54,14 @@ public class NpcLevelComponent implements Component<EntityStore> {
 
     public void setWeakness(CombatStyle weakness) {
         this.weakness = weakness;
+    }
+
+    public String getArchetypeId() {
+        return archetypeId;
+    }
+
+    public void setArchetypeId(String archetypeId) {
+        this.archetypeId = archetypeId;
     }
 
     public boolean isElite() {
@@ -76,7 +91,7 @@ public class NpcLevelComponent implements Component<EntityStore> {
 
     @Override
     public NpcLevelComponent clone() {
-        NpcLevelComponent cloned = new NpcLevelComponent(level, groupId, weakness, elite, baseName);
+        NpcLevelComponent cloned = new NpcLevelComponent(level, groupId, weakness, archetypeId, elite, baseName);
         cloned.setLastDisplayKey(lastDisplayKey);
         return cloned;
     }

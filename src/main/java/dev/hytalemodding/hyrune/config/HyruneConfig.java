@@ -21,12 +21,17 @@ public class HyruneConfig {
     public static class ItemizationSpecializedStatsConfig {
         public double flatRollMinScalar = 0.20;
         public double flatRollMaxScalar = 0.80;
+        // Deprecated fallback. Prefer statDefinitions[*].baseMin/baseMax.
         public double percentRollMin = 0.02;
+        // Deprecated fallback. Prefer statDefinitions[*].baseMin/baseMax.
         public double percentRollMax = 0.14;
-        public double percentRollTierInfluence = 0.12;
+        public double percentRollTierInfluence = 0.25;
+        public double legendaryRollStatMultiplier = 1.10;
+        public double mythicRollStatMultiplier = 1.35;
         public double durabilityTierInfluence = 1.00;
         public Map<String, Double> rollTypeWeights = defaultRollTypeWeights();
         public Map<String, String> rollTypeConstraintByStat = defaultRollTypeConstraintByStat();
+        public Map<String, StatDefinitionConfig> statDefinitions = defaultStatDefinitions();
         public Map<String, Double> tierScalarByKeyword = defaultTierScalarByKeyword();
         public RarityScalarConfig rarityScalar = new RarityScalarConfig();
         public Map<String, Integer> statsPerRarity = defaultStatsPerRarity();
@@ -37,6 +42,21 @@ public class HyruneConfig {
         public Map<String, Map<String, Double>> baseStatsByArchetype = defaultBaseStatsByArchetype();
         public int uiDisplayFlatDecimals = 0;
         public int uiDisplayPercentDecimals = 1;
+    }
+
+    public static class StatDefinitionConfig {
+        public double baseMin = 0.01;
+        public double baseMax = 0.03;
+        public double scalingWeight = 0.20;
+
+        public StatDefinitionConfig() {
+        }
+
+        public StatDefinitionConfig(double baseMin, double baseMax, double scalingWeight) {
+            this.baseMin = baseMin;
+            this.baseMax = baseMax;
+            this.scalingWeight = scalingWeight;
+        }
     }
 
     public static class PrefixConfig {
@@ -322,31 +342,72 @@ public class HyruneConfig {
         Map<String, String> out = new LinkedHashMap<>();
         out.put("movement_speed", "percent_only");
         out.put("crit_chance", "percent_only");
+        out.put("crit_reduction", "percent_only");
+        return out;
+    }
+
+    private static Map<String, StatDefinitionConfig> defaultStatDefinitions() {
+        Map<String, StatDefinitionConfig> out = new LinkedHashMap<>();
+
+        // Crit stats: 1-3%, weight 0.2
+        StatDefinitionConfig crit = statDef(0.01, 0.03, 0.20);
+        out.put("physical_crit_chance", crit);
+        out.put("magical_crit_chance", statDef(0.01, 0.03, 0.20));
+        out.put("healing_crit_chance", statDef(0.01, 0.03, 0.20));
+        out.put("crit_bonus", statDef(0.01, 0.03, 0.20));
+        out.put("healing_crit_bonus", statDef(0.01, 0.03, 0.20));
+        out.put("crit_reduction", statDef(0.01, 0.03, 0.20));
+
+        // Resource stats: 5-10%, weight 0.6
+        out.put("mana_regen", statDef(0.05, 0.10, 0.60));
+        out.put("hp_regen", statDef(0.05, 0.10, 0.60));
+        out.put("mana_cost_reduction", statDef(0.05, 0.10, 0.60));
+        out.put("max_hp", statDef(0.05, 0.10, 0.60));
+        out.put("healing_power", statDef(0.05, 0.10, 0.60));
+
+        // Defense stats: 3-6%, weight 0.4
+        out.put("physical_defence", statDef(0.03, 0.06, 0.40));
+        out.put("magical_defence", statDef(0.03, 0.06, 0.40));
+        out.put("block_efficiency", statDef(0.03, 0.06, 0.40));
+        out.put("physical_penetration", statDef(0.03, 0.06, 0.40));
+        out.put("magical_penetration", statDef(0.03, 0.06, 0.40));
+
+        // Reflect / utility stats: 0.5-2%, weight 0.15
+        out.put("reflect_damage", statDef(0.005, 0.02, 0.15));
+        out.put("movement_speed", statDef(0.005, 0.02, 0.15));
+        out.put("attack_speed", statDef(0.005, 0.02, 0.15));
+        out.put("cast_speed", statDef(0.005, 0.02, 0.15));
+        out.put("block_break_speed", statDef(0.005, 0.02, 0.15));
+        out.put("rare_drop_chance", statDef(0.005, 0.02, 0.15));
+        out.put("double_drop_chance", statDef(0.005, 0.02, 0.15));
+        out.put("physical_damage", statDef(0.005, 0.02, 0.15));
+        out.put("magical_damage", statDef(0.005, 0.02, 0.15));
+
         return out;
     }
 
     private static Map<String, Double> defaultTierScalarByKeyword() {
         Map<String, Double> out = new LinkedHashMap<>();
-        // Combat Tiers (15% increase per tier)
-    out.put("crude", 1.00);      // Baseline
-    out.put("copper", 1.15);     
-    out.put("bronze", 1.32);     
-    out.put("iron", 1.52);       
-    out.put("steel", 1.75);      
-    out.put("cobalt", 2.01);     
-    out.put("thorium", 2.31);    
-    out.put("adamantite", 2.66); 
-    out.put("mithril", 3.05);    
-    out.put("onyxium", 3.51);    
-    out.put("prisma", 4.04);     
+        // Combat tiers with exponential 30% growth per tier.
+        out.put("crude", 1.00);
+        out.put("copper", 1.30);
+        out.put("bronze", 1.69);
+        out.put("iron", 2.197);
+        out.put("steel", 2.8561);
+        out.put("cobalt", 3.7129);
+        out.put("thorium", 4.8268);
+        out.put("adamantite", 6.2749);
+        out.put("mithril", 8.1573);
+        out.put("onyxium", 10.6045);
+        out.put("prisma", 13.7858);
 
-    // Vocational / Cloth / Leather Tiers (Matching the power curve)
-    out.put("wool", 1.00);
-    out.put("linen", 1.32);      // Equivalent to Bronze
-    out.put("leather", 1.52);    // Equivalent to Iron
-    out.put("silk", 2.01);       // Equivalent to Cobalt
-    out.put("shadoweave", 3.05); // Equivalent to Mithril
-    out.put("raven", 4.04);      // Equivalent to Prisma
+        // Vocational / cloth / leather tiers mapped onto the same curve.
+        out.put("wool", 1.00);
+        out.put("linen", 1.69);
+        out.put("leather", 2.197);
+        out.put("silk", 3.7129);
+        out.put("shadoweave", 8.1573);
+        out.put("raven", 13.7858);
         return out;
     }
 
@@ -560,5 +621,9 @@ public class HyruneConfig {
             out.put(key, value);
         }
         return out;
+    }
+
+    private static StatDefinitionConfig statDef(double baseMin, double baseMax, double scalingWeight) {
+        return new StatDefinitionConfig(baseMin, baseMax, scalingWeight);
     }
 }

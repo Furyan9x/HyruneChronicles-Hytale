@@ -39,10 +39,7 @@ public final class ItemStatResolver {
         double droppedKeep = 1.0 - clamp(metadata == null ? 0.0 : metadata.getDroppedPenalty(), 0.0, 1.0);
 
         for (ItemizedStat stat : ItemizedStat.values()) {
-            // Avoid double-dipping against native item Health bonuses.
-            // Archetype MAX_HP bases are hidden from tooltip and stack on top of Hytale armor HP.
-            // We only want rolled/socketed MAX_HP to contribute through itemization.
-            double baseValue = stat == ItemizedStat.MAX_HP ? 0.0 : base.get(stat);
+            double baseValue = base.get(stat);
             double flatRoll = metadata == null ? 0.0 : metadata.getFlatStatRoll(stat);
             double percentRoll = metadata == null ? 0.0 : metadata.getPercentStatRoll(stat);
             double socketFlat = socketBonuses.get(stat);

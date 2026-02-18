@@ -1,98 +1,70 @@
 {
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Armor_Cloth_Cindercloth_Head.name"
-                              },
-    "Parent":  "Armor_Iron_Head",
-    "Quality":  "Common",
-    "ItemLevel":  45,
-    "Icon":  "Icons/ItemsGenerated/Armor_Cloth_Cindercloth_Head.png",
-    "IconProperties":  {
-                           "Rotation":  [
-                                            22.5,
-                                            45,
-                                            22.5
-                                        ],
-                           "Scale":  0.5,
-                           "Translation":  [
-                                               -1.8,
-                                               -1.8
-                                           ]
-                       },
-    "Model":  "Items/Armors/Cindercloth/Head.blockymodel",
-    "Texture":  "Items/Armors/Cindercloth/Head_Texture.png",
-    "Recipe":  {
-                   "TimeSeconds":  2,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Bolt_Cindercloth",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  3
-                                 },
-                                 {
-                                     "ItemId":  null,
-                                     "ResourceTypeId":  "Wood_Trunk",
-                                     "Quantity":  2
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Bar_Adamantite",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  2
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Id":  "Arcanebench",
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Arcane_Armor_Head"
-                                                               ]
-                                            }
-                                        ]
-               },
-    "Armor":  {
-                  "ArmorSlot":  "Head",
-                  "BaseDamageResistance":  0,
-                  "CosmeticsToHide":  [
-                                          "EarAccessory",
-                                          "Ear",
-                                          "Haircut",
-                                          "HeadAccessory"
-                                      ],
-                  "StatModifiers":  {
-                                        "Health":  [
-                                                       {
-                                                           "Amount":  9,
-                                                           "CalculationType":  "Additive"
-                                                       }
-                                                   ],
-                                        "Mana":  [
-                                                     {
-                                                         "Amount":  20,
-                                                         "CalculationType":  "Additive"
-                                                     }
-                                                 ]
-                                    },
-                  "DamageResistance":  {
-                                           "Physical":  [
-                                                            {
-                                                                "Amount":  0.05,
-                                                                "CalculationType":  "Multiplicative"
-                                                            }
-                                                        ],
-                                           "Projectile":  [
-                                                              {
-                                                                  "Amount":  0.05,
-                                                                  "CalculationType":  "Multiplicative"
-                                                              }
-                                                          ]
-                                       }
-              },
-    "Tags":  {
-                 "Type":  [
-                              "Armor"
-                          ]
-             },
-    "MaxDurability":  120,
-    "ItemSoundSetId":  "ISS_Armor_Cloth"
+  "TranslationProperties": {
+    "Name": "server.items.Armor_Cloth_Cindercloth_Head.name"
+  },
+  "Parent": "Armor_Iron_Head",
+  "Quality": "Common",
+  "ItemLevel": 45,
+  "Icon": "Icons/ItemsGenerated/Armor_Cloth_Cindercloth_Head.png",
+  "IconProperties": {
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Scale": 0.5,
+    "Translation": [
+      -1.8,
+      -1.8
+    ]
+  },
+  "Model": "Items/Armors/Cindercloth/Head.blockymodel",
+  "Texture": "Items/Armors/Cindercloth/Head_Texture.png",
+  "Recipe": {
+    "TimeSeconds": 2,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Bolt_Cindercloth",
+        "ResourceTypeId": null,
+        "Quantity": 3
+      },
+      {
+        "ItemId": null,
+        "ResourceTypeId": "Wood_Trunk",
+        "Quantity": 2
+      },
+      {
+        "ItemId": "Ingredient_Bar_Adamantite",
+        "ResourceTypeId": null,
+        "Quantity": 2
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Armor_Head"
+        ]
+      }
+    ]
+  },
+  "Armor": {
+    "ArmorSlot": "Head",
+    "BaseDamageResistance": 0,
+    "CosmeticsToHide": [
+      "EarAccessory",
+      "Ear",
+      "Haircut",
+      "HeadAccessory"
+    ]
+  },
+  "Tags": {
+    "Type": [
+      "Armor"
+    ]
+  },
+  "MaxDurability": 120,
+  "ItemSoundSetId": "ISS_Armor_Cloth"
 }

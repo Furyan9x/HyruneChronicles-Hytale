@@ -1,90 +1,68 @@
 {
-    "TranslationProperties":  {
-                                  "Name":  "server.items.Armor_Wool_Chest.name"
-                              },
-    "Parent":  "Armor_Iron_Chest",
-    "Recipe":  {
-                   "TimeSeconds":  2,
-                   "KnowledgeRequired":  false,
-                   "Input":  [
-                                 {
-                                     "ItemId":  "Ingredient_Stick",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  2
-                                 },
-                                 {
-                                     "ItemId":  "Ingredient_Leather_Light",
-                                     "ResourceTypeId":  null,
-                                     "Quantity":  1
-                                 },
-                                 {
-                                     "ItemId":  null,
-                                     "ResourceTypeId":  "Rubble",
-                                     "Quantity":  2
-                                 }
-                             ],
-                   "BenchRequirement":  [
-                                            {
-                                                "Id":  "Arcanebench",
-                                                "Type":  "Crafting",
-                                                "Categories":  [
-                                                                   "Arcane_Armor_Chest"
-                                                               ]
-                                            }
-                                        ]
-               },
-    "Quality":  "Common",
-    "ItemLevel":  30,
-    "Icon":  "Icons/ItemsGenerated/Armor_Wool_Chest.png",
-    "IconProperties":  {
-                           "Rotation":  [
-                                            22.5,
-                                            45,
-                                            22.5
-                                        ],
-                           "Scale":  0.415,
-                           "Translation":  [
-                                               1.5,
-                                               -6.9
-                                           ]
-                       },
-    "Model":  "Items/Armors/Wool/Chest.blockymodel",
-    "Texture":  "Items/Armors/Wool/Chest_Texture.png",
-    "Armor":  {
-                  "ArmorSlot":  "Chest",
-                  "BaseDamageResistance":  0,
-                  "CosmeticsToHide":  [
-                                          "Overtop"
-                                      ],
-                  "DamageResistance":  {
-                                           "Physical":  [
-                                                            {
-                                                                "Amount":  0.09,
-                                                                "CalculationType":  "Multiplicative"
-                                                            }
-                                                        ],
-                                           "Projectile":  [
-                                                              {
-                                                                  "Amount":  0.09,
-                                                                  "CalculationType":  "Multiplicative"
-                                                              }
-                                                          ]
-                                       },
-                  "StatModifiers":  {
-                                        "Health":  [
-                                                       {
-                                                           "Amount":  17,
-                                                           "CalculationType":  "Additive"
-                                                       }
-                                                   ]
-                                    }
-              },
-    "MaxDurability":  100,
-    "DurabilityLossOnHit":  1,
-    "Tags":  {
-                 "Type":  [
-                              "Armor"
-                          ]
-             },
-    "ItemSoundSetId":  "ISS_Armor_Cloth"
+  "TranslationProperties": {
+    "Name": "server.items.Armor_Wool_Chest.name"
+  },
+  "Parent": "Armor_Iron_Chest",
+  "Recipe": {
+    "TimeSeconds": 2,
+    "KnowledgeRequired": false,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Stick",
+        "ResourceTypeId": null,
+        "Quantity": 2
+      },
+      {
+        "ItemId": "Ingredient_Leather_Light",
+        "ResourceTypeId": null,
+        "Quantity": 1
+      },
+      {
+        "ItemId": null,
+        "ResourceTypeId": "Rubble",
+        "Quantity": 2
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Armor_Chest"
+        ]
+      }
+    ]
+  },
+  "Quality": "Common",
+  "ItemLevel": 30,
+  "Icon": "Icons/ItemsGenerated/Armor_Wool_Chest.png",
+  "IconProperties": {
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Scale": 0.415,
+    "Translation": [
+      1.5,
+      -6.9
+    ]
+  },
+  "Model": "Items/Armors/Wool/Chest.blockymodel",
+  "Texture": "Items/Armors/Wool/Chest_Texture.png",
+  "Armor": {
+    "ArmorSlot": "Chest",
+    "BaseDamageResistance": 0,
+    "CosmeticsToHide": [
+      "Overtop"
+    ]
+  },
+  "MaxDurability": 100,
+  "DurabilityLossOnHit": 1,
+  "Tags": {
+    "Type": [
+      "Armor"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Armor_Cloth"
 }

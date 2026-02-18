@@ -60,7 +60,8 @@ public final class ItemStatDisplayFormatter {
         if (decimals <= 0) {
             long rounded = Math.round(value);
             if (enforceMinOneAtIntegerPrecision && rounded == 0L && Math.abs(value) > EPSILON) {
-                rounded = value > 0.0 ? 1L : -1L;
+                // Avoid misleading +1/-1 displays for tiny non-zero values when integer precision is configured.
+                return trimTrailingZeros(String.format(Locale.US, "%+.1f", value));
             }
             return String.format(Locale.US, "%+d", rounded);
         }

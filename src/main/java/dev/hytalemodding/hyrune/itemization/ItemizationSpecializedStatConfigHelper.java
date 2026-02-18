@@ -5,6 +5,7 @@ import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.repair.ItemRarity;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,20 @@ import java.util.Set;
  * Central helper for specialized stat configuration lookups.
  */
 public final class ItemizationSpecializedStatConfigHelper {
+    private static final EnumSet<ItemizedStat> FLAT_MIN_ONE_FLOOR_STATS = EnumSet.of(
+        ItemizedStat.PHYSICAL_DAMAGE,
+        ItemizedStat.PHYSICAL_PENETRATION,
+        ItemizedStat.MAGICAL_PENETRATION,
+        ItemizedStat.PHYSICAL_DEFENCE,
+        ItemizedStat.BLOCK_EFFICIENCY,
+        ItemizedStat.REFLECT_DAMAGE,
+        ItemizedStat.HP_REGEN,
+        ItemizedStat.HEALING_POWER,
+        ItemizedStat.HEALING_CRIT_BONUS,
+        ItemizedStat.MANA_COST_REDUCTION,
+        ItemizedStat.MANA_REGEN
+    );
+
     public enum RollType {
         FLAT,
         PERCENT
@@ -25,6 +40,9 @@ public final class ItemizationSpecializedStatConfigHelper {
         FLAT_ONLY,
         PERCENT_ONLY,
         EITHER
+    }
+
+    public record PercentRollDefinition(double baseMin, double baseMax, double scalingWeight) {
     }
 
     private ItemizationSpecializedStatConfigHelper() {
@@ -38,16 +56,33 @@ public final class ItemizationSpecializedStatConfigHelper {
         return config().flatRollMaxScalar;
     }
 
-    public static double percentRollMin() {
-        return config().percentRollMin;
+    public static double rollStatRarityMultiplier(ItemRarity rarity) {
+        if (rarity == null) {
+            return 1.0;
+        }
+        HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
+        return switch (rarity) {
+            case LEGENDARY -> clamp(cfg.legendaryRollStatMultiplier, 0.0, 10.0);
+            case MYTHIC -> clamp(cfg.mythicRollStatMultiplier, 0.0, 10.0);
+            default -> 1.0;
+        };
     }
 
-    public static double percentRollMax() {
-        return config().percentRollMax;
+    public static double flatRollMinimumFloor(ItemizedStat stat) {
+        if (stat == null) {
+            return 0.0;
+        }
+        return FLAT_MIN_ONE_FLOOR_STATS.contains(stat) ? 1.0 : 0.0;
     }
 
-    public static double percentRollTierInfluence() {
-        return config().percentRollTierInfluence;
+    public static double scaledFlatRollMinimumFloor(ItemizedStat stat, double tierScalar) {
+        double baseFloor = flatRollMinimumFloor(stat);
+        if (baseFloor <= 0.0) {
+            return 0.0;
+        }
+        double effectiveTier = Math.max(1.0, tierScalar);
+        double scaled = baseFloor * (1.0 + ((effectiveTier - 1.0) * 0.35));
+        return Math.max(baseFloor, scaled);
     }
 
     public static double durabilityTierInfluence() {
@@ -285,6 +320,32 @@ public final class ItemizationSpecializedStatConfigHelper {
         return Math.max(0.0001, stat.getFlatReference());
     }
 
+    public static PercentRollDefinition percentRollDefinition(ItemizedStat stat) {
+        HyruneConfig.ItemizationSpecializedStatsConfig cfg = config();
+        double fallbackMin = clamp(cfg.percentRollMin, 0.0001, 10.0);
+        double fallbackMax = clamp(cfg.percentRollMax, 0.0001, 10.0);
+        double fallbackWeight = clamp(cfg.percentRollTierInfluence, 0.0, 5.0);
+
+        if (stat == null || cfg.statDefinitions == null || cfg.statDefinitions.isEmpty()) {
+            return sanitizePercentDefinition(fallbackMin, fallbackMax, fallbackWeight);
+        }
+
+        HyruneConfig.StatDefinitionConfig configured = null;
+        for (Map.Entry<String, HyruneConfig.StatDefinitionConfig> entry : cfg.statDefinitions.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                continue;
+            }
+            if (entry.getKey().trim().equalsIgnoreCase(stat.getId())) {
+                configured = entry.getValue();
+                break;
+            }
+        }
+        if (configured == null) {
+            return sanitizePercentDefinition(fallbackMin, fallbackMax, fallbackWeight);
+        }
+        return sanitizePercentDefinition(configured.baseMin, configured.baseMax, configured.scalingWeight);
+    }
+
     public static double tierScalar(String itemId) {
         if (itemId == null || itemId.isBlank()) {
             return 1.0;
@@ -306,7 +367,10 @@ public final class ItemizationSpecializedStatConfigHelper {
                 best = Math.max(best, raw);
             }
         }
-        return clamp(best, 0.25, 5.0);
+        if (Double.isNaN(best) || Double.isInfinite(best)) {
+            return 1.0;
+        }
+        return Math.max(0.25, best);
     }
 
     public static int uiDisplayFlatDecimals() {
@@ -326,6 +390,18 @@ public final class ItemizationSpecializedStatConfigHelper {
 
     private static int clampInt(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private static PercentRollDefinition sanitizePercentDefinition(double baseMin, double baseMax, double scalingWeight) {
+        double min = clamp(baseMin, 0.0001, 10.0);
+        double max = clamp(baseMax, 0.0001, 10.0);
+        if (max < min) {
+            double t = min;
+            min = max;
+            max = t;
+        }
+        double weight = clamp(scalingWeight, 0.0, 5.0);
+        return new PercentRollDefinition(min, max, weight);
     }
 
     private static HyruneConfig.ItemizationSpecializedStatsConfig config() {

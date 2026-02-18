@@ -61,6 +61,9 @@ public final class ItemRollService {
         double tierScalar = ItemizationSpecializedStatConfigHelper.tierScalar(itemId);
         int statCount = ItemizationSpecializedStatConfigHelper.statsForRarity(rarity);
         RollResults rolled = rollStatPool(itemId, archetype, prefixWord, statCount, random);
+        double flatRarityRollMultiplier = ItemRarityRollModel.rollStatMultiplierFlat(rarity);
+        double percentRarityRollMultiplier = ItemRarityRollModel.rollStatMultiplierPercent(rarity);
+        RollResults scaledRolled = applyRollMultiplier(rolled, flatRarityRollMultiplier, percentRarityRollMultiplier);
 
         ItemInstanceMetadata data = new ItemInstanceMetadata();
         data.setVersion(ItemInstanceMetadata.CURRENT_SCHEMA_VERSION);
@@ -70,8 +73,8 @@ public final class ItemRollService {
         data.setSeed(random.nextLong());
         data.setSocketCapacity(GemSocketConfigHelper.socketsForRarity(rarity));
         data.setSocketedGems(List.of());
-        data.setStatFlatRollsRaw(rolled.flatRolls());
-        data.setStatPercentRollsRaw(rolled.percentRolls());
+        data.setStatFlatRollsRaw(scaledRolled.flatRolls());
+        data.setStatPercentRollsRaw(scaledRolled.percentRolls());
         data.setDroppedPenalty(source == ItemRollSource.DROPPED ? DROPPED_GEAR_STAT_PENALTY : 0d);
 
         if (HyruneConfigManager.getConfig().itemizationDebugLogging) {
@@ -81,9 +84,9 @@ public final class ItemRollService {
                 + ", score=" + scoreSummary(rarityDebug)
                 + ", prefix=" + (data.getPrefixRaw().isBlank() ? "none" : data.getPrefixRaw())
                 + ", arch=" + archetype.getId()
-                + ", rows=" + formatRows(rolled.rowSelections())
-                + ", flat=" + rolled.flatRolls().size()
-                + ", pct=" + rolled.percentRolls().size()
+                + ", rows=" + formatRows(scaledRolled.rowSelections())
+                + ", flat=" + scaledRolled.flatRolls().size()
+                + ", pct=" + scaledRolled.percentRolls().size()
                 + ", tier=" + String.format(Locale.US, "%.3f", tierScalar));
         }
 
@@ -156,7 +159,7 @@ public final class ItemRollService {
             rows.add(new RowSelection(row, targetLane, chosen.getId(), type));
             switch (type) {
                 case FLAT -> flatOut.put(chosen.getId(), rollFlatBonus(itemId, archetype, chosen, random));
-                case PERCENT -> percentOut.put(chosen.getId(), rollPercentBonus(itemId, random));
+                case PERCENT -> percentOut.put(chosen.getId(), rollPercentBonus(itemId, chosen, random));
             }
         }
         return new RollResults(flatOut, percentOut, rows);
@@ -273,17 +276,40 @@ public final class ItemRollService {
         double scalar = randomBetween(minScalar, maxScalar, random);
         double base = ItemizationSpecializedStatConfigHelper.baseValueForArchetypeStat(archetype, stat);
         double tierScalar = ItemizationSpecializedStatConfigHelper.tierScalar(itemId);
-        return round4(base * scalar * tierScalar);
+        double rolled = base * scalar * tierScalar;
+        double scaledFloor = ItemizationSpecializedStatConfigHelper.scaledFlatRollMinimumFloor(stat, tierScalar);
+        rolled = Math.max(scaledFloor, rolled);
+        return round4(rolled);
     }
 
-    private static double rollPercentBonus(String itemId, ThreadLocalRandom random) {
-        double min = ItemizationSpecializedStatConfigHelper.percentRollMin();
-        double max = ItemizationSpecializedStatConfigHelper.percentRollMax();
-        double rolled = randomBetween(min, max, random);
+    private static double rollPercentBonus(String itemId, ItemizedStat stat, ThreadLocalRandom random) {
+        ItemizationSpecializedStatConfigHelper.PercentRollDefinition definition =
+            ItemizationSpecializedStatConfigHelper.percentRollDefinition(stat);
+        double baseRoll = randomBetween(definition.baseMin(), definition.baseMax(), random);
         double tierScalar = ItemizationSpecializedStatConfigHelper.tierScalar(itemId);
-        double tierFactor = 1.0 + ((tierScalar - 1.0) * Math.max(0.0, ItemizationSpecializedStatConfigHelper.percentRollTierInfluence()));
-        rolled *= Math.max(0.10, tierFactor);
+        double rolled = baseRoll * (1.0 + (Math.max(0.0, tierScalar) * definition.scalingWeight()));
         return round4(rolled);
+    }
+
+    private static RollResults applyRollMultiplier(RollResults in, double flatMultiplier, double percentMultiplier) {
+        if (in == null) {
+            return new RollResults(Map.of(), Map.of(), List.of());
+        }
+        if (Math.abs(flatMultiplier - 1.0) < 1e-9 && Math.abs(percentMultiplier - 1.0) < 1e-9) {
+            return in;
+        }
+
+        Map<String, Double> flat = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> entry : in.flatRolls().entrySet()) {
+            flat.put(entry.getKey(), round4(valueOrZero(entry.getValue()) * flatMultiplier));
+        }
+
+        Map<String, Double> pct = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> entry : in.percentRolls().entrySet()) {
+            pct.put(entry.getKey(), round4(valueOrZero(entry.getValue()) * percentMultiplier));
+        }
+
+        return new RollResults(flat, pct, in.rowSelections());
     }
 
     private static double randomBetween(double min, double max, ThreadLocalRandom random) {
@@ -297,6 +323,13 @@ public final class ItemRollService {
 
     private static double round4(double value) {
         return Double.parseDouble(String.format(Locale.US, "%.4f", value));
+    }
+
+    private static double valueOrZero(Double value) {
+        if (value == null || Double.isNaN(value) || Double.isInfinite(value)) {
+            return 0.0;
+        }
+        return value;
     }
 
     private static ItemStack applyDurabilityScaling(ItemStack stack, String itemId, ItemRarity rarity) {

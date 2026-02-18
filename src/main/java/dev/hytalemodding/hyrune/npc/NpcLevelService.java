@@ -2,8 +2,10 @@ package dev.hytalemodding.hyrune.npc;
 
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -11,12 +13,22 @@ import java.util.concurrent.ThreadLocalRandom;
  * Service for npc level.
  */
 public class NpcLevelService {
+    private static final String DEFAULT_ARCHETYPE_ID = "DPS";
+
+    public record NpcCombatStats(double damageMultiplier,
+                                 double defenceReduction,
+                                 double critChance,
+                                 double critMultiplier,
+                                 String archetypeId) {
+    }
 
     private final NpcLevelConfig config;
+    private final Map<String, NpcLevelConfig.NpcArchetypeProfile> archetypeProfilesById;
     private final Random random = new Random();
 
     public NpcLevelService(NpcLevelConfig config) {
-        this.config = config;
+        this.config = config == null ? new NpcLevelConfig() : config;
+        this.archetypeProfilesById = indexProfiles(this.config);
     }
 
     public NpcLevelConfig getConfig() {
@@ -39,7 +51,8 @@ public class NpcLevelService {
 
         int level = rollLevel(config.getDefaultLevel(), config.getDefaultVariance());
         CombatStyle weakness = CombatStyle.fromString(config.getDefaultWeakness(), CombatStyle.MELEE);
-        return new NpcLevelComponent(level, "default", weakness, false, baseName);
+        String archetypeId = normalizeArchetypeOrDefault(config.getDefaultArchetype());
+        return new NpcLevelComponent(level, "default", weakness, archetypeId, false, baseName);
     }
 
     public int getCombatLevel(int level) {
@@ -61,6 +74,49 @@ public class NpcLevelService {
 
     public CombatStyle resolveWeakness(String weakness) {
         return CombatStyle.fromString(weakness, CombatStyle.MELEE);
+    }
+
+    public NpcCombatStats resolveCombatStats(NpcLevelComponent component, CombatStyle style) {
+        CombatStyle resolvedStyle = style == null ? CombatStyle.MELEE : style;
+        String archetypeId = component == null
+            ? normalizeArchetypeOrDefault(config.getDefaultArchetype())
+            : normalizeArchetypeOrDefault(component.getArchetypeId());
+        NpcLevelConfig.NpcArchetypeProfile profile = resolveArchetypeProfile(archetypeId);
+        int level = component == null ? 1 : Math.max(1, Math.min(99, component.getLevel()));
+
+        double styleBias = switch (resolvedStyle) {
+            case RANGED -> clamp(profile.getRangedBias(), 0.10, 5.0);
+            case MAGIC -> clamp(profile.getMagicBias(), 0.10, 5.0);
+            case MELEE -> clamp(profile.getMeleeBias(), 0.10, 5.0);
+        };
+        double damageMultiplier = clamp(
+            (profile.getBaseDamage() + (level * profile.getDamagePerLevel())) * styleBias,
+            0.10,
+            25.0
+        );
+        double defenceReduction = clamp(
+            profile.getBaseDefenceReduction() + (level * profile.getDefencePerLevel()),
+            0.0,
+            Math.max(0.0, profile.getDefenceCap())
+        );
+        double critChance = clamp(
+            profile.getBaseCritChance() + (level * profile.getCritChancePerLevel()),
+            0.0,
+            Math.max(0.0, profile.getCritChanceCap())
+        );
+        double critMultiplier = clamp(
+            profile.getBaseCritMultiplier() + (level * profile.getCritMultiplierPerLevel()),
+            1.0,
+            Math.max(1.0, profile.getCritMultiplierCap())
+        );
+
+        return new NpcCombatStats(
+            damageMultiplier,
+            defenceReduction,
+            critChance,
+            critMultiplier,
+            archetypeId
+        );
     }
 
     public boolean isNpc(NPCEntity npc) {
@@ -87,28 +143,27 @@ public class NpcLevelService {
         int level = rollLevel(group.getBaseLevel(), group.getVariance());
         CombatStyle weakness = CombatStyle.fromString(group.getWeakness(), CombatStyle.MELEE);
         String groupId = group.getId() != null ? group.getId() : "group";
-        return new NpcLevelComponent(level, groupId, weakness, group.isElite(), baseName);
+        String archetypeId = normalizeArchetypeOrDefault(group.getArchetype());
+        return new NpcLevelComponent(level, groupId, weakness, archetypeId, group.isElite(), baseName);
     }
 
     private NpcLevelComponent buildFromOverride(NpcLevelConfig.NpcLevelOverride override, String baseName) {
         int level = rollLevel(override.getLevel(), override.getVariance());
         CombatStyle weakness = CombatStyle.fromString(override.getWeakness(), CombatStyle.MELEE);
         String groupId = override.getTypeId() != null ? override.getTypeId() : "override";
-        return new NpcLevelComponent(level, groupId, weakness, override.isElite(), baseName);
+        String archetypeId = normalizeArchetypeOrDefault(override.getArchetype());
+        return new NpcLevelComponent(level, groupId, weakness, archetypeId, override.isElite(), baseName);
     }
 
     private int rollLevel(int baseLevel, int variance) {
-        int clampedVariance = Math.min(Math.max(variance, 0), 2);
-        int min = baseLevel - clampedVariance;
-        int max = baseLevel + clampedVariance;
-        int level = min + random.nextInt(max - min + 1);
-        if (level < 1) {
-            level = 1;
+        int clampedBaseLevel = Math.max(1, Math.min(99, baseLevel));
+        int clampedVariance = Math.max(0, variance);
+        int min = Math.max(1, clampedBaseLevel - clampedVariance);
+        int max = Math.min(99, clampedBaseLevel + clampedVariance);
+        if (max < min) {
+            max = min;
         }
-        if (level > 99) {
-            level = 99;
-        }
-        return level;
+        return min + random.nextInt(max - min + 1);
     }
 
     private NpcLevelConfig.NpcLevelOverride findOverride(String npcTypeId) {
@@ -117,7 +172,7 @@ public class NpcLevelService {
         }
         String normalized = npcTypeId.toLowerCase(Locale.ROOT);
         for (NpcLevelConfig.NpcLevelOverride override : config.getOverrides()) {
-            if (override.getTypeId() == null) {
+            if (override == null || override.getTypeId() == null) {
                 continue;
             }
             if (override.getTypeId().toLowerCase(Locale.ROOT).equals(normalized)) {
@@ -161,18 +216,27 @@ public class NpcLevelService {
         }
         return false;
     }
+
     /**
      * Returns a random NPC ID from the specified group ID.
      * Returns null if group doesn't exist or is empty.
      */
     public String getRandomIdFromGroup(String groupId) {
+        if (groupId == null || groupId.isBlank()) {
+            return null;
+        }
         for (NpcLevelConfig.NpcLevelGroup group : config.getGroups()) {
-            if (group.getId().equalsIgnoreCase(groupId)) {
-                List<String> contains = group.getMatch().getContains();
-                if (contains == null || contains.isEmpty()) return null;
-
-                return contains.get(ThreadLocalRandom.current().nextInt(contains.size()));
+            if (group == null || group.getId() == null || group.getMatch() == null) {
+                continue;
             }
+            if (!group.getId().equalsIgnoreCase(groupId)) {
+                continue;
+            }
+            List<String> contains = group.getMatch().getContains();
+            if (contains == null || contains.isEmpty()) {
+                return null;
+            }
+            return contains.get(ThreadLocalRandom.current().nextInt(contains.size()));
         }
         return null;
     }
@@ -203,5 +267,67 @@ public class NpcLevelService {
             }
         }
         return false;
+    }
+
+    private NpcLevelConfig.NpcArchetypeProfile resolveArchetypeProfile(String archetypeId) {
+        String normalized = normalizeArchetype(archetypeId);
+        NpcLevelConfig.NpcArchetypeProfile profile = archetypeProfilesById.get(normalized);
+        if (profile != null) {
+            return profile;
+        }
+
+        profile = archetypeProfilesById.get(normalizeArchetype(config.getDefaultArchetype()));
+        if (profile != null) {
+            return profile;
+        }
+
+        profile = archetypeProfilesById.get(DEFAULT_ARCHETYPE_ID);
+        if (profile != null) {
+            return profile;
+        }
+
+        return new NpcLevelConfig.NpcArchetypeProfile();
+    }
+
+    private String normalizeArchetypeOrDefault(String archetypeId) {
+        String normalized = normalizeArchetype(archetypeId);
+        if (archetypeProfilesById.containsKey(normalized)) {
+            return normalized;
+        }
+        String configuredDefault = normalizeArchetype(config.getDefaultArchetype());
+        if (archetypeProfilesById.containsKey(configuredDefault)) {
+            return configuredDefault;
+        }
+        return DEFAULT_ARCHETYPE_ID;
+    }
+
+    private static String normalizeArchetype(String archetypeId) {
+        if (archetypeId == null || archetypeId.isBlank()) {
+            return DEFAULT_ARCHETYPE_ID;
+        }
+        return archetypeId.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private static Map<String, NpcLevelConfig.NpcArchetypeProfile> indexProfiles(NpcLevelConfig config) {
+        Map<String, NpcLevelConfig.NpcArchetypeProfile> out = new LinkedHashMap<>();
+        if (config != null && config.getArchetypeProfiles() != null) {
+            for (NpcLevelConfig.NpcArchetypeProfile profile : config.getArchetypeProfiles()) {
+                if (profile == null) {
+                    continue;
+                }
+                String key = normalizeArchetype(profile.getId());
+                out.put(key, profile);
+            }
+        }
+        if (!out.containsKey(DEFAULT_ARCHETYPE_ID)) {
+            NpcLevelConfig.NpcArchetypeProfile fallback = new NpcLevelConfig.NpcArchetypeProfile();
+            fallback.setId(DEFAULT_ARCHETYPE_ID);
+            out.put(DEFAULT_ARCHETYPE_ID, fallback);
+        }
+        return out;
+    }
+
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
