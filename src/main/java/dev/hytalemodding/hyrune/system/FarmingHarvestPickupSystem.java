@@ -5,16 +5,20 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
+import com.hypixel.hytale.server.core.entity.ItemUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.InteractivelyPickupItemEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.hytalemodding.hyrune.itemization.GatheringUtilityDropService;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * ECS system for farming harvest pickup.
@@ -74,6 +78,12 @@ import java.util.Locale;
             return;
         }
 
+        var stats = PlayerItemizationStatsService.getOrRecompute(player);
+        if (GatheringUtilityDropService.shouldDoubleDropForGathering(stats.getItemDoubleDropChanceBonus(), ThreadLocalRandom.current())) {
+            itemStack = itemStack.withQuantity(GatheringUtilityDropService.doubledQuantity(itemStack.getQuantity()));
+            event.setItemStack(itemStack);
+        }
+
         long xp = reward.xp;
         if (itemStack.getQuantity() > 1) {
             xp *= itemStack.getQuantity();
@@ -83,6 +93,16 @@ import java.util.Locale;
         }
 
         service.addSkillXp(playerRef.getUuid(), SkillType.FARMING, xp);
+
+        if (playerRef.getReference() == null) {
+            return;
+        }
+        for (ItemStack rare : GatheringUtilityDropService.resolveRareDrops(SkillType.FARMING, stats, ThreadLocalRandom.current())) {
+            if (rare == null || rare.isEmpty()) {
+                continue;
+            }
+            ItemUtils.dropItem(playerRef.getReference(), rare, store);
+        }
     }
 
     private static boolean isHoldingSickle(Player player) {

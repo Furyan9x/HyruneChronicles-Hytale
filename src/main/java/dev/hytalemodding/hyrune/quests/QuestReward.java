@@ -1,7 +1,17 @@
 package dev.hytalemodding.hyrune.quests;
 
+import com.hypixel.hytale.server.core.entity.ItemUtils;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
+import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import com.hypixel.hytale.logger.HytaleLogger;
+import dev.hytalemodding.hyrune.itemization.ItemGenerationService;
+import dev.hytalemodding.hyrune.itemization.ItemRarityRollModel;
+import dev.hytalemodding.hyrune.itemization.ItemRollSource;
 
 import java.util.logging.Level;
 
@@ -63,8 +73,50 @@ public abstract class QuestReward {
         
         @Override
         public void grant(java.util.UUID playerId) {
-            // TODO: Implement item granting through inventory system
-            LOGGER.at(Level.INFO).log("Granting " + count + "x " + itemId + " to player " + playerId);
+            if (playerId == null || itemId == null || itemId.isBlank() || count <= 0) {
+                return;
+            }
+
+            PlayerRef playerRef = Universe.get().getPlayer(playerId);
+            if (playerRef == null || playerRef.getReference() == null) {
+                LOGGER.at(Level.INFO).log("Skipping item reward for offline player " + playerId + ": " + count + "x " + itemId);
+                return;
+            }
+
+            var entityRef = playerRef.getReference();
+            var store = entityRef.getStore();
+            if (store == null) {
+                return;
+            }
+
+            Player player = store.getComponent(entityRef, Player.getComponentType());
+            if (player == null) {
+                return;
+            }
+
+            Inventory inventory = player.getInventory();
+            if (inventory == null) {
+                return;
+            }
+
+            ItemContainer container = inventory.getCombinedHotbarFirst();
+            if (container == null) {
+                return;
+            }
+
+            ItemStack reward = ItemGenerationService.rollIfEligible(
+                new ItemStack(itemId, count),
+                ItemRollSource.QUEST_REWARD,
+                ItemRarityRollModel.GenerationContext.of("quest_reward_item")
+            );
+
+            var tx = container.addItemStack(reward);
+            ItemStack remainder = tx == null ? reward : tx.getRemainder();
+            if (remainder != null && !remainder.isEmpty()) {
+                ItemUtils.dropItem(entityRef, remainder, store);
+            }
+
+            LOGGER.at(Level.INFO).log("Granted " + count + "x " + itemId + " to player " + playerId);
         }
         
         public String getItemId() { return itemId; }

@@ -24,6 +24,8 @@ public class HyruneSystems {
         registry.registerSystem(new CombatStateSystem());
         registry.registerSystem(new SkillCombatBonusSystem());
         registry.registerSystem(new CombatXpSystem(slayerService));
+        registry.registerSystem(new MonsterDropGenerationOnDeathSystem());
+        registry.registerSystem(new ContainerOpenItemGenerationSystem());
         registry.registerSystem(new SkillRegenSystem());
 
         // Profession XP & Logic

@@ -49,7 +49,12 @@ import com.hypixel.hytale.server.core.util.TargetUtil;
 import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.component.FishingBobberComponent;
 import dev.hytalemodding.hyrune.component.FishingMetaData;
+import dev.hytalemodding.hyrune.itemization.GatheringUtilityDropService;
+import dev.hytalemodding.hyrune.itemization.ItemGenerationService;
 import dev.hytalemodding.hyrune.level.LevelingService;
+import dev.hytalemodding.hyrune.itemization.ItemRarityRollModel;
+import dev.hytalemodding.hyrune.itemization.ItemRollSource;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.registry.FishingRegistry;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.system.FishingCastSystem;
@@ -57,6 +62,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 // Handles casting and reeling for the fishing rod interaction.
 /**
@@ -119,7 +125,7 @@ public class FishingInteraction extends SimpleInstantInteraction {
             ? held.getFromMetadataOrNull(FishingMetaData.KEY, FishingMetaData.CODEC)
             : null;
         if (metaData != null && metaData.getBoundBobber() != null) {
-            handleReel(playerRef, inventory, metaData, commandBuffer, world);
+            handleReel(playerRef, player, inventory, metaData, commandBuffer, world);
             return;
         }
 
@@ -176,6 +182,7 @@ public class FishingInteraction extends SimpleInstantInteraction {
 
     // Reels the bobber and awards a catch if the bite window is active.
     private static void handleReel(PlayerRef playerRef,
+                                   Player player,
                                    Inventory inventory,
                                    FishingMetaData metaData,
                                    CommandBuffer<EntityStore> commandBuffer,
@@ -218,7 +225,15 @@ public class FishingInteraction extends SimpleInstantInteraction {
 
         TransformComponent bobberTransform = commandBuffer.getComponent(bobberRef, TransformComponent.getComponentType());
         Vector3d catchPos = bobberTransform != null ? bobberTransform.getPosition() : null;
-        ItemStack caught = new ItemStack(fish.itemId, 1);
+        ItemStack caught = ItemGenerationService.rollIfEligible(
+            new ItemStack(fish.itemId, 1),
+            ItemRollSource.FISHING,
+            ItemRarityRollModel.GenerationContext.of("fishing_catch")
+        );
+        var itemStats = PlayerItemizationStatsService.getOrRecompute(player);
+        if (GatheringUtilityDropService.shouldDoubleDropForGathering(itemStats.getItemDoubleDropChanceBonus(), ThreadLocalRandom.current())) {
+            caught = caught.withQuantity(GatheringUtilityDropService.doubledQuantity(caught.getQuantity()));
+        }
         if (playerRef.getReference() != null) {
             com.hypixel.hytale.server.core.entity.ItemUtils.interactivelyPickupItem(
                 playerRef.getReference(),
@@ -226,6 +241,17 @@ public class FishingInteraction extends SimpleInstantInteraction {
                 catchPos,
                 commandBuffer
             );
+            for (ItemStack rare : GatheringUtilityDropService.resolveRareDrops(SkillType.FISHING, itemStats, ThreadLocalRandom.current())) {
+                if (rare == null || rare.isEmpty()) {
+                    continue;
+                }
+                com.hypixel.hytale.server.core.entity.ItemUtils.interactivelyPickupItem(
+                    playerRef.getReference(),
+                    rare,
+                    catchPos,
+                    commandBuffer
+                );
+            }
         }
 
         service.addSkillXp(playerRef.getUuid(), SkillType.FISHING, fish.xp);

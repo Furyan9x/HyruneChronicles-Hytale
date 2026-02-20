@@ -1,0 +1,47 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 58, Left: 0, Right: 0);
+  Background: #0b2233(0.55);
+  Padding: (Left: 8, Right: 8, Top: 6, Bottom: 6);
+
+  Group {
+    Anchor: (Width: 44, Height: 44);
+    Background: #132d43(0.9);
+    Padding: (Left: 3, Top: 3, Right: 3, Bottom: 3);
+    ItemIcon #EntryIcon { Anchor: (Width: 38, Height: 38); }
+  }
+
+  Group { Anchor: (Width: 8); }
+
+  Group {
+    LayoutMode: Top;
+    FlexWeight: 1;
+    Anchor: (Height: 44);
+
+    Label #EntryName {
+      Text: "Item Name";
+      Anchor: (Height: 20, Left: 0, Right: 0);
+      Style: (FontSize: 13, TextColor: #f7e9cd, VerticalAlignment: Center);
+    }
+
+    Label #EntrySub {
+      Text: "Details";
+      Anchor: (Height: 18, Left: 0, Right: 0);
+      Style: (FontSize: 11, TextColor: #b7c7d8, VerticalAlignment: Center);
+    }
+  }
+
+  Group { Anchor: (Width: 8); }
+
+  Group {
+    LayoutMode: Center;
+    Anchor: (Width: 118, Height: 44);
+    TextButton #EntryButton {
+      Anchor: (Width: 106, Height: 28);
+      Text: "Select";
+      Style: $C.@DefaultTextButtonStyle;
+    }
+  }
+}

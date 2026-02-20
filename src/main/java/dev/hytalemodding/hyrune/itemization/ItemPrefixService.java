@@ -22,6 +22,9 @@ public final class ItemPrefixService {
         "raven", "cindercloth", "shadoweave", "doomed", "ancient", "runic",
         "frost", "bone", "tribal", "void"
     ));
+    private static final Set<String> TYPE_TOKENS_TO_SUFFIX = new HashSet<>(Set.of(
+        "shortbow", "longbow", "crossbow", "bow", "blowgun", "dart"
+    ));
 
     private ItemPrefixService() {
     }
@@ -42,7 +45,7 @@ public final class ItemPrefixService {
             return base;
         }
 
-        String[] words = base.split("\\s+");
+        String[] words = reorderLeadingTypeSuffixIfNeeded(base.split("\\s+"));
         int tierIndex = findTierIndex(words);
         if (tierIndex >= 0 && words.length >= 2) {
             String tier = words[tierIndex];
@@ -64,6 +67,19 @@ public final class ItemPrefixService {
         }
 
         return words[0] + " " + prefixWord.trim() + " " + String.join(" ", Arrays.copyOfRange(words, 1, words.length));
+    }
+
+    private static String[] reorderLeadingTypeSuffixIfNeeded(String[] words) {
+        if (words == null || words.length < 2) {
+            return words == null ? new String[0] : words;
+        }
+        String first = words[0];
+        if (first == null || !TYPE_TOKENS_TO_SUFFIX.contains(first.toLowerCase(Locale.ROOT))) {
+            return words;
+        }
+        String[] reordered = Arrays.copyOfRange(words, 1, words.length + 1);
+        reordered[reordered.length - 1] = first;
+        return reordered;
     }
 
     private static String baseDisplayName(String itemId) {
@@ -119,4 +135,3 @@ public final class ItemPrefixService {
         }
     }
 }
-

@@ -53,6 +53,12 @@
   "Armor": {
     "ArmorSlot": "Chest",
     "BaseDamageResistance": 0,
+    "DamageResistance": {},
+    "DamageEnhancement": {},
+    "StatModifiers": {},
+    "Regenerating": {},
+    "KnockbackResistances": {},
+    "KnockbackEnhancements": {},
     "CosmeticsToHide": [
       "Overtop"
     ]

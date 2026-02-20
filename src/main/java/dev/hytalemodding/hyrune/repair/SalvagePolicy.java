@@ -1,5 +1,7 @@
 package dev.hytalemodding.hyrune.repair;
 
+import com.hypixel.hytale.server.core.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,5 +36,14 @@ public final class SalvagePolicy {
             returns.add(new RepairMaterialCost(cost.getItemId(), quantity));
         }
         return returns;
+    }
+
+    public static List<RepairMaterialCost> estimateSalvageReturns(ItemStack stack, ItemRarity rarity, int benchTier) {
+        if (stack == null || stack.isEmpty() || stack.getItemId() == null) {
+            return Collections.emptyList();
+        }
+        RepairProfile profile = RepairProfileRegistry.resolve(stack.getItemId());
+        List<RepairMaterialCost> fullBuildCosts = profile.buildCosts(1.0, rarity);
+        return estimateSalvageReturns(fullBuildCosts, benchTier);
     }
 }

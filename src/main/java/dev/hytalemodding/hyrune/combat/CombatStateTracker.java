@@ -30,6 +30,11 @@ public final class CombatStateTracker {
         if (last == null) {
             return false;
         }
-        return System.currentTimeMillis() - last < COMBAT_GRACE_MS;
+        long elapsed = System.currentTimeMillis() - last;
+        if (elapsed < COMBAT_GRACE_MS) {
+            return true;
+        }
+        LAST_COMBAT.remove(uuid, last);
+        return false;
     }
 }

@@ -102,6 +102,68 @@ public final class GemSocketApplicationService {
         return out;
     }
 
+    public static Result removeAllGemsAndDestroySlot(Inventory inventory, short targetSlot, String removerItemId) {
+        if (inventory == null) {
+            return Result.fail("Inventory is unavailable.");
+        }
+        ItemContainer container = inventory.getCombinedEverything();
+        if (container == null) {
+            return Result.fail("Inventory container is unavailable.");
+        }
+        if (targetSlot < 0 || targetSlot >= container.getCapacity()) {
+            return Result.fail("Invalid receiver slot.");
+        }
+        if (removerItemId == null || removerItemId.isBlank()) {
+            return Result.fail("Gem remover item is missing.");
+        }
+
+        ItemStack receiver = container.getItemStack(targetSlot);
+        if (receiver == null || receiver.isEmpty() || receiver.getItemId() == null) {
+            return Result.fail("No receiver item selected.");
+        }
+        ItemInstanceMetadata metadata = receiver.getFromMetadataOrNull(ItemInstanceMetadata.KEYED_CODEC);
+        if (metadata == null) {
+            return Result.fail("Receiver item has no socket metadata.");
+        }
+        metadata = ItemInstanceMetadataMigration.migrateToCurrent(metadata);
+        List<String> socketedGems = metadata.getSocketedGems();
+        if (socketedGems.isEmpty()) {
+            return Result.fail("Selected item has no socketed gems to remove.");
+        }
+
+        for (String gemItemId : socketedGems) {
+            ItemStack gemStack = new ItemStack(gemItemId, 1);
+            if (!container.canAddItemStack(gemStack)) {
+                return Result.fail("Not enough inventory space to recover socketed gems.");
+            }
+        }
+
+        var removerTx = container.removeItemStack(new ItemStack(removerItemId.trim(), 1));
+        if (removerTx == null || !removerTx.succeeded()) {
+            return Result.fail("You need 1x " + removerItemId.trim() + " to remove gems.");
+        }
+
+        var removeReceiverTx = container.removeItemStackFromSlot(targetSlot);
+        if (removeReceiverTx == null || !removeReceiverTx.succeeded()) {
+            return Result.fail("Unable to remove the selected item.");
+        }
+
+        int recovered = 0;
+        for (String gemItemId : socketedGems) {
+            var addTx = container.addItemStack(new ItemStack(gemItemId, 1));
+            if (addTx == null || !addTx.succeeded() || (addTx.getRemainder() != null && !addTx.getRemainder().isEmpty())) {
+                return Result.fail("Failed to return one or more gems to inventory.");
+            }
+            recovered++;
+        }
+
+        return Result.success(
+            "The socketing ritual cracked the host item. "
+                + recovered
+                + " gem(s) were recovered, but the item was destroyed."
+        );
+    }
+
     public record ReceiverEntry(short slot, ItemStack stack, ItemInstanceMetadata metadata) {
     }
 

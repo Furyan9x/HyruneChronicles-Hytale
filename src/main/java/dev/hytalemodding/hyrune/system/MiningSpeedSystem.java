@@ -70,8 +70,14 @@ public class MiningSpeedSystem extends EntityEventSystem<EntityStore, DamageBloc
         }
 
         double itemBonus = PlayerItemizationStatsService.getCached(uuidComponent.getUuid()).getItemBlockBreakSpeedBonus();
-        float multiplier = (1.0f + (level * MINING_DAMAGE_PER_LEVEL)) * (float) (1.0 + itemBonus);
+        float multiplier = computeMiningDamageMultiplier(level, itemBonus);
         event.setDamage(event.getDamage() * multiplier);
+    }
+
+    public static float computeMiningDamageMultiplier(int miningLevel, double itemBlockBreakBonus) {
+        int clampedLevel = Math.max(0, miningLevel);
+        double clampedItemBonus = Math.max(0.0, itemBlockBreakBonus);
+        return (1.0f + (clampedLevel * MINING_DAMAGE_PER_LEVEL)) * (float) (1.0 + clampedItemBonus);
     }
 
 }

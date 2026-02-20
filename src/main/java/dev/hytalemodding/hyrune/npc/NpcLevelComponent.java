@@ -11,6 +11,7 @@ public class NpcLevelComponent implements Component<EntityStore> {
     private String groupId;
     private CombatStyle weakness;
     private String archetypeId;
+    private String rankId = NpcRank.NORMAL.name();
     private boolean elite;
     private String baseName;
     private String lastDisplayKey;
@@ -22,14 +23,25 @@ public class NpcLevelComponent implements Component<EntityStore> {
                              String groupId,
                              CombatStyle weakness,
                              String archetypeId,
+                             String rankId,
                              boolean elite,
                              String baseName) {
         this.level = level;
         this.groupId = groupId;
         this.weakness = weakness;
         this.archetypeId = archetypeId;
+        this.rankId = rankId;
         this.elite = elite;
         this.baseName = baseName;
+    }
+
+    public NpcLevelComponent(int level,
+                             String groupId,
+                             CombatStyle weakness,
+                             String archetypeId,
+                             boolean elite,
+                             String baseName) {
+        this(level, groupId, weakness, archetypeId, NpcRank.NORMAL.name(), elite, baseName);
     }
 
     public int getLevel() {
@@ -72,6 +84,14 @@ public class NpcLevelComponent implements Component<EntityStore> {
         this.elite = elite;
     }
 
+    public String getRankId() {
+        return rankId;
+    }
+
+    public void setRankId(String rankId) {
+        this.rankId = rankId;
+    }
+
     public String getBaseName() {
         return baseName;
     }
@@ -91,7 +111,7 @@ public class NpcLevelComponent implements Component<EntityStore> {
 
     @Override
     public NpcLevelComponent clone() {
-        NpcLevelComponent cloned = new NpcLevelComponent(level, groupId, weakness, archetypeId, elite, baseName);
+        NpcLevelComponent cloned = new NpcLevelComponent(level, groupId, weakness, archetypeId, rankId, elite, baseName);
         cloned.setLastDisplayKey(lastDisplayKey);
         return cloned;
     }

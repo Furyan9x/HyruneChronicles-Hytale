@@ -10,8 +10,10 @@ import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.farming.FarmingData;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.farming.FarmingStageData;
+import com.hypixel.hytale.server.core.entity.ItemUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
@@ -20,6 +22,8 @@ import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import dev.hytalemodding.hyrune.itemization.GatheringUtilityDropService;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.registry.ToolRequirementRegistry;
@@ -29,6 +33,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * ECS system for gathering xp.
@@ -171,6 +176,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
                 return;
             }
             LevelingService.get().addSkillXp(playerRef.getUuid(), SkillType.MINING, miningReward.xp);
+            applyGatheringUtilityDrops(store, player, playerRef, SkillType.MINING, blockType);
             return;
         }
 
@@ -186,6 +192,7 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
                 return;
             }
             LevelingService.get().addSkillXp(playerRef.getUuid(), SkillType.WOODCUTTING, woodcuttingReward.xp);
+            applyGatheringUtilityDrops(store, player, playerRef, SkillType.WOODCUTTING, blockType);
             return;
         }
 
@@ -206,6 +213,30 @@ public class GatheringXpSystem extends EntityEventSystem<EntityStore, BreakBlock
                 xp = Math.round(xp * 1.25);
             }
             LevelingService.get().addSkillXp(playerRef.getUuid(), SkillType.FARMING, xp);
+        }
+    }
+
+    private static void applyGatheringUtilityDrops(@Nonnull Store<EntityStore> store,
+                                                   @Nonnull Player player,
+                                                   @Nonnull PlayerRef playerRef,
+                                                   @Nonnull SkillType skill,
+                                                   @Nonnull BlockType blockType) {
+        if (playerRef.getReference() == null) {
+            return;
+        }
+
+        var stats = PlayerItemizationStatsService.getOrRecompute(player);
+        var bonusDrops = GatheringUtilityDropService.resolveBlockUtilityDrops(
+            skill,
+            blockType,
+            stats,
+            ThreadLocalRandom.current()
+        );
+        for (ItemStack drop : bonusDrops) {
+            if (drop == null || drop.isEmpty()) {
+                continue;
+            }
+            ItemUtils.dropItem(playerRef.getReference(), drop, store);
         }
     }
 

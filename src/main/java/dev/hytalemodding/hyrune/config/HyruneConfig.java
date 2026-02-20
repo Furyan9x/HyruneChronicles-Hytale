@@ -8,6 +8,8 @@ import java.util.Map;
  * Runtime config for Hyrune gameplay switches and requirement maps.
  */
 public class HyruneConfig {
+    public int configSchemaVersion = 2;
+
     public static class RarityScalarConfig {
         public double common = 1.00;
         public double uncommon = 1.10;
@@ -71,6 +73,15 @@ public class HyruneConfig {
         public Map<String, Map<String, Map<String, Double>>> bonusesByGemPatternAndArchetype = defaultGemBonusesByPatternAndArchetype();
     }
 
+    public static class RegenConfig {
+        public double playerHealthRegenPerConstitution = 20.0 / 99.0;
+        public double playerHealthRegenCapPerSecond = 20.0;
+        public double npcHealthRegenPerLevel = 20.0 / 99.0;
+        public double npcHealthRegenCapPerSecond = 20.0;
+        public double bossHealthRegenPerLevel = 1000.0 / 99.0;
+        public double bossHealthRegenCapPerSecond = 1000.0;
+    }
+
     public static class RarityWeights {
         public double common = 0.700;
         public double uncommon = 0.180;
@@ -90,6 +101,24 @@ public class HyruneConfig {
         public int maxProfessionLevel = 99;
     }
 
+    public static class GatheringRareDropEntry {
+        public String itemId = "";
+        public int minQuantity = 1;
+        public int maxQuantity = 1;
+        public double weight = 1.0;
+    }
+
+    public static class GatheringRareDropSkillConfig {
+        public double baseChance = 0.0;
+        public List<GatheringRareDropEntry> drops = List.of();
+    }
+
+    public static class GatheringUtilityDropConfig {
+        public boolean enableDoubleDrops = true;
+        public boolean enableRareDrops = true;
+        public Map<String, GatheringRareDropSkillConfig> rareDropsBySkill = defaultGatheringRareDropsBySkill();
+    }
+
     public boolean durabilityDebugLogging = true;
     public boolean itemizationDebugLogging = true;
     public boolean enableDynamicItemTooltips = true;
@@ -105,6 +134,8 @@ public class HyruneConfig {
     public Map<String, Integer> farmingSeedLevelRequirements = defaultSeedRequirements();
     public Map<String, Integer> farmingAnimalLevelRequirements = defaultAnimalRequirements();
     public Map<String, String> npcNameOverrides = new LinkedHashMap<>();
+    public RegenConfig regen = new RegenConfig();
+    public GatheringUtilityDropConfig gatheringUtilityDrops = new GatheringUtilityDropConfig();
     public PrefixConfig prefixes = new PrefixConfig();
     public GemSocketConfig gemSockets = new GemSocketConfig();
 
@@ -130,6 +161,7 @@ public class HyruneConfig {
 
     private static List<String> defaultItemizationExcludedPrefixes() {
         return List.of(
+            "weapon_arrow_",
             "weapon_bomb_",
             "weapon_grenade_",
             "weapon_poison_flask_",
@@ -161,6 +193,21 @@ public class HyruneConfig {
         dropped.legendary = 0.006;
         dropped.mythic = 0.001;
         defaults.put("dropped", dropped);
+        defaults.put("monster_drop", dropped);
+        defaults.put("container_loot", dropped);
+        defaults.put("quest_reward", dropped);
+        defaults.put("slayer_shop", dropped);
+        defaults.put("fishing", dropped);
+        defaults.put("world_pickup", dropped);
+
+        RarityWeights starterKit = new RarityWeights();
+        starterKit.common = 1.000;
+        starterKit.uncommon = 0.000;
+        starterKit.rare = 0.000;
+        starterKit.epic = 0.000;
+        starterKit.legendary = 0.000;
+        starterKit.mythic = 0.000;
+        defaults.put("starter_kit", starterKit);
         return defaults;
     }
 
@@ -184,6 +231,19 @@ public class HyruneConfig {
         defaults.put(5, 0.32);
         defaults.put(6, 0.40);
         return defaults;
+    }
+
+    private static Map<String, GatheringRareDropSkillConfig> defaultGatheringRareDropsBySkill() {
+        Map<String, GatheringRareDropSkillConfig> defaults = new LinkedHashMap<>();
+        defaults.put("MINING", rareSkillDefaults());
+        defaults.put("WOODCUTTING", rareSkillDefaults());
+        defaults.put("FISHING", rareSkillDefaults());
+        defaults.put("FARMING", rareSkillDefaults());
+        return defaults;
+    }
+
+    private static GatheringRareDropSkillConfig rareSkillDefaults() {
+        return new GatheringRareDropSkillConfig();
     }
 
     private static Map<String, Integer> defaultStatsPerRarity() {
@@ -229,8 +289,7 @@ public class HyruneConfig {
             "Squall",
             "Zephyr",
             "Stone",
-            "Crag",
-            "Root"
+            "Crag"
         );
     }
 
@@ -248,74 +307,74 @@ public class HyruneConfig {
     private static Map<String, Map<String, Map<String, Double>>> defaultGemBonusesByPatternAndArchetype() {
         Map<String, Map<String, Map<String, Double>>> out = new LinkedHashMap<>();
         out.put("Rock_Gem_Ruby", archetypeBonusMap(
-            "weapon_melee", statMap("physical_damage", 1.25),
-            "weapon_ranged", statMap("physical_damage", 1.10),
-            "weapon_magic", statMap("crit_bonus", 0.02),
-            "armor_heavy", statMap("max_hp", 1.25),
-            "armor_light", statMap("attack_speed", 0.01),
-            "armor_magic", statMap("healing_power", 0.03),
-            "tool", statMap("block_break_speed", 0.02),
-            "generic", statMap("max_hp", 1.0)
+            "weapon_melee", statMap("physical_damage", 1.00),
+            "weapon_ranged", statMap("physical_damage", 0.85),
+            "weapon_magic", statMap("crit_bonus", 0.012),
+            "armor_heavy", statMap("max_hp", 1.20),
+            "armor_light", statMap("attack_speed", 0.007),
+            "armor_magic", statMap("healing_power", 0.020),
+            "tool", statMap("block_break_speed", 0.010),
+            "generic", statMap("max_hp", 0.75)
         ));
         out.put("Rock_Gem_Sapphire", archetypeBonusMap(
-            "weapon_melee", statMap("physical_crit_chance", 0.01),
-            "weapon_ranged", statMap("physical_crit_chance", 0.012),
-            "weapon_magic", statMap("magical_damage", 1.20),
-            "armor_heavy", statMap("magical_defence", 0.9),
-            "armor_light", statMap("movement_speed", 0.01),
-            "armor_magic", statMap("mana_regen", 0.02),
-            "tool", statMap("rare_drop_chance", 0.01),
-            "generic", statMap("mana_regen", 0.01)
+            "weapon_melee", statMap("physical_crit_chance", 0.008),
+            "weapon_ranged", statMap("physical_crit_chance", 0.010),
+            "weapon_magic", statMap("magical_damage", 1.00),
+            "armor_heavy", statMap("magical_defence", 0.75),
+            "armor_light", statMap("movement_speed", 0.007),
+            "armor_magic", statMap("mana_regen", 0.012),
+            "tool", statMap("rare_drop_chance", 0.008),
+            "generic", statMap("mana_regen", 0.008)
         ));
         out.put("Rock_Gem_Emerald", archetypeBonusMap(
-            "weapon_melee", statMap("max_hp", 0.8),
-            "weapon_ranged", statMap("movement_speed", 0.01),
-            "weapon_magic", statMap("mana_cost_reduction", 0.01),
-            "armor_heavy", statMap("physical_defence", 1.0),
-            "armor_light", statMap("hp_regen", 0.05),
-            "armor_magic", statMap("healing_power", 0.04),
-            "tool", statMap("double_drop_chance", 0.01),
-            "generic", statMap("max_hp", 1.0)
+            "weapon_melee", statMap("max_hp", 0.60),
+            "weapon_ranged", statMap("movement_speed", 0.008),
+            "weapon_magic", statMap("mana_cost_reduction", 0.008),
+            "armor_heavy", statMap("physical_defence", 0.80),
+            "armor_light", statMap("hp_regen", 0.020),
+            "armor_magic", statMap("healing_power", 0.025),
+            "tool", statMap("double_drop_chance", 0.008),
+            "generic", statMap("max_hp", 0.75)
         ));
         out.put("Rock_Gem_Diamond", archetypeBonusMap(
-            "weapon_melee", statMap("crit_bonus", 0.02),
-            "weapon_ranged", statMap("physical_penetration", 0.01),
-            "weapon_magic", statMap("magical_penetration", 0.01),
-            "armor_heavy", statMap("physical_defence", 1.2),
-            "armor_light", statMap("magical_defence", 1.0),
-            "armor_magic", statMap("magical_defence", 1.2),
-            "tool", statMap("block_break_speed", 0.02),
-            "generic", statMap("max_hp", 1.0)
+            "weapon_melee", statMap("crit_bonus", 0.012),
+            "weapon_ranged", statMap("physical_penetration", 0.008),
+            "weapon_magic", statMap("magical_penetration", 0.008),
+            "armor_heavy", statMap("physical_defence", 0.90),
+            "armor_light", statMap("magical_defence", 0.80),
+            "armor_magic", statMap("magical_defence", 0.95),
+            "tool", statMap("block_break_speed", 0.012),
+            "generic", statMap("max_hp", 0.75)
         ));
         out.put("Rock_Gem_Topaz", archetypeBonusMap(
-            "weapon_melee", statMap("attack_speed", 0.015),
-            "weapon_ranged", statMap("attack_speed", 0.015),
-            "weapon_magic", statMap("cast_speed", 0.015),
-            "armor_heavy", statMap("crit_reduction", 0.01),
-            "armor_light", statMap("movement_speed", 0.012),
-            "armor_magic", statMap("mana_cost_reduction", 0.01),
-            "tool", statMap("block_break_speed", 0.03),
-            "generic", statMap("max_hp", 1.0)
+            "weapon_melee", statMap("attack_speed", 0.010),
+            "weapon_ranged", statMap("attack_speed", 0.010),
+            "weapon_magic", statMap("cast_speed", 0.010),
+            "armor_heavy", statMap("crit_reduction", 0.008),
+            "armor_light", statMap("movement_speed", 0.010),
+            "armor_magic", statMap("mana_cost_reduction", 0.008),
+            "tool", statMap("block_break_speed", 0.015),
+            "generic", statMap("max_hp", 0.60)
         ));
         out.put("Rock_Gem_Voidstone", archetypeBonusMap(
-            "weapon_melee", statMap("physical_penetration", 0.012),
-            "weapon_ranged", statMap("physical_penetration", 0.012),
-            "weapon_magic", statMap("magical_penetration", 0.012),
-            "armor_heavy", statMap("reflect_damage", 0.01),
-            "armor_light", statMap("crit_reduction", 0.01),
-            "armor_magic", statMap("crit_reduction", 0.01),
-            "tool", statMap("rare_drop_chance", 0.012),
-            "generic", statMap("max_hp", 1.0)
+            "weapon_melee", statMap("physical_penetration", 0.010),
+            "weapon_ranged", statMap("physical_penetration", 0.010),
+            "weapon_magic", statMap("magical_penetration", 0.010),
+            "armor_heavy", statMap("reflect_damage", 0.008),
+            "armor_light", statMap("crit_reduction", 0.008),
+            "armor_magic", statMap("crit_reduction", 0.008),
+            "tool", statMap("rare_drop_chance", 0.010),
+            "generic", statMap("max_hp", 0.60)
         ));
         out.put("Rock_Gem_Zephyr", archetypeBonusMap(
-            "weapon_melee", statMap("movement_speed", 0.01),
-            "weapon_ranged", statMap("movement_speed", 0.012),
-            "weapon_magic", statMap("cast_speed", 0.012),
-            "armor_heavy", statMap("hp_regen", 0.05),
-            "armor_light", statMap("movement_speed", 0.015),
-            "armor_magic", statMap("mana_regen", 0.02),
-            "tool", statMap("double_drop_chance", 0.015),
-            "generic", statMap("movement_speed", 0.01)
+            "weapon_melee", statMap("movement_speed", 0.008),
+            "weapon_ranged", statMap("movement_speed", 0.010),
+            "weapon_magic", statMap("cast_speed", 0.010),
+            "armor_heavy", statMap("hp_regen", 0.020),
+            "armor_light", statMap("movement_speed", 0.012),
+            "armor_magic", statMap("mana_regen", 0.012),
+            "tool", statMap("double_drop_chance", 0.010),
+            "generic", statMap("movement_speed", 0.008)
         ));
         return out;
     }
@@ -342,6 +401,7 @@ public class HyruneConfig {
         Map<String, String> out = new LinkedHashMap<>();
         out.put("movement_speed", "percent_only");
         out.put("crit_chance", "percent_only");
+        out.put("hp_regen", "percent_only");
         out.put("crit_reduction", "percent_only");
         return out;
     }
@@ -447,7 +507,6 @@ public class HyruneConfig {
     // MELEE FOCUS
     out.put("Flame", List.of("physical_damage", "physical_crit_chance", "crit_bonus", "attack_speed"));
     out.put("Blaze", List.of("attack_speed", "physical_crit_chance", "physical_damage", "crit_bonus"));
-    out.put("Desert", List.of("physical_defence", "max_hp", "block_efficiency", "reflect_damage"));
     out.put("Ember", List.of("physical_crit_chance", "attack_speed", "physical_damage", "crit_bonus"));
 
     // MAGIC FOCUS
@@ -463,7 +522,7 @@ public class HyruneConfig {
     // TANK / SURVIVABILITY
     out.put("Stone", List.of("physical_defence", "magical_defence", "max_hp", "crit_reduction"));
     out.put("Crag", List.of("physical_defence", "block_efficiency", "reflect_damage", "hp_regen"));
-    out.put("Root", List.of("max_hp", "hp_regen", "magical_defence", "physical_defence"));
+    out.put("Desert", List.of("physical_defence", "max_hp", "block_efficiency", "reflect_damage"));
 
     return out;
 }

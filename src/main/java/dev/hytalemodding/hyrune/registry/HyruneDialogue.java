@@ -55,7 +55,7 @@ public class HyruneDialogue {
 
     private static void registerDialogues() {
         registerMasterHans();
-        registerSlayerMaster();
+        registerSlayerMasterDialogues();
     }
 
     // ==================== MASTER HANS (10 LINES!) ====================
@@ -96,13 +96,17 @@ public class HyruneDialogue {
 
     // ==================== SLAYER MASTER (35 LINES!) ====================
 
-    private static void registerSlayerMaster() {
+    private static void registerSlayerMasterDialogues() {
         if (slayerService == null) {
             LOGGER.at(Level.WARNING).log("SlayerService is null, skipping Slayer Master dialogue");
             return;
         }
+        registerSlayerMasterDialogue("slayer_master", "slayer_master");
+        registerSlayerMasterDialogue("tier2_slayer_master", "tier2_slayer_master");
+    }
 
-        var slayer = new SimpleDialogue("slayer_master")
+    private static void registerSlayerMasterDialogue(String dialogueId, String masterId) {
+        var slayer = new SimpleDialogue(dialogueId)
                 .add("greeting", "Greetings.",
                         choice("I have completed my task.", "turn_in"),
                         choice("What is the Slayer skill?", "explain"),
@@ -137,12 +141,17 @@ public class HyruneDialogue {
 
         slayer.node("request").setText((playerRef, playerEntityRef, store) -> {
             int slayerLevel = getSlayerLevel(playerRef);
-            SlayerTaskAssignment assignment = slayerService.assignTask(playerRef.getUuid(), slayerLevel);
+            int combatLevel = getCombatLevel(playerRef);
+            String requirementsMessage = slayerService.getMasterRequirementMessage(masterId, slayerLevel, combatLevel);
+            if (requirementsMessage != null) {
+                return requirementsMessage;
+            }
+            SlayerTaskAssignment assignment = slayerService.assignTask(playerRef.getUuid(), masterId, slayerLevel, combatLevel);
             if (assignment == null) {
                 return "I have no tasks suitable for you right now.";
             }
             String target = assignment.getTargetNpcTypeId();
-            return "Your task is to slay " + assignment.getTotalKills() + " " + target + "s. Return when you are done.";
+            return "Your task is to slay " + assignment.getTotalKills() + " " + target + ". Return when you are done.";
         });
 
         slayer.node("turn_in").setText((playerRef, playerEntityRef, store) -> {
@@ -150,12 +159,20 @@ public class HyruneDialogue {
             if (player == null) {
                 return "I can't find your records right now.";
             }
+            String turnInRequirement = slayerService.getTurnInRequirementMessage(playerRef.getUuid(), masterId);
+            if (turnInRequirement != null) {
+                return turnInRequirement;
+            }
             SlayerTurnInResult result = slayerService.turnInTask(player);
             if (result == null) {
                 return "You have not completed your task yet.";
             }
             String message = "Well done. You earned " + result.pointsAwarded()
                     + " Slayer points and " + result.slayerXpAwarded() + " Slayer XP.";
+            if (result.streakMilestoneBonusPoints() > 0) {
+                message += " Streak bonus: +" + result.streakMilestoneBonusPoints() + " points.";
+            }
+            message += " Current streak: " + result.streak() + ".";
             if (result.itemRewarded()) {
                 message += " A special item reward is pending.";
             }
@@ -186,6 +203,9 @@ public class HyruneDialogue {
                 });
 
         DialogueRegistry.register(slayer);
+        if ("tier2_slayer_master".equalsIgnoreCase(dialogueId)) {
+            DialogueRegistry.register("tier_2_slayer_master", slayer);
+        }
     }
 
     // ==================== HELPER METHODS ====================
@@ -199,6 +219,18 @@ public class HyruneDialogue {
             return levelingService.getSkillLevel(playerRef.getUuid(), SkillType.SLAYER);
         } catch (RuntimeException e) {
             LOGGER.at(Level.WARNING).log("Failed to get Slayer level for " + playerRef.getUsername() + ": " + e.getMessage());
+            return 1;
+        }
+    }
+
+    private static int getCombatLevel(com.hypixel.hytale.server.core.universe.PlayerRef playerRef) {
+        if (levelingService == null) {
+            return 1;
+        }
+        try {
+            return Math.max(1, levelingService.getCombatLevel(playerRef.getUuid()));
+        } catch (RuntimeException e) {
+            LOGGER.at(Level.WARNING).log("Failed to get combat level for " + playerRef.getUsername() + ": " + e.getMessage());
             return 1;
         }
     }

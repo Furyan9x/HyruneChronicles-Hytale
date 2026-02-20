@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.bonus.SkillStatBonusApplier;
 import dev.hytalemodding.hyrune.itemization.EffectiveItemStats;
 import dev.hytalemodding.hyrune.itemization.ItemizedStat;
+import dev.hytalemodding.hyrune.itemization.ItemizedStatRuntimeContracts;
 import dev.hytalemodding.hyrune.itemization.PlayerItemizationStats;
 import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 
@@ -82,6 +83,26 @@ public class ItemStatsCommand extends AbstractPlayerCommand {
             } else {
                 ctx.sendMessage(Message.raw("  " + stat.getDisplayName() + ": " + flat(value) + " (" + pct(value) + ")"));
             }
+        }
+
+        ctx.sendMessage(Message.raw("[ItemStats] Runtime Consumers (Active Stats)"));
+        boolean anyActive = false;
+        for (ItemizedStat stat : ItemizedStat.values()) {
+            double value = stats.getTotalResolvedSpecialized().get(stat);
+            if (Math.abs(value) <= 1e-9) {
+                continue;
+            }
+            ItemizedStatRuntimeContracts.Contract contract = ItemizedStatRuntimeContracts.get(stat);
+            if (contract == null) {
+                continue;
+            }
+            anyActive = true;
+            String formattedValue = preferPercentPrimary(stat) ? pct(value) : flat(value);
+            ctx.sendMessage(Message.raw("  " + stat.getDisplayName() + ": " + formattedValue
+                + " -> " + contract.hookLocation()));
+        }
+        if (!anyActive) {
+            ctx.sendMessage(Message.raw("  No active specialized stats."));
         }
     }
 

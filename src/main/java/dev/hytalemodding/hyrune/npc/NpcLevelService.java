@@ -2,6 +2,9 @@ package dev.hytalemodding.hyrune.npc;
 
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,40 +22,53 @@ public class NpcLevelService {
                                  double defenceReduction,
                                  double critChance,
                                  double critMultiplier,
+                                 double healthMultiplier,
+                                 String rankId,
                                  String archetypeId) {
     }
 
-    private final NpcLevelConfig config;
-    private final Map<String, NpcLevelConfig.NpcArchetypeProfile> archetypeProfilesById;
+    private final NpcFamiliesConfig familiesConfig;
+    private final Map<String, NpcFamiliesConfig.NpcArchetypeProfile> archetypeProfilesById;
+    private final Map<String, NpcFamiliesConfig.NpcFamilyDefinition> familyById;
+    private final Map<String, NpcFamiliesConfig.NpcRankProfile> rankProfileById;
+    private final List<NpcFamiliesConfig.NpcFamilyDefinition> orderedFamilies;
     private final Random random = new Random();
 
-    public NpcLevelService(NpcLevelConfig config) {
-        this.config = config == null ? new NpcLevelConfig() : config;
-        this.archetypeProfilesById = indexProfiles(this.config);
+    public NpcLevelService(NpcFamiliesConfig familiesConfig) {
+        this.familiesConfig = familiesConfig == null ? new NpcFamiliesConfig() : familiesConfig;
+        this.archetypeProfilesById = indexProfiles(this.familiesConfig);
+        this.familyById = indexFamilies(this.familiesConfig);
+        this.rankProfileById = indexRankProfiles(this.familiesConfig);
+        this.orderedFamilies = orderFamilies(this.familiesConfig);
     }
 
-    public NpcLevelConfig getConfig() {
-        return config;
+    public NpcFamiliesConfig getFamiliesConfig() {
+        return familiesConfig;
+    }
+
+    public String getDefaultWeakness() {
+        return familiesConfig.defaultWeakness;
+    }
+
+    public double getWeaknessMultiplier() {
+        return familiesConfig.weaknessMultiplier;
+    }
+
+    public double getResistanceMultiplier() {
+        return familiesConfig.resistanceMultiplier;
     }
 
     public NpcLevelComponent buildComponent(String npcTypeId, String baseName) {
         if (isExcluded(npcTypeId, baseName)) {
             return null;
         }
-        NpcLevelConfig.NpcLevelOverride override = findOverride(npcTypeId);
-        if (override != null) {
-            return buildFromOverride(override, baseName);
+
+        ResolvedFamilyAssignment familyAssignment = findFamilyAssignment(npcTypeId);
+        if (familyAssignment != null) {
+            return buildFromFamilyAssignment(familyAssignment, baseName);
         }
 
-        NpcLevelConfig.NpcLevelGroup group = findGroup(npcTypeId);
-        if (group != null) {
-            return buildFromGroup(group, baseName);
-        }
-
-        int level = rollLevel(config.getDefaultLevel(), config.getDefaultVariance());
-        CombatStyle weakness = CombatStyle.fromString(config.getDefaultWeakness(), CombatStyle.MELEE);
-        String archetypeId = normalizeArchetypeOrDefault(config.getDefaultArchetype());
-        return new NpcLevelComponent(level, "default", weakness, archetypeId, false, baseName);
+        return buildFromConfigDefault(baseName);
     }
 
     public int getCombatLevel(int level) {
@@ -79,35 +95,47 @@ public class NpcLevelService {
     public NpcCombatStats resolveCombatStats(NpcLevelComponent component, CombatStyle style) {
         CombatStyle resolvedStyle = style == null ? CombatStyle.MELEE : style;
         String archetypeId = component == null
-            ? normalizeArchetypeOrDefault(config.getDefaultArchetype())
+            ? normalizeArchetypeOrDefault(familiesConfig.defaultArchetype)
             : normalizeArchetypeOrDefault(component.getArchetypeId());
-        NpcLevelConfig.NpcArchetypeProfile profile = resolveArchetypeProfile(archetypeId);
+        String rankId = component == null ? NpcRank.NORMAL.name() : normalizeRank(component.getRankId());
+        NpcFamiliesConfig.NpcRankProfile rankProfile = resolveRankProfile(rankId);
+        NpcFamiliesConfig.NpcArchetypeProfile profile = resolveArchetypeProfile(archetypeId);
         int level = component == null ? 1 : Math.max(1, Math.min(99, component.getLevel()));
+        int effectiveLevel = level;
 
         double styleBias = switch (resolvedStyle) {
-            case RANGED -> clamp(profile.getRangedBias(), 0.10, 5.0);
-            case MAGIC -> clamp(profile.getMagicBias(), 0.10, 5.0);
-            case MELEE -> clamp(profile.getMeleeBias(), 0.10, 5.0);
+            case RANGED -> clamp(profile.rangedBias, 0.10, 5.0);
+            case MAGIC -> clamp(profile.magicBias, 0.10, 5.0);
+            case MELEE -> clamp(profile.meleeBias, 0.10, 5.0);
         };
+        double damageGrowthRate = clamp(profile.damageGrowthRate, 1.0, 5.0);
+        double defenceGrowthRate = clamp(profile.defenceGrowthRate, 1.0, 5.0);
+        double critGrowthRate = clamp(profile.critGrowthRate, 1.0, 5.0);
+        double rankMultiplier = clamp(rankProfile.statMultiplier, 1.0, 100.0);
         double damageMultiplier = clamp(
-            (profile.getBaseDamage() + (level * profile.getDamagePerLevel())) * styleBias,
+            exponentialStat(profile.baseDamage, damageGrowthRate, effectiveLevel) * styleBias * rankMultiplier,
             0.10,
             25.0
         );
         double defenceReduction = clamp(
-            profile.getBaseDefenceReduction() + (level * profile.getDefencePerLevel()),
+            exponentialStat(profile.baseDefenceReduction, defenceGrowthRate, effectiveLevel) * rankMultiplier,
             0.0,
-            Math.max(0.0, profile.getDefenceCap())
+            Math.max(0.0, profile.defenceCap)
         );
         double critChance = clamp(
-            profile.getBaseCritChance() + (level * profile.getCritChancePerLevel()),
+            exponentialStat(profile.baseCritChance, critGrowthRate, effectiveLevel) * rankMultiplier,
             0.0,
-            Math.max(0.0, profile.getCritChanceCap())
+            Math.max(0.0, profile.critChanceCap)
         );
         double critMultiplier = clamp(
-            profile.getBaseCritMultiplier() + (level * profile.getCritMultiplierPerLevel()),
+            (profile.baseCritMultiplier + (effectiveLevel * profile.critMultiplierPerLevel)) * rankMultiplier,
             1.0,
-            Math.max(1.0, profile.getCritMultiplierCap())
+            Math.max(1.0, profile.critMultiplierCap)
+        );
+        double healthMultiplier = clamp(
+            Math.max(0.10, profile.baseHealthMultiplier) * Math.pow(defenceGrowthRate, effectiveLevel) * rankMultiplier,
+            0.10,
+            500.0
         );
 
         return new NpcCombatStats(
@@ -115,6 +143,8 @@ public class NpcLevelService {
             defenceReduction,
             critChance,
             critMultiplier,
+            healthMultiplier,
+            rankId,
             archetypeId
         );
     }
@@ -128,31 +158,40 @@ public class NpcLevelService {
             return false;
         }
         String normalized = npcTypeId.toLowerCase(Locale.ROOT);
-        for (NpcLevelConfig.NpcLevelGroup group : config.getGroups()) {
-            if (group == null || group.getId() == null || group.getMatch() == null) {
-                continue;
-            }
-            if (group.getId().equalsIgnoreCase(groupId) && matches(group.getMatch(), normalized)) {
-                return true;
-            }
+        NpcFamiliesConfig.NpcFamilyDefinition family = familyById.get(groupId.toLowerCase(Locale.ROOT));
+        return family != null && NpcFamilyMatcher.matchesFamily(family, normalized);
+    }
+
+    private NpcLevelComponent buildFromFamilyAssignment(ResolvedFamilyAssignment resolved, String baseName) {
+        if (resolved == null || resolved.family == null) {
+            return null;
         }
-        return false;
+        NpcFamiliesConfig.NpcFamilyDefinition family = resolved.family;
+        int level = rollLevel(family.baseLevel, family.variance);
+        NpcRank rank = NpcRank.fromString(family.rank, NpcRank.NORMAL);
+        NpcFamiliesConfig.NpcRankProfile rankProfile = resolveRankProfile(rank.name());
+        int adjustedLevel = Math.max(1, Math.min(99, level + rankProfile.levelOffset));
+        CombatStyle weakness = CombatStyle.fromString(family.weakness, CombatStyle.MELEE);
+        String archetypeId = normalizeArchetypeOrDefault(family.archetype);
+        String groupId = family.id == null || family.id.isBlank()
+            ? "family"
+            : family.id;
+        return new NpcLevelComponent(
+            adjustedLevel,
+            groupId,
+            weakness,
+            archetypeId,
+            rank.name(),
+            family.elite,
+            baseName
+        );
     }
 
-    private NpcLevelComponent buildFromGroup(NpcLevelConfig.NpcLevelGroup group, String baseName) {
-        int level = rollLevel(group.getBaseLevel(), group.getVariance());
-        CombatStyle weakness = CombatStyle.fromString(group.getWeakness(), CombatStyle.MELEE);
-        String groupId = group.getId() != null ? group.getId() : "group";
-        String archetypeId = normalizeArchetypeOrDefault(group.getArchetype());
-        return new NpcLevelComponent(level, groupId, weakness, archetypeId, group.isElite(), baseName);
-    }
-
-    private NpcLevelComponent buildFromOverride(NpcLevelConfig.NpcLevelOverride override, String baseName) {
-        int level = rollLevel(override.getLevel(), override.getVariance());
-        CombatStyle weakness = CombatStyle.fromString(override.getWeakness(), CombatStyle.MELEE);
-        String groupId = override.getTypeId() != null ? override.getTypeId() : "override";
-        String archetypeId = normalizeArchetypeOrDefault(override.getArchetype());
-        return new NpcLevelComponent(level, groupId, weakness, archetypeId, override.isElite(), baseName);
+    private NpcLevelComponent buildFromConfigDefault(String baseName) {
+        int level = rollLevel(familiesConfig.defaultLevel, familiesConfig.defaultVariance);
+        CombatStyle weakness = CombatStyle.fromString(familiesConfig.defaultWeakness, CombatStyle.MELEE);
+        String archetypeId = normalizeArchetypeOrDefault(familiesConfig.defaultArchetype);
+        return new NpcLevelComponent(level, "default", weakness, archetypeId, NpcRank.NORMAL.name(), false, baseName);
     }
 
     private int rollLevel(int baseLevel, int variance) {
@@ -166,44 +205,11 @@ public class NpcLevelService {
         return min + random.nextInt(max - min + 1);
     }
 
-    private NpcLevelConfig.NpcLevelOverride findOverride(String npcTypeId) {
-        if (npcTypeId == null) {
-            return null;
-        }
-        String normalized = npcTypeId.toLowerCase(Locale.ROOT);
-        for (NpcLevelConfig.NpcLevelOverride override : config.getOverrides()) {
-            if (override == null || override.getTypeId() == null) {
-                continue;
-            }
-            if (override.getTypeId().toLowerCase(Locale.ROOT).equals(normalized)) {
-                return override;
-            }
-        }
-        return null;
-    }
-
-    private NpcLevelConfig.NpcLevelGroup findGroup(String npcTypeId) {
-        if (npcTypeId == null) {
-            return null;
-        }
-        String normalized = npcTypeId.toLowerCase(Locale.ROOT);
-        List<NpcLevelConfig.NpcLevelGroup> groups = config.getGroups();
-        for (NpcLevelConfig.NpcLevelGroup group : groups) {
-            if (group == null || group.getMatch() == null) {
-                continue;
-            }
-            if (matches(group.getMatch(), normalized)) {
-                return group;
-            }
-        }
-        return null;
-    }
-
     public boolean isExcluded(String npcTypeId, String baseName) {
         if (npcTypeId == null && baseName == null) {
             return true;
         }
-        for (String excluded : config.getExcludedNpcIds()) {
+        for (String excluded : familiesConfig.excludedNpcIds) {
             if (excluded == null || excluded.isBlank()) {
                 continue;
             }
@@ -225,20 +231,29 @@ public class NpcLevelService {
         if (groupId == null || groupId.isBlank()) {
             return null;
         }
-        for (NpcLevelConfig.NpcLevelGroup group : config.getGroups()) {
-            if (group == null || group.getId() == null || group.getMatch() == null) {
-                continue;
-            }
-            if (!group.getId().equalsIgnoreCase(groupId)) {
-                continue;
-            }
-            List<String> contains = group.getMatch().getContains();
-            if (contains == null || contains.isEmpty()) {
-                return null;
-            }
-            return contains.get(ThreadLocalRandom.current().nextInt(contains.size()));
+        NpcFamiliesConfig.NpcFamilyDefinition family = familyById.get(groupId.toLowerCase(Locale.ROOT));
+        if (family == null) {
+            return null;
+        }
+        if (family.typeIds != null && !family.typeIds.isEmpty()) {
+            return family.typeIds.get(ThreadLocalRandom.current().nextInt(family.typeIds.size()));
         }
         return null;
+    }
+
+    public NpcFamiliesConfig.NpcFamilyDefinition getFamilyDefinition(String groupId) {
+        if (groupId == null || groupId.isBlank()) {
+            return null;
+        }
+        return familyById.get(groupId.toLowerCase(Locale.ROOT));
+    }
+
+    public NpcFamiliesConfig.NpcArchetypeProfile getArchetypeProfile(String archetypeId) {
+        return resolveArchetypeProfile(archetypeId);
+    }
+
+    public NpcFamiliesConfig.NpcRankProfile getRankProfile(String rankId) {
+        return resolveRankProfile(rankId);
     }
 
     private boolean matchesExclude(String value, String excluded) {
@@ -250,33 +265,14 @@ public class NpcLevelService {
         return haystack.equals(needle) || haystack.contains(needle);
     }
 
-    private boolean matches(NpcLevelConfig.NpcLevelMatch match, String npcTypeId) {
-        for (String id : match.getTypeIds()) {
-            if (id != null && npcTypeId.equals(id.toLowerCase(Locale.ROOT))) {
-                return true;
-            }
-        }
-        for (String prefix : match.getStartsWith()) {
-            if (prefix != null && npcTypeId.startsWith(prefix.toLowerCase(Locale.ROOT))) {
-                return true;
-            }
-        }
-        for (String fragment : match.getContains()) {
-            if (fragment != null && npcTypeId.contains(fragment.toLowerCase(Locale.ROOT))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private NpcLevelConfig.NpcArchetypeProfile resolveArchetypeProfile(String archetypeId) {
+    private NpcFamiliesConfig.NpcArchetypeProfile resolveArchetypeProfile(String archetypeId) {
         String normalized = normalizeArchetype(archetypeId);
-        NpcLevelConfig.NpcArchetypeProfile profile = archetypeProfilesById.get(normalized);
+        NpcFamiliesConfig.NpcArchetypeProfile profile = archetypeProfilesById.get(normalized);
         if (profile != null) {
             return profile;
         }
 
-        profile = archetypeProfilesById.get(normalizeArchetype(config.getDefaultArchetype()));
+        profile = archetypeProfilesById.get(normalizeArchetype(familiesConfig.defaultArchetype));
         if (profile != null) {
             return profile;
         }
@@ -286,7 +282,7 @@ public class NpcLevelService {
             return profile;
         }
 
-        return new NpcLevelConfig.NpcArchetypeProfile();
+        return new NpcFamiliesConfig.NpcArchetypeProfile();
     }
 
     private String normalizeArchetypeOrDefault(String archetypeId) {
@@ -294,11 +290,28 @@ public class NpcLevelService {
         if (archetypeProfilesById.containsKey(normalized)) {
             return normalized;
         }
-        String configuredDefault = normalizeArchetype(config.getDefaultArchetype());
+        String configuredDefault = normalizeArchetype(familiesConfig.defaultArchetype);
         if (archetypeProfilesById.containsKey(configuredDefault)) {
             return configuredDefault;
         }
         return DEFAULT_ARCHETYPE_ID;
+    }
+
+    private ResolvedFamilyAssignment findFamilyAssignment(String npcTypeId) {
+        if (npcTypeId == null || npcTypeId.isBlank() || orderedFamilies.isEmpty()) {
+            return null;
+        }
+        String normalized = npcTypeId.toLowerCase(Locale.ROOT);
+        for (NpcFamiliesConfig.NpcFamilyDefinition family : orderedFamilies) {
+            if (family == null || family.id == null) {
+                continue;
+            }
+            if (!NpcFamilyMatcher.matchesFamily(family, normalized)) {
+                continue;
+            }
+            return new ResolvedFamilyAssignment(family);
+        }
+        return null;
     }
 
     private static String normalizeArchetype(String archetypeId) {
@@ -308,26 +321,96 @@ public class NpcLevelService {
         return archetypeId.trim().toUpperCase(Locale.ROOT);
     }
 
-    private static Map<String, NpcLevelConfig.NpcArchetypeProfile> indexProfiles(NpcLevelConfig config) {
-        Map<String, NpcLevelConfig.NpcArchetypeProfile> out = new LinkedHashMap<>();
-        if (config != null && config.getArchetypeProfiles() != null) {
-            for (NpcLevelConfig.NpcArchetypeProfile profile : config.getArchetypeProfiles()) {
+    private String normalizeRank(String rankId) {
+        return NpcRank.fromString(rankId, NpcRank.NORMAL).name();
+    }
+
+    private NpcFamiliesConfig.NpcRankProfile resolveRankProfile(String rankId) {
+        String normalized = normalizeRank(rankId);
+        NpcFamiliesConfig.NpcRankProfile profile = rankProfileById.get(normalized);
+        if (profile != null) {
+            return profile;
+        }
+        profile = rankProfileById.get(NpcRank.NORMAL.name());
+        if (profile != null) {
+            return profile;
+        }
+        NpcFamiliesConfig.NpcRankProfile fallback = new NpcFamiliesConfig.NpcRankProfile();
+        fallback.id = NpcRank.NORMAL.name();
+        fallback.levelOffset = 0;
+        fallback.statMultiplier = 1.0;
+        return fallback;
+    }
+
+    private static Map<String, NpcFamiliesConfig.NpcArchetypeProfile> indexProfiles(NpcFamiliesConfig config) {
+        Map<String, NpcFamiliesConfig.NpcArchetypeProfile> out = new LinkedHashMap<>();
+        if (config != null && config.archetypeProfiles != null) {
+            for (NpcFamiliesConfig.NpcArchetypeProfile profile : config.archetypeProfiles) {
                 if (profile == null) {
                     continue;
                 }
-                String key = normalizeArchetype(profile.getId());
+                String key = normalizeArchetype(profile.id);
                 out.put(key, profile);
             }
         }
         if (!out.containsKey(DEFAULT_ARCHETYPE_ID)) {
-            NpcLevelConfig.NpcArchetypeProfile fallback = new NpcLevelConfig.NpcArchetypeProfile();
-            fallback.setId(DEFAULT_ARCHETYPE_ID);
+            NpcFamiliesConfig.NpcArchetypeProfile fallback = new NpcFamiliesConfig.NpcArchetypeProfile();
+            fallback.id = DEFAULT_ARCHETYPE_ID;
             out.put(DEFAULT_ARCHETYPE_ID, fallback);
         }
         return out;
     }
 
+    private static Map<String, NpcFamiliesConfig.NpcFamilyDefinition> indexFamilies(NpcFamiliesConfig config) {
+        Map<String, NpcFamiliesConfig.NpcFamilyDefinition> out = new HashMap<>();
+        if (config == null || config.families == null) {
+            return out;
+        }
+        for (NpcFamiliesConfig.NpcFamilyDefinition family : config.families) {
+            if (family == null || family.id == null || family.id.isBlank()) {
+                continue;
+            }
+            out.put(family.id.toLowerCase(Locale.ROOT), family);
+        }
+        return out;
+    }
+
+    private static Map<String, NpcFamiliesConfig.NpcRankProfile> indexRankProfiles(NpcFamiliesConfig config) {
+        Map<String, NpcFamiliesConfig.NpcRankProfile> out = new HashMap<>();
+        if (config == null || config.rankProfiles == null) {
+            return out;
+        }
+        for (NpcFamiliesConfig.NpcRankProfile rank : config.rankProfiles) {
+            if (rank == null || rank.id == null || rank.id.isBlank()) {
+                continue;
+            }
+            out.put(rank.id.toUpperCase(Locale.ROOT), rank);
+        }
+        return out;
+    }
+
+    private static List<NpcFamiliesConfig.NpcFamilyDefinition> orderFamilies(NpcFamiliesConfig config) {
+        if (config == null || config.families == null || config.families.isEmpty()) {
+            return List.of();
+        }
+        List<NpcFamiliesConfig.NpcFamilyDefinition> ordered = new ArrayList<>(config.families);
+        ordered.sort(Comparator.comparingInt((NpcFamiliesConfig.NpcFamilyDefinition a) -> {
+            if (a == null || a.id == null) {
+                return 0;
+            }
+            return a.id.length();
+        }).reversed());
+        return ordered;
+    }
+
     private static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private static double exponentialStat(double base, double growthRate, int level) {
+        return Math.max(0.0, base) * Math.pow(Math.max(0.0, growthRate), Math.max(0, level));
+    }
+
+    private record ResolvedFamilyAssignment(NpcFamiliesConfig.NpcFamilyDefinition family) {
     }
 }

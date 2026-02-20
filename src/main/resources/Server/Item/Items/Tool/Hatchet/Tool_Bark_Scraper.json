@@ -1,0 +1,12 @@
+{
+    "Interactions": {
+        "Secondary": {
+            "Interactions": [
+                {
+                    "Type": "HyruneNpcProfiler",
+                    "CancelOnItemChange": true
+                }
+            ]
+        }
+    }
+}

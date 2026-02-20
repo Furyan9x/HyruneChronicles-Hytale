@@ -3,6 +3,7 @@ package dev.hytalemodding;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent;
+import com.hypixel.hytale.server.core.event.events.ecs.InteractivelyPickupItemEvent;
 import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
 import com.hypixel.hytale.server.core.event.events.player.DrainPlayerFromWorldEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
@@ -16,6 +17,7 @@ import dev.hytalemodding.hyrune.commands.CharacterCommand;
 import dev.hytalemodding.hyrune.commands.CheckTagsCommand;
 import dev.hytalemodding.hyrune.commands.ClearNpcHologramsCommand;
 import dev.hytalemodding.hyrune.commands.ReloadConfigCommand;
+import dev.hytalemodding.hyrune.commands.NpcConfigAuditCommand;
 import dev.hytalemodding.hyrune.commands.SetSkillCommand;
 import dev.hytalemodding.hyrune.commands.SkillInfoCommand;
 import dev.hytalemodding.hyrune.commands.SocialDebugCommand;
@@ -24,6 +26,8 @@ import dev.hytalemodding.hyrune.commands.ItemRollsCommand;
 import dev.hytalemodding.hyrune.commands.ItemDiagCommand;
 import dev.hytalemodding.hyrune.commands.ItemStatsCommand;
 import dev.hytalemodding.hyrune.commands.GemUiCommand;
+import dev.hytalemodding.hyrune.commands.SalvageCommand;
+import dev.hytalemodding.hyrune.commands.HighAlchCommand;
 import dev.hytalemodding.hyrune.component.GameModeDataComponent;
 import dev.hytalemodding.hyrune.database.JsonLevelRepository;
 import dev.hytalemodding.hyrune.database.JsonQuestRepository;
@@ -36,6 +40,8 @@ import dev.hytalemodding.hyrune.events.LevelingVisualsListener;
 import dev.hytalemodding.hyrune.events.FarmingHarvestListener;
 import dev.hytalemodding.hyrune.events.FarmingRequirementListener;
 import dev.hytalemodding.hyrune.events.ItemizationInventoryListener;
+import dev.hytalemodding.hyrune.events.ContainerLootItemizationListener;
+import dev.hytalemodding.hyrune.events.WorldItemGenerationListener;
 import dev.hytalemodding.hyrune.itemization.tooltip.HyruneDynamicTooltipService;
 import dev.hytalemodding.hyrune.registry.HyruneComponents;
 import dev.hytalemodding.hyrune.registry.HyruneDialogue;
@@ -43,13 +49,14 @@ import dev.hytalemodding.hyrune.registry.HyruneSystems;
 import dev.hytalemodding.hyrune.component.FishingBobberComponent;
 import dev.hytalemodding.hyrune.interaction.FishingInteraction;
 import dev.hytalemodding.hyrune.interaction.GemSocketInteraction;
+import dev.hytalemodding.hyrune.interaction.NpcProfilerInteraction;
 import dev.hytalemodding.hyrune.interaction.RepairBenchInteraction;
 import dev.hytalemodding.hyrune.events.PlayerJoinListener;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.level.formulas.LevelFormula;
 import dev.hytalemodding.hyrune.events.ArmorRequirementListener;
 import dev.hytalemodding.hyrune.events.TradePackInventoryListener;
-import dev.hytalemodding.hyrune.slayer.SlayerDataInitializer;
+import dev.hytalemodding.hyrune.slayer.SlayerConfigRepository;
 import dev.hytalemodding.hyrune.slayer.SlayerService;
 import dev.hytalemodding.hyrune.slayer.SlayerTaskRegistry;
 import dev.hytalemodding.hyrune.repair.RepairProfileConfig;
@@ -60,8 +67,8 @@ import dev.hytalemodding.hyrune.social.SocialService;
 import dev.hytalemodding.hyrune.util.NameplateManager;
 import com.hypixel.hytale.server.core.event.events.player.PlayerInteractEvent;
 import dev.hytalemodding.hyrune.npc.NpcLevelComponent;
-import dev.hytalemodding.hyrune.npc.NpcLevelConfig;
-import dev.hytalemodding.hyrune.npc.NpcLevelConfigRepository;
+import dev.hytalemodding.hyrune.npc.NpcFamiliesConfig;
+import dev.hytalemodding.hyrune.npc.NpcFamiliesConfigRepository;
 import dev.hytalemodding.hyrune.npc.NpcLevelService;
 import dev.hytalemodding.hyrune.quests.QuestManager;
 
@@ -86,6 +93,7 @@ public class Hyrune extends JavaPlugin {
     private LevelingService service;
     private SlayerService slayerService;
     private NpcLevelService npcLevelService;
+    private NpcFamiliesConfig npcFamiliesConfig;
     private SocialService socialService;
     private PacketFilter socialInteractionWatcherFilter;
     private HyruneDynamicTooltipService dynamicTooltipService;
@@ -110,11 +118,12 @@ public class Hyrune extends JavaPlugin {
         this.service = new LevelingService(formula, levelRepository);
 
         // Initialize progression/AI services that depend on local data repositories.
-        NpcLevelConfigRepository npcLevelConfigRepository = new NpcLevelConfigRepository("./hyrune_data");
-        NpcLevelConfig npcLevelConfig = npcLevelConfigRepository.loadOrCreate();
-        this.npcLevelService = new NpcLevelService(npcLevelConfig);
+        NpcFamiliesConfigRepository npcFamiliesRepository =
+            new NpcFamiliesConfigRepository("./hyrune_data", "./lib/Server/NPC/Roles");
+        this.npcFamiliesConfig = npcFamiliesRepository.loadOrCreate();
+        this.npcLevelService = new NpcLevelService(this.npcFamiliesConfig);
 
-        SlayerTaskRegistry slayerTaskRegistry = SlayerDataInitializer.buildRegistry();
+        SlayerTaskRegistry slayerTaskRegistry = new SlayerConfigRepository("./hyrune_data").loadOrCreateRegistry();
         for (String issue : slayerTaskRegistry.validate()) {
             LOGGER.at(Level.WARNING).log("Slayer task registry issue: " + issue);
         }
@@ -164,7 +173,9 @@ public class Hyrune extends JavaPlugin {
         this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingRequirementListener()::onPlayerInteract);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ArmorRequirementListener()::onInventoryChange);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new TradePackInventoryListener()::onInventoryChange);
+        this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ContainerLootItemizationListener()::onInventoryChange);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ItemizationInventoryListener()::onInventoryChange);
+        this.getEventRegistry().registerGlobal(InteractivelyPickupItemEvent.class, new WorldItemGenerationListener()::onInteractivelyPickupItem);
         this.socialInteractionWatcherFilter = PacketAdapters.registerInbound(new SocialInteractionWatcher());
     }
 
@@ -197,6 +208,11 @@ public class Hyrune extends JavaPlugin {
             GemSocketInteraction.class,
             GemSocketInteraction.CODEC
         );
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "HyruneNpcProfiler",
+            NpcProfilerInteraction.class,
+            NpcProfilerInteraction.CODEC
+        );
     }
 
     private void registerCommands() {
@@ -206,12 +222,15 @@ public class Hyrune extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new SkillInfoCommand());
         this.getCommandRegistry().registerCommand(new ClearNpcHologramsCommand());
         this.getCommandRegistry().registerCommand(new ReloadConfigCommand());
+        this.getCommandRegistry().registerCommand(new NpcConfigAuditCommand());
         this.getCommandRegistry().registerCommand(new SocialDebugCommand());
         this.getCommandRegistry().registerCommand(new ItemMetaCommand());
         this.getCommandRegistry().registerCommand(new ItemRollsCommand());
         this.getCommandRegistry().registerCommand(new ItemStatsCommand());
         this.getCommandRegistry().registerCommand(new ItemDiagCommand());
         this.getCommandRegistry().registerCommand(new GemUiCommand());
+        this.getCommandRegistry().registerCommand(new SalvageCommand());
+        this.getCommandRegistry().registerCommand(new HighAlchCommand());
     }
 
     @Override
@@ -279,6 +298,15 @@ public class Hyrune extends JavaPlugin {
      */
     public static NpcLevelService getNpcLevelService() {
         return instance != null ? instance.npcLevelService : null;
+    }
+
+    /**
+     * Gets the npc families config.
+     *
+     * @return loaded families config, if available
+     */
+    public static NpcFamiliesConfig getNpcFamiliesConfig() {
+        return instance != null ? instance.npcFamiliesConfig : null;
     }
 
 

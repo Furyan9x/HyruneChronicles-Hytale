@@ -12,6 +12,7 @@ public class SlayerPlayerData implements PlayerData {
     private SlayerTaskAssignment assignment;
     private int slayerPoints;
     private int completedTasks;
+    private int currentStreak;
 
     public SlayerPlayerData() {
     }
@@ -61,5 +62,17 @@ public class SlayerPlayerData implements PlayerData {
 
     public void incrementCompletedTasks() {
         this.completedTasks++;
+    }
+
+    public int getCurrentStreak() {
+        return currentStreak;
+    }
+
+    public void incrementStreak() {
+        this.currentStreak++;
+    }
+
+    public void resetStreak() {
+        this.currentStreak = 0;
     }
 }

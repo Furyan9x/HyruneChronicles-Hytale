@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "tasks": [
+    { "id": "rats", "targetFamilyId": "rat", "requiredSlayerLevel": 1, "requiredCombatLevel": 1 },
+    { "id": "spiders", "targetFamilyId": "spider", "requiredSlayerLevel": 1, "requiredCombatLevel": 1 },
+    { "id": "wolves", "targetFamilyId": "wolf", "requiredSlayerLevel": 1, "requiredCombatLevel": 1 },
+    { "id": "goblins", "targetFamilyId": "goblin", "requiredSlayerLevel": 1, "requiredCombatLevel": 3 },
+    { "id": "hounds", "targetFamilyId": "hound", "requiredSlayerLevel": 8, "requiredCombatLevel": 10 },
+    { "id": "zombies", "targetFamilyId": "zombie", "requiredSlayerLevel": 5, "requiredCombatLevel": 8 },
+    { "id": "skeletons", "targetFamilyId": "skeleton", "requiredSlayerLevel": 10, "requiredCombatLevel": 15 },
+    { "id": "trorks", "targetFamilyId": "trork", "requiredSlayerLevel": 12, "requiredCombatLevel": 16 },
+    { "id": "outlanders", "targetFamilyId": "outlander", "requiredSlayerLevel": 15, "requiredCombatLevel": 20 },
+    { "id": "scaraks", "targetFamilyId": "scarak", "requiredSlayerLevel": 18, "requiredCombatLevel": 24 },
+
+    { "id": "skeleton_knights", "targetFamilyId": "skeleton_knight", "requiredSlayerLevel": 22, "requiredCombatLevel": 40 },
+    { "id": "skeleton_archmages", "targetFamilyId": "skeleton_archmage", "requiredSlayerLevel": 28, "requiredCombatLevel": 45 },
+    { "id": "outlander_brutes", "targetFamilyId": "outlander_brute", "requiredSlayerLevel": 24, "requiredCombatLevel": 42 },
+    { "id": "outlander_sorcerers", "targetFamilyId": "outlander_sorcerer", "requiredSlayerLevel": 26, "requiredCombatLevel": 44 },
+    { "id": "trork_maulers", "targetFamilyId": "trork_mauler", "requiredSlayerLevel": 22, "requiredCombatLevel": 38 },
+    { "id": "trork_shamans", "targetFamilyId": "trork_shaman", "requiredSlayerLevel": 24, "requiredCombatLevel": 40 },
+    { "id": "risen_knights", "targetFamilyId": "risen_knight", "requiredSlayerLevel": 30, "requiredCombatLevel": 50 },
+    { "id": "shadow_knights", "targetFamilyId": "shadow_knight", "requiredSlayerLevel": 35, "requiredCombatLevel": 58 },
+    { "id": "spectres", "targetFamilyId": "spectre", "requiredSlayerLevel": 40, "requiredCombatLevel": 62 },
+    { "id": "spawns", "targetFamilyId": "spawn", "requiredSlayerLevel": 42, "requiredCombatLevel": 64 },
+    { "id": "scarak_defenders", "targetFamilyId": "scarak_defender", "requiredSlayerLevel": 25, "requiredCombatLevel": 42 },
+    { "id": "scarak_fighters", "targetFamilyId": "scarak_fighter", "requiredSlayerLevel": 23, "requiredCombatLevel": 40 },
+    { "id": "scarak_broodmothers", "targetFamilyId": "scarak_broodmother", "requiredSlayerLevel": 55, "requiredCombatLevel": 75 },
+    { "id": "trork_chieftains", "targetFamilyId": "trork_chieftain", "requiredSlayerLevel": 50, "requiredCombatLevel": 70 },
+    { "id": "goblin_dukes", "targetFamilyId": "goblin_duke", "requiredSlayerLevel": 60, "requiredCombatLevel": 78 },
+    { "id": "dragons", "targetFamilyId": "dragon", "requiredSlayerLevel": 75, "requiredCombatLevel": 90 }
+  ]
+}
+

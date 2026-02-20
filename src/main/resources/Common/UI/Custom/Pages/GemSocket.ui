@@ -1,23 +1,36 @@
 $C = "../Common.ui";
 
-@TitleText = LabelStyle(FontSize: 18, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-@BodyText = LabelStyle(FontSize: 14, TextColor: #f7e9cd, VerticalAlignment: Center);
-@SectionHeader = LabelStyle(FontSize: 13, TextColor: #f2d38a, HorizontalAlignment: Start, RenderBold: true);
+@TitleText = LabelStyle(FontSize: 20, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@SectionHeader = LabelStyle(FontSize: 12, TextColor: #f2d38a, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
 @ValueText = LabelStyle(FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center);
 
+@TabIconAnchor = Anchor(Width: 34, Height: 20);
+@TabButtonAnchor = Anchor(Width: 120, Height: 30);
+@GemTabStyle = TabStyleState(
+  Background: "Images/Tab.png",
+  Overlay: (TexturePath: "Images/TabOverlay.png", Border: 0),
+  IconAnchor: @TabIconAnchor,
+  Anchor: @TabButtonAnchor
+);
+@GemTabsStyle = TabNavigationStyle(
+  TabStyle: (Default: @GemTabStyle, Hovered: @GemTabStyle, Pressed: @GemTabStyle),
+  SelectedTabStyle: (Default: (...@GemTabStyle, Overlay: (TexturePath: "Images/TabSelectedOverlay.png", Border: 0)))
+);
+
 $C.@DecoratedContainer {
-  Anchor: (Width: 820, Height: 560);
+  Anchor: (Width: 920, Height: 700);
 
   Group #Title {
-    Anchor: (Top: 0, Left: 0, Right: 0, Height: 50);
+    Anchor: (Top: 0, Left: 0, Right: 0, Height: 52);
 
     Label {
       Text: "Gem Socketing";
       Style: @TitleText;
-      Anchor: (Full: 0);
+      Anchor: (Left: 40, Right: 40, Height: 32, Top: 6);
     }
+
     TextButton #GemClose {
-      Anchor: (Right: 4, Top: 8, Width: 24, Height: 24);
+      Anchor: (Right: 6, Top: 8, Width: 24, Height: 24);
       Text: "X";
       Style: $C.@HeaderTextButtonStyle;
     }
@@ -25,106 +38,175 @@ $C.@DecoratedContainer {
 
   Group #Content {
     LayoutMode: Top;
-    Padding: (Top: 56, Left: 20, Right: 20, Bottom: 20);
+    Anchor: (Top: 54, Left: 14, Right: 14, Bottom: 14);
 
-    Label {
-      Text: "Held gem is auto-filled from your hand. Select a receiver item and click Socket.";
-      Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
-      Anchor: (Height: 28, Left: 0, Right: 0);
+    TabNavigation #TabBar {
+      Anchor: (Height: 34, Left: 8, Right: 8);
+      Style: @GemTabsStyle;
+      SelectedTab: "Add";
+
+      TabButton #TabAddBtn { Id: "Add"; Text: "Add"; Icon: "none.png"; IconSelected: "none.png"; }
+      TabButton #TabRemoveBtn { Id: "Remove"; Text: "Remove"; Icon: "none.png"; IconSelected: "none.png"; }
     }
 
     Group { Anchor: (Height: 8); }
 
-    Group #InsertRow {
+    Group #TopSlotsPanel {
       LayoutMode: Left;
-      Anchor: (Left: 0, Right: 0, Height: 44);
-      Background: #000000(0.35);
-      Padding: (Left: 12, Right: 12);
+      Anchor: (Height: 178, Left: 0, Right: 0);
+      Background: #081d2a(0.66);
+      Padding: (Left: 14, Right: 14, Top: 10, Bottom: 10);
 
-      ItemIcon #GemIcon {
-        Anchor: (Width: 28, Height: 28);
-        Padding: (Top: 8);
+      Group {
+        LayoutMode: Top;
+        Anchor: (Width: 400, Height: 158);
+
+        Label { Text: "Equipment Item"; Style: ( ...@SectionHeader, HorizontalAlignment: Center ); Anchor: (Height: 18, Left: 0, Right: 0); }
+        Label #TopEquipName { Text: "No equipment selected"; Style: ( ...@ValueText, HorizontalAlignment: Center ); Anchor: (Height: 22, Left: 0, Right: 0); }
+        Group { Anchor: (Height: 6); }
+        Group {
+          LayoutMode: Center;
+          Anchor: (Height: 64, Left: 0, Right: 0);
+          Group {
+          Anchor: (Width: 64, Height: 64);
+          Background: #132d43(0.9);
+          Padding: (Left: 4, Top: 4, Right: 4, Bottom: 4);
+          ItemIcon #TopEquipIcon { Anchor: (Width: 56, Height: 56); Visible: false; }
+          }
+        }
+        Group { Anchor: (Height: 6); }
+        Label #ReceiverPreviewGem { Text: "Sockets: 0/0"; Style: ( ...@ValueText, HorizontalAlignment: Center ); Anchor: (Height: 20, Left: 0, Right: 0); }
       }
 
-      Group { Anchor: (Width: 10); }
+      Group { FlexWeight: 1; }
 
-      Label #GemName {
-        Anchor: (Width: 260, Height: 44);
-        Style: @ValueText;
-      }
+      Group {
+        LayoutMode: Top;
+        Anchor: (Width: 400, Height: 158);
 
-      Label #GemBonus {
-        Anchor: (Width: 180, Height: 44);
-        Style: @ValueText;
+        Label { Text: "Material Item"; Style: ( ...@SectionHeader, HorizontalAlignment: Center ); Anchor: (Height: 18, Left: 0, Right: 0); }
+        Label #TopMaterialName { Text: "No gem selected"; Style: ( ...@ValueText, HorizontalAlignment: Center ); Anchor: (Height: 22, Left: 0, Right: 0); }
+        Group { Anchor: (Height: 6); }
+        Group {
+          LayoutMode: Center;
+          Anchor: (Height: 64, Left: 0, Right: 0);
+          Group {
+          Anchor: (Width: 64, Height: 64);
+          Background: #132d43(0.9);
+          Padding: (Left: 4, Top: 4, Right: 4, Bottom: 4);
+          ItemIcon #TopMaterialIcon { Anchor: (Width: 56, Height: 56); Visible: false; }
+          }
+        }
+        Group { Anchor: (Height: 6); }
+        Label #TopMaterialOwned { Text: "Owned: 0"; Style: ( ...@ValueText, HorizontalAlignment: Center ); Anchor: (Height: 20, Left: 0, Right: 0); }
+        Label #ReceiverPreviewSocketed { Text: "Selected Effect: -"; Style: ( ...@ValueText, HorizontalAlignment: Center ); Anchor: (Height: 20, Left: 0, Right: 0); }
+        Label #TopMaterialModeHint {
+          Text: "Select a material from the right inventory list.";
+          Style: (FontSize: 11, TextColor: #9db3c6, VerticalAlignment: Center, HorizontalAlignment: Center);
+          Anchor: (Height: 22, Left: 0, Right: 0);
+        }
       }
     }
 
     Group { Anchor: (Height: 8); }
 
-    Group #ReceiverPreview {
+    Group {
       LayoutMode: Top;
-      Anchor: (Left: 0, Right: 0, Height: 86);
-      Background: #000000(0.35);
-      Padding: (Left: 12, Top: 8, Right: 12);
+      Anchor: (Height: 128, Left: 0, Right: 0);
+      Background: #071927(0.55);
+      Padding: (Top: 8, Left: 10, Right: 10, Bottom: 8);
 
-      Label {
-        Text: "Receiver";
-        Style: @SectionHeader;
-        Anchor: (Height: 18, Left: 0, Right: 0);
+      Label { Text: "Socketed Gems"; Style: @SectionHeader; Anchor: (Height: 18, Left: 0, Right: 0); }
+      Group #SocketedGemListScroll {
+        LayoutMode: TopScrolling;
+        Anchor: (Height: 76, Left: 0, Right: 0);
+        Padding: (Right: 14);
+        Group #SocketedGemList { LayoutMode: Top; Anchor: (Left: 0, Right: 0); }
       }
-
-      Label #ReceiverPreviewName {
-        Text: "Receiver: none";
-        Style: @ValueText;
-        Anchor: (Height: 20, Left: 0, Right: 0);
-      }
-
-      Label #ReceiverPreviewGem {
-        Text: "Sockets: 0/0";
-        Style: @ValueText;
-        Anchor: (Height: 20, Left: 0, Right: 0);
-      }
-
-      Label #ReceiverPreviewSocketed {
-        Text: "After Socket: -";
-        Style: @ValueText;
-        Anchor: (Height: 20, Left: 0, Right: 0);
+      Label #SocketedGemEmpty {
+        Text: "No gems socketed on selected item.";
+        Style: (FontSize: 12, TextColor: #9fb0c5, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Anchor: (Height: 24, Left: 0, Right: 0);
+        Visible: true;
       }
     }
 
-    Group { Anchor: (Height: 10); }
+    Group { Anchor: (Height: 8); }
 
-    Group #ReceiverListScroll {
-      LayoutMode: TopScrolling;
+    Group #InventoryReplica {
+      LayoutMode: Left;
       FlexWeight: 1;
       Anchor: (Left: 0, Right: 0);
 
-      Group #ReceiverList {
+      Group {
         LayoutMode: Top;
-        Anchor: (Left: 0, Right: 0);
-        Padding: (Bottom: 4);
-      }
-    }
+        FlexWeight: 1;
+        Background: #071a28(0.6);
+        Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
 
-    Label #ReceiverEmpty {
-      Text: "No eligible rolled items found in inventory.";
-      Style: LabelStyle(...@BodyText, HorizontalAlignment: Center);
-      Anchor: (Height: 28, Left: 0, Right: 0);
-      Visible: false;
+        Label { Text: "Equipment Inventory"; Style: @SectionHeader; Anchor: (Height: 18, Left: 0, Right: 0); }
+        Group #EquipInventoryScroll {
+          LayoutMode: TopScrolling;
+          FlexWeight: 1;
+          Anchor: (Left: 0, Right: 0);
+          Padding: (Right: 14);
+          Group #EquipInventoryGrid { LayoutMode: Top; Anchor: (Left: 0, Right: 0); }
+        }
+        Label #EquipInventoryEmpty {
+          Text: "No eligible equipment items found.";
+          Style: (FontSize: 12, TextColor: #9fb0c5, HorizontalAlignment: Center, VerticalAlignment: Center);
+          Anchor: (Height: 22, Left: 0, Right: 0);
+          Visible: false;
+        }
+      }
+
+      Group { Anchor: (Width: 8); }
+
+      Group {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Background: #071a28(0.6);
+        Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+        Label #RightInventoryTitle { Text: "Gem Inventory"; Style: @SectionHeader; Anchor: (Height: 18, Left: 0, Right: 0); }
+        Group #MaterialInventoryScroll {
+          LayoutMode: TopScrolling;
+          FlexWeight: 1;
+          Anchor: (Left: 0, Right: 0);
+          Padding: (Right: 14);
+          Group #MaterialInventoryGrid { LayoutMode: Top; Anchor: (Left: 0, Right: 0); }
+        }
+        Label #MaterialInventoryEmpty {
+          Text: "No valid material items found.";
+          Style: (FontSize: 12, TextColor: #9fb0c5, HorizontalAlignment: Center, VerticalAlignment: Center);
+          Anchor: (Height: 22, Left: 0, Right: 0);
+          Visible: false;
+        }
+      }
     }
 
     Group { Anchor: (Height: 10); }
 
-    Group {
+    Group #AddActionRow {
       LayoutMode: Center;
-      Anchor: (Left: 0, Right: 0, Height: 42);
-
+      Anchor: (Left: 0, Right: 0, Height: 40);
+      Visible: true;
       TextButton #SocketButton {
         Anchor: (Width: 220, Height: 34);
-        Text: "Socket Gem";
+        Text: "Socket";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+    }
+
+    Group #RemoveActionRow {
+      LayoutMode: Center;
+      Anchor: (Left: 0, Right: 0, Height: 40);
+      Visible: true;
+      TextButton #RemoveButton {
+        Anchor: (Width: 220, Height: 34);
+        Text: "Remove";
         Style: $C.@DefaultTextButtonStyle;
       }
     }
   }
 }
-

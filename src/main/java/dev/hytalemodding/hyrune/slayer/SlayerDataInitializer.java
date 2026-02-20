@@ -1,41 +1,73 @@
 package dev.hytalemodding.hyrune.slayer;
 
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Builds default slayer data.
+ * Builds Slayer task registry from data-driven task/master configs.
  */
 public class SlayerDataInitializer {
 
-    public static SlayerTaskRegistry buildRegistry() {
+    public static SlayerTaskRegistry buildRegistry(SlayerTasksConfig tasksConfig, SlayerMastersConfig mastersConfig) {
         SlayerTaskRegistry registry = new SlayerTaskRegistry();
-
-        // TIER 1: Vermin & Insects (Groups from NpcLevelConfig)
-        registry.registerTier(new SlayerTaskTier(1, 19, List.of(
-                new SlayerTaskDefinition("t1_vermin", "vermin", 8, 14),
-                new SlayerTaskDefinition("t1_beasts", "beasts", 6, 12)
-        )));
-
-        // TIER 2: Wildlife & Outlaws
-        registry.registerTier(new SlayerTaskTier(20, 39, List.of(
-                new SlayerTaskDefinition("t2_beasts", "beasts", 22, 30),
-                new SlayerTaskDefinition("t2_preds", "predators", 18, 26)
-        )));
-
-        // TIER 3: Undead & Beasts
-        registry.registerTier(new SlayerTaskTier(40, 59, List.of(
-                new SlayerTaskDefinition("t3_preds", "predators", 35, 50),
-                new SlayerTaskDefinition("t3_outlaws", "outlaws", 21, 33),
-                new SlayerTaskDefinition("t3_brutes", "brutes", 16, 54)
-        )));
-
-        // TIER 4: Elites
-        registry.registerTier(new SlayerTaskTier(60, 79, List.of(
-                new SlayerTaskDefinition("t4_outlaws", "outlaws", 53, 80),
-                new SlayerTaskDefinition("t4_undead", "undead", 44, 62)
-        )));
-
+        registerTasks(registry, tasksConfig);
+        registerMasters(registry, mastersConfig);
         return registry;
+    }
+
+    private static void registerTasks(SlayerTaskRegistry registry, SlayerTasksConfig tasksConfig) {
+        if (registry == null || tasksConfig == null || tasksConfig.tasks == null) {
+            return;
+        }
+        for (SlayerTasksConfig.Task task : tasksConfig.tasks) {
+            if (task == null || task.id == null || task.id.isBlank()
+                || task.targetFamilyId == null || task.targetFamilyId.isBlank()) {
+                continue;
+            }
+            registry.registerTask(new SlayerTaskDefinition(
+                task.id,
+                task.targetFamilyId,
+                Math.max(1, task.requiredSlayerLevel),
+                Math.max(1, task.requiredCombatLevel)
+            ));
+        }
+    }
+
+    private static void registerMasters(SlayerTaskRegistry registry, SlayerMastersConfig mastersConfig) {
+        if (registry == null || mastersConfig == null || mastersConfig.masters == null) {
+            return;
+        }
+        for (SlayerMastersConfig.Master master : mastersConfig.masters) {
+            if (master == null || master.id == null || master.id.isBlank()) {
+                continue;
+            }
+            List<SlayerMasterDefinition.TaskEntry> taskEntries = new ArrayList<>();
+            if (master.taskEntries != null) {
+                for (SlayerMastersConfig.TaskEntry entry : master.taskEntries) {
+                    if (entry == null || entry.taskId == null || entry.taskId.isBlank()) {
+                        continue;
+                    }
+                    taskEntries.add(new SlayerMasterDefinition.TaskEntry(
+                        entry.taskId,
+                        Math.max(1, entry.weight),
+                        Math.max(1, entry.minCount),
+                        Math.max(entry.minCount, entry.maxCount)
+                    ));
+                }
+            }
+            registry.registerMaster(new SlayerMasterDefinition(
+                master.id,
+                master.displayName == null || master.displayName.isBlank() ? master.id : master.displayName,
+                Math.max(1, master.minSlayerLevel),
+                Math.max(1, master.minCombatLevel),
+                Math.max(1, master.basePoints),
+                Math.max(1, master.streakMilestoneInterval),
+                Math.max(0, master.streakMilestoneBonusPoints),
+                taskEntries
+            ));
+        }
     }
 }

@@ -8,6 +8,7 @@ import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.combat.CombatStateTracker;
@@ -40,28 +41,38 @@ public class CombatStateSystem extends EntityEventSystem<EntityStore, Damage> {
             return;
         }
 
-        // Victim
+        // Victim (players and NPCs/entities with UUID component).
         var holder = EntityUtils.toHolder(index, archetypeChunk);
-        Player victimPlayer = holder.getComponent(Player.getComponentType());
-        if (victimPlayer != null) {
-            UUID victimUuid = PlayerEntityAccess.getPlayerUuid(victimPlayer);
-            if (victimUuid != null) {
-                CombatStateTracker.markCombat(victimUuid);
-            }
+        UUIDComponent victimUuidComponent = holder.getComponent(UUIDComponent.getComponentType());
+        if (victimUuidComponent != null && victimUuidComponent.getUuid() != null) {
+            CombatStateTracker.markCombat(victimUuidComponent.getUuid());
         }
 
-        // Attacker (if entity source is a player)
+        // Attacker (entity/projectile sources with UUID component).
         Damage.Source source = damage.getSource();
         if (source instanceof Damage.EntitySource entitySource) {
-            Ref<EntityStore> attackerRef = entitySource.getRef();
-            if (attackerRef != null && attackerRef.isValid()) {
-                Player attackerPlayer = store.getComponent(attackerRef, Player.getComponentType());
-                if (attackerPlayer != null) {
-                    UUID attackerUuid = PlayerEntityAccess.getPlayerUuid(attackerPlayer);
-                    if (attackerUuid != null) {
-                        CombatStateTracker.markCombat(attackerUuid);
-                    }
-                }
+            markAttackerCombat(store, entitySource.getRef());
+        } else if (source instanceof Damage.ProjectileSource projectileSource) {
+            markAttackerCombat(store, projectileSource.getRef());
+        }
+    }
+
+    private static void markAttackerCombat(Store<EntityStore> store, Ref<EntityStore> attackerRef) {
+        if (attackerRef == null || !attackerRef.isValid()) {
+            return;
+        }
+
+        UUIDComponent attackerUuidComponent = store.getComponent(attackerRef, UUIDComponent.getComponentType());
+        if (attackerUuidComponent != null && attackerUuidComponent.getUuid() != null) {
+            CombatStateTracker.markCombat(attackerUuidComponent.getUuid());
+            return;
+        }
+
+        Player attackerPlayer = store.getComponent(attackerRef, Player.getComponentType());
+        if (attackerPlayer != null) {
+            UUID attackerUuid = PlayerEntityAccess.getPlayerUuid(attackerPlayer);
+            if (attackerUuid != null) {
+                CombatStateTracker.markCombat(attackerUuid);
             }
         }
     }

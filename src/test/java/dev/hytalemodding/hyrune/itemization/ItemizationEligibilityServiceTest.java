@@ -23,10 +23,11 @@ class ItemizationEligibilityServiceTest {
     void excludedPrefixWinsOverEligiblePrefix() {
         HyruneConfig config = new HyruneConfig();
         config.itemizationEligiblePrefixes = List.of("weapon_");
-        config.itemizationExcludedPrefixes = List.of("weapon_bomb_");
+        config.itemizationExcludedPrefixes = List.of("weapon_bomb_", "weapon_arrow_");
         config.itemizationExcludedIds = List.of();
 
         assertFalse(ItemizationEligibilityService.isEligibleItemId("Weapon_Bomb_Fire", config));
+        assertFalse(ItemizationEligibilityService.isEligibleItemId("Weapon_Arrow_Iron", config));
     }
 
     @Test

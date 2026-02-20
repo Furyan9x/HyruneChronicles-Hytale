@@ -3,6 +3,9 @@ package dev.hytalemodding.hyrune.gamemode;
 import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import dev.hytalemodding.hyrune.itemization.ItemGenerationService;
+import dev.hytalemodding.hyrune.itemization.ItemRarityRollModel;
+import dev.hytalemodding.hyrune.itemization.ItemRollSource;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -151,7 +154,12 @@ public class StarterKitProvider {
 
         boolean success = true;
         for (ItemStack item : starterKit) {
-            var transaction = container.addItemStack(item);
+            ItemStack rolled = ItemGenerationService.rollIfEligible(
+                item,
+                ItemRollSource.STARTER_KIT,
+                ItemRarityRollModel.GenerationContext.of("starter_kit_grant")
+            );
+            var transaction = container.addItemStack(rolled);
             if (transaction == null || !transaction.succeeded()) {
                 success = false;
                 // Continue trying to add other items even if one fails

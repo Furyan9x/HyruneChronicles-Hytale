@@ -18,7 +18,10 @@ public final class NpcLevelStatsApplier {
     private NpcLevelStatsApplier() {
     }
 
-    public static void apply(Store<EntityStore> store, Ref<EntityStore> ref, NpcLevelComponent component) {
+    public static void apply(Store<EntityStore> store,
+                             Ref<EntityStore> ref,
+                             NpcLevelComponent component,
+                             NpcLevelService levelService) {
         if (store == null || ref == null || component == null) {
             return;
         }
@@ -33,7 +36,13 @@ public final class NpcLevelStatsApplier {
             return;
         }
 
-        float healthBonus = component.getLevel() * SkillStatBonusApplier.HEALTH_PER_CONSTITUTION;
+        NpcLevelService.NpcCombatStats combatStats = levelService == null
+            ? null
+            : levelService.resolveCombatStats(component, CombatStyle.MELEE);
+        double healthMultiplier = combatStats == null ? 1.0 : combatStats.healthMultiplier();
+        float healthBonus = (float) (component.getLevel()
+            * SkillStatBonusApplier.HEALTH_PER_CONSTITUTION
+            * Math.max(0.10, healthMultiplier));
         Modifier modifier = new StaticModifier(Modifier.ModifierTarget.MAX,
             StaticModifier.CalculationType.ADDITIVE, healthBonus);
         statMap.putModifier(healthIndex, HEALTH_MODIFIER_ID, modifier);

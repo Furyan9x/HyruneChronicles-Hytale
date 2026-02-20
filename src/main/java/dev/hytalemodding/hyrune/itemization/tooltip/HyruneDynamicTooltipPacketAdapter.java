@@ -6,6 +6,7 @@ import com.hypixel.hytale.protocol.EntityUpdate;
 import com.hypixel.hytale.protocol.EquipmentUpdate;
 import com.hypixel.hytale.protocol.InventorySection;
 import com.hypixel.hytale.protocol.ItemBase;
+import com.hypixel.hytale.protocol.ItemUpdate;
 import com.hypixel.hytale.protocol.ItemWithAllMetadata;
 import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.UpdateType;
@@ -449,22 +450,68 @@ public final class HyruneDynamicTooltipPacketAdapter {
             return;
         }
 
+        UUID playerUuid = playerRef.getUuid();
+        String language = playerRef.getLanguage();
+        Map<String, ItemBase> virtualItems = new LinkedHashMap<>();
+        Map<String, String> translations = new LinkedHashMap<>();
         Integer localEntityId = playerEntityIds.get(playerRef.getUuid());
-        if (localEntityId == null) {
-            return;
-        }
 
         for (EntityUpdate entityUpdate : entityUpdates.updates) {
-            if (entityUpdate == null || entityUpdate.networkId != localEntityId || entityUpdate.updates == null) {
+            if (entityUpdate == null || entityUpdate.updates == null) {
                 continue;
             }
 
+            boolean isLocalPlayer = localEntityId != null && entityUpdate.networkId == localEntityId;
             for (ComponentUpdate update : entityUpdate.updates) {
-                if (update instanceof EquipmentUpdate equipmentUpdate) {
+                if (isLocalPlayer && update instanceof EquipmentUpdate equipmentUpdate) {
                     processEquipmentUpdate(playerRef, equipmentUpdate);
+                    continue;
+                }
+                if (update instanceof ItemUpdate itemUpdate) {
+                    processEntityItemUpdate(playerUuid, language, itemUpdate, virtualItems, translations);
                 }
             }
         }
+
+        sendAuxiliaryPackets(playerRef, virtualItems, translations);
+    }
+
+    private void processEntityItemUpdate(UUID playerUuid,
+                                         String language,
+                                         ItemUpdate itemUpdate,
+                                         Map<String, ItemBase> virtualItems,
+                                         Map<String, String> translations) {
+        if (itemUpdate.item == null || itemUpdate.item.itemId == null || itemUpdate.item.itemId.isBlank()) {
+            return;
+        }
+        if (HyruneVirtualItemRegistry.isVirtualId(itemUpdate.item.itemId)) {
+            return;
+        }
+
+        HyruneDynamicTooltipComposer.ComposedTooltip composed =
+            tooltipComposer.compose(playerUuid, itemUpdate.item.itemId, itemUpdate.item.metadata);
+        if (composed == null) {
+            return;
+        }
+
+        String virtualId = virtualItemRegistry.generateVirtualId(itemUpdate.item.itemId, composed.getCombinedHash());
+        ItemBase virtualBase = virtualItemRegistry.getOrCreateVirtualItemBase(itemUpdate.item.itemId, virtualId, composed.getRarity());
+        if (virtualBase == null) {
+            return;
+        }
+
+        virtualItems.put(virtualId, virtualBase);
+
+        String baseDescription = virtualItemRegistry.getOriginalDescription(itemUpdate.item.itemId, language);
+        String fullDescription = composed.buildDescription(baseDescription);
+        translations.put(HyruneVirtualItemRegistry.getVirtualDescriptionKey(virtualId), fullDescription);
+        String baseName = virtualItemRegistry.getOriginalName(itemUpdate.item.itemId, language);
+        String resolvedName = composed.getDisplayNameOverride() == null ? baseName : composed.getDisplayNameOverride();
+        translations.put(HyruneVirtualItemRegistry.getVirtualNameKey(virtualId), resolvedName);
+
+        ItemWithAllMetadata clone = itemUpdate.item.clone();
+        clone.itemId = virtualId;
+        itemUpdate.item = clone;
     }
 
     private void processEquipmentUpdate(PlayerRef playerRef, EquipmentUpdate equipment) {

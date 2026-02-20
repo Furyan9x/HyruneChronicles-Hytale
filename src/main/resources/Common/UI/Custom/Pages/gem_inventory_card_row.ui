@@ -1,0 +1,87 @@
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 74, Left: 0, Right: 0);
+
+  Group #Slot0 {
+    LayoutMode: Top;
+    Anchor: (Width: 72, Height: 72);
+    Background: #0c2438(0.75);
+    Padding: (Top: 2, Left: 2, Right: 2, Bottom: 2);
+
+    Button #CardBtn0 {
+      Anchor: (Width: 68, Height: 68);
+      Background: #122e45(0.95);
+      ItemIcon #CardIcon0 { Anchor: (Width: 56, Height: 56, Top: 2, Left: 6); }
+      Label #CardMeta0 { Text: ""; Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 12); Style: (FontSize: 10, TextColor: #d0dfec, HorizontalAlignment: Center, VerticalAlignment: Center); }
+      Label #CardSel0 { Text: "S"; Anchor: (Top: 0, Right: 2, Width: 12, Height: 12); Style: (FontSize: 10, TextColor: #9fffbf, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Visible: false; }
+    }
+  }
+
+  Group { Anchor: (Width: 6); }
+
+  Group #Slot1 {
+    LayoutMode: Top;
+    Anchor: (Width: 72, Height: 72);
+    Background: #0c2438(0.75);
+    Padding: (Top: 2, Left: 2, Right: 2, Bottom: 2);
+
+    Button #CardBtn1 {
+      Anchor: (Width: 68, Height: 68);
+      Background: #122e45(0.95);
+      ItemIcon #CardIcon1 { Anchor: (Width: 56, Height: 56, Top: 2, Left: 6); }
+      Label #CardMeta1 { Text: ""; Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 12); Style: (FontSize: 10, TextColor: #d0dfec, HorizontalAlignment: Center, VerticalAlignment: Center); }
+      Label #CardSel1 { Text: "S"; Anchor: (Top: 0, Right: 2, Width: 12, Height: 12); Style: (FontSize: 10, TextColor: #9fffbf, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Visible: false; }
+    }
+  }
+
+  Group { Anchor: (Width: 6); }
+
+  Group #Slot2 {
+    LayoutMode: Top;
+    Anchor: (Width: 72, Height: 72);
+    Background: #0c2438(0.75);
+    Padding: (Top: 2, Left: 2, Right: 2, Bottom: 2);
+
+    Button #CardBtn2 {
+      Anchor: (Width: 68, Height: 68);
+      Background: #122e45(0.95);
+      ItemIcon #CardIcon2 { Anchor: (Width: 56, Height: 56, Top: 2, Left: 6); }
+      Label #CardMeta2 { Text: ""; Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 12); Style: (FontSize: 10, TextColor: #d0dfec, HorizontalAlignment: Center, VerticalAlignment: Center); }
+      Label #CardSel2 { Text: "S"; Anchor: (Top: 0, Right: 2, Width: 12, Height: 12); Style: (FontSize: 10, TextColor: #9fffbf, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Visible: false; }
+    }
+  }
+
+  Group { Anchor: (Width: 6); }
+
+  Group #Slot3 {
+    LayoutMode: Top;
+    Anchor: (Width: 72, Height: 72);
+    Background: #0c2438(0.75);
+    Padding: (Top: 2, Left: 2, Right: 2, Bottom: 2);
+
+    Button #CardBtn3 {
+      Anchor: (Width: 68, Height: 68);
+      Background: #122e45(0.95);
+      ItemIcon #CardIcon3 { Anchor: (Width: 56, Height: 56, Top: 2, Left: 6); }
+      Label #CardMeta3 { Text: ""; Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 12); Style: (FontSize: 10, TextColor: #d0dfec, HorizontalAlignment: Center, VerticalAlignment: Center); }
+      Label #CardSel3 { Text: "S"; Anchor: (Top: 0, Right: 2, Width: 12, Height: 12); Style: (FontSize: 10, TextColor: #9fffbf, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Visible: false; }
+    }
+  }
+
+  Group { Anchor: (Width: 6); }
+
+  Group #Slot4 {
+    LayoutMode: Top;
+    Anchor: (Width: 72, Height: 72);
+    Background: #0c2438(0.75);
+    Padding: (Top: 2, Left: 2, Right: 2, Bottom: 2);
+
+    Button #CardBtn4 {
+      Anchor: (Width: 68, Height: 68);
+      Background: #122e45(0.95);
+      ItemIcon #CardIcon4 { Anchor: (Width: 56, Height: 56, Top: 2, Left: 6); }
+      Label #CardMeta4 { Text: ""; Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 12); Style: (FontSize: 10, TextColor: #d0dfec, HorizontalAlignment: Center, VerticalAlignment: Center); }
+      Label #CardSel4 { Text: "S"; Anchor: (Top: 0, Right: 2, Width: 12, Height: 12); Style: (FontSize: 10, TextColor: #9fffbf, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Visible: false; }
+    }
+  }
+}

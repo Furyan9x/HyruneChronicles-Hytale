@@ -110,6 +110,18 @@ public final class PlayerItemizationStatsService {
         CACHE.remove(uuid);
     }
 
+    public static double getDefensiveStat(Player player, PlayerItemizationStats stats, ItemizedStat stat) {
+        if (stats == null || stat == null) {
+            return 0.0;
+        }
+        double value = stats.getArmorResolvedSpecialized().get(stat);
+        Inventory inventory = player == null ? null : player.getInventory();
+        if (inventory != null && isShieldItem(inventory.getItemInHand())) {
+            value += stats.getHeldResolvedSpecialized().get(stat);
+        }
+        return value;
+    }
+
     private static PlayerItemizationStats recompute(Player player, long fingerprint) {
         Inventory inventory = player.getInventory();
         if (inventory == null) {
@@ -156,40 +168,18 @@ public final class PlayerItemizationStatsService {
         }
 
         double physicalDamageMultiplier = clamp(
-            1.0
-                + (heldSpecialized.get(ItemizedStat.PHYSICAL_DAMAGE) * 0.02)
-                + (heldSpecialized.get(ItemizedStat.PHYSICAL_PENETRATION) * 0.01)
-                + (heldSpecialized.get(ItemizedStat.ATTACK_SPEED) * 0.20),
+            1.0 + (heldSpecialized.get(ItemizedStat.PHYSICAL_DAMAGE) * 0.02),
             0.20,
             4.0
         );
         double magicalDamageMultiplier = clamp(
-            1.0
-                + (heldSpecialized.get(ItemizedStat.MAGICAL_DAMAGE) * 0.02)
-                + (heldSpecialized.get(ItemizedStat.MAGICAL_PENETRATION) * 0.01)
-                + (heldSpecialized.get(ItemizedStat.CAST_SPEED) * 0.20),
+            1.0 + (heldSpecialized.get(ItemizedStat.MAGICAL_DAMAGE) * 0.02),
             0.20,
             4.0
         );
 
-        double physicalDefenceReductionBonus = clamp(
-            (defensiveSpecialized.get(ItemizedStat.PHYSICAL_DEFENCE) * 0.004)
-                + (defensiveSpecialized.get(ItemizedStat.BLOCK_EFFICIENCY) * 0.010)
-                + (defensiveSpecialized.get(ItemizedStat.CRIT_REDUCTION) * 0.005)
-                + (defensiveSpecialized.get(ItemizedStat.MAX_HP) * 0.0008)
-                + (defensiveSpecialized.get(ItemizedStat.HP_REGEN) * 0.020),
-            0.0,
-            0.70
-        );
-        double magicalDefenceReductionBonus = clamp(
-            (defensiveSpecialized.get(ItemizedStat.MAGICAL_DEFENCE) * 0.004)
-                + (defensiveSpecialized.get(ItemizedStat.BLOCK_EFFICIENCY) * 0.006)
-                + (defensiveSpecialized.get(ItemizedStat.CRIT_REDUCTION) * 0.005)
-                + (defensiveSpecialized.get(ItemizedStat.MAX_HP) * 0.0008)
-                + (defensiveSpecialized.get(ItemizedStat.HP_REGEN) * 0.020),
-            0.0,
-            0.70
-        );
+        double physicalDefenceReductionBonus = defenceReductionFromArmor(defensiveSpecialized.get(ItemizedStat.PHYSICAL_DEFENCE));
+        double magicalDefenceReductionBonus = defenceReductionFromArmor(defensiveSpecialized.get(ItemizedStat.MAGICAL_DEFENCE));
 
         double physicalCritChanceBonus = clamp(heldSpecialized.get(ItemizedStat.PHYSICAL_CRIT_CHANCE), 0.0, 0.60);
         double magicalCritChanceBonus = clamp(heldSpecialized.get(ItemizedStat.MAGICAL_CRIT_CHANCE), 0.0, 0.60);
@@ -198,15 +188,16 @@ public final class PlayerItemizationStatsService {
         double moveSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.MOVEMENT_SPEED), -0.20, 0.60);
         double attackSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.ATTACK_SPEED), -0.20, 0.80);
         double castSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.CAST_SPEED), -0.20, 0.80);
-        double blockBreakSpeedBonus = clamp(totalSpecialized.get(ItemizedStat.BLOCK_BREAK_SPEED), 0.0, 1.50);
-        double rareDropChanceBonus = clamp(totalSpecialized.get(ItemizedStat.RARE_DROP_CHANCE), 0.0, 0.75);
-        double doubleDropChanceBonus = clamp(totalSpecialized.get(ItemizedStat.DOUBLE_DROP_CHANCE), 0.0, 0.60);
+        // Tool utility stats are sourced from held-item specialization.
+        double blockBreakSpeedBonus = clamp(heldSpecialized.get(ItemizedStat.BLOCK_BREAK_SPEED), 0.0, 1.50);
+        double rareDropChanceBonus = clamp(heldSpecialized.get(ItemizedStat.RARE_DROP_CHANCE), 0.0, 0.75);
+        double doubleDropChanceBonus = clamp(heldSpecialized.get(ItemizedStat.DOUBLE_DROP_CHANCE), 0.0, 0.60);
         double manaRegenBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.MANA_REGEN));
         double staminaRegenBonus = 0.0;
         double hpRegenBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.HP_REGEN));
         double maxHpBonus = Math.max(0.0, totalSpecialized.get(ItemizedStat.MAX_HP));
         double manaCostReduction = clamp(totalSpecialized.get(ItemizedStat.MANA_COST_REDUCTION), 0.0, 0.75);
-        double reflectDamage = Math.max(0.0, defensiveSpecialized.get(ItemizedStat.REFLECT_DAMAGE));
+        double reflectDamage = clamp(defensiveSpecialized.get(ItemizedStat.REFLECT_DAMAGE), 0.0, 0.75);
 
         PlayerItemizationStats out = new PlayerItemizationStats(
             fingerprint,
@@ -305,6 +296,11 @@ public final class PlayerItemizationStatsService {
 
     private static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private static double defenceReductionFromArmor(double armorValue) {
+        double armor = Math.max(0.0, armorValue);
+        return clamp(armor * 0.004, 0.0, 0.70);
     }
 
     private static String fmt(double value) {

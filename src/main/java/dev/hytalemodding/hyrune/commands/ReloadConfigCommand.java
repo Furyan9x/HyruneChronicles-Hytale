@@ -29,12 +29,21 @@ public class ReloadConfigCommand extends AbstractPlayerCommand {
                            @Nonnull PlayerRef playerRef,
                            @Nonnull World world) {
         HyruneConfig cfg = HyruneConfigManager.reload();
+        HyruneConfig.RegenConfig regen = cfg.regen == null ? new HyruneConfig.RegenConfig() : cfg.regen;
         ctx.sendMessage(Message.raw(
-            "Hyrune config reloaded. durabilityDebugLogging=" + cfg.durabilityDebugLogging
+            "Hyrune config reloaded."
+                + " regen[p:" + fmt(regen.playerHealthRegenPerConstitution) + "/con, cap " + fmt(regen.playerHealthRegenCapPerSecond)
+                + " | npc:" + fmt(regen.npcHealthRegenPerLevel) + "/lvl, cap " + fmt(regen.npcHealthRegenCapPerSecond)
+                + " | boss:" + fmt(regen.bossHealthRegenPerLevel) + "/lvl, cap " + fmt(regen.bossHealthRegenCapPerSecond) + "]"
+                + " durabilityDebugLogging=" + cfg.durabilityDebugLogging
                 + ", animalHusbandryGating=" + cfg.enableAnimalHusbandryGating
                 + ", seedRules=" + cfg.farmingSeedLevelRequirements.size()
                 + ", animalRules=" + cfg.farmingAnimalLevelRequirements.size()
                 + ", npcNameOverrides=" + cfg.npcNameOverrides.size()
         ));
+    }
+
+    private static String fmt(double value) {
+        return String.format(java.util.Locale.US, "%.3f", value);
     }
 }

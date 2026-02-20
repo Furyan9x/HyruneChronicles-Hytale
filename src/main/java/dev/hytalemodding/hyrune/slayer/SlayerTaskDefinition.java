@@ -6,14 +6,14 @@ package dev.hytalemodding.hyrune.slayer;
 public class SlayerTaskDefinition {
     private final String id;
     private final String targetGroupId;
-    private final int minCount;
-    private final int maxCount;
+    private final int requiredSlayerLevel;
+    private final int requiredCombatLevel;
 
-    public SlayerTaskDefinition(String id, String targetGroupId, int minCount, int maxCount) {
+    public SlayerTaskDefinition(String id, String targetGroupId, int requiredSlayerLevel, int requiredCombatLevel) {
         this.id = id;
         this.targetGroupId = targetGroupId;
-        this.minCount = minCount;
-        this.maxCount = maxCount;
+        this.requiredSlayerLevel = Math.max(1, requiredSlayerLevel);
+        this.requiredCombatLevel = Math.max(1, requiredCombatLevel);
     }
 
     public String getId() {
@@ -24,11 +24,11 @@ public class SlayerTaskDefinition {
         return targetGroupId;
     }
 
-    public int getMinCount() {
-        return minCount;
+    public int getRequiredSlayerLevel() {
+        return requiredSlayerLevel;
     }
 
-    public int getMaxCount() {
-        return maxCount;
+    public int getRequiredCombatLevel() {
+        return requiredCombatLevel;
     }
 }

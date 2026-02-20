@@ -59,7 +59,7 @@ public class NpcLevelAssignmentSystem extends EntityTickingSystem<EntityStore> i
         }
         commandBuffer.putComponent(ref, Hyrune.getNpcLevelComponentType(), component);
 
-        NpcLevelStatsApplier.apply(store, ref, component);
+        NpcLevelStatsApplier.apply(store, ref, component, levelService);
     }
 
 

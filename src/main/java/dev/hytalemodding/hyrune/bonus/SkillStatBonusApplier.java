@@ -32,6 +32,7 @@ public final class SkillStatBonusApplier {
 
     public static final float MANA_REGEN_PER_MAGIC = 0.2f;
     public static final float STAMINA_REGEN_PER_AGILITY = 1.0f / 99.0f;
+    public static final float HEALTH_REGEN_PER_CONSTITUTION = 20.0f / 99.0f;
 
     private static final String HEALTH_MODIFIER_ID = "hyrune:health_bonus";
     private static final String ITEM_HEALTH_MODIFIER_ID = "hyrune:item_health_bonus";

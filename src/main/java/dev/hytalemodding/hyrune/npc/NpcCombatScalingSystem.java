@@ -18,6 +18,9 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import dev.hytalemodding.Hyrune;
+import dev.hytalemodding.hyrune.itemization.ItemizedStat;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStats;
+import dev.hytalemodding.hyrune.itemization.PlayerItemizationStatsService;
 import dev.hytalemodding.hyrune.system.SkillCombatBonusSystem;
 
 import javax.annotation.Nonnull;
@@ -60,7 +63,7 @@ public class NpcCombatScalingSystem extends EntityEventSystem<EntityStore, Damag
         }
 
         applyNpcDefence(index, chunk, store, damage);
-        applyNpcOutgoing(store, damage);
+        applyNpcOutgoing(index, chunk, store, damage);
     }
 
     private void applyNpcDefence(int index,
@@ -89,16 +92,19 @@ public class NpcCombatScalingSystem extends EntityEventSystem<EntityStore, Damag
 
         CombatStyle weakness = npcLevel.getWeakness() != null
             ? npcLevel.getWeakness()
-            : levelService.resolveWeakness(levelService.getConfig().getDefaultWeakness());
+            : levelService.resolveWeakness(levelService.getDefaultWeakness());
         double multiplier = style == weakness
-            ? levelService.getConfig().getWeaknessMultiplier()
-            : levelService.getConfig().getResistanceMultiplier();
+            ? levelService.getWeaknessMultiplier()
+            : levelService.getResistanceMultiplier();
 
         float finalDamage = (float) (afterDefence * multiplier);
         damage.setAmount(finalDamage);
     }
 
-    private void applyNpcOutgoing(Store<EntityStore> store, Damage damage) {
+    private void applyNpcOutgoing(int index,
+                                  ArchetypeChunk<EntityStore> chunk,
+                                  Store<EntityStore> store,
+                                  Damage damage) {
         Damage.Source source = damage.getSource();
         if (source == null) {
             return;
@@ -128,19 +134,31 @@ public class NpcCombatScalingSystem extends EntityEventSystem<EntityStore, Damag
 
         CombatStyle style = resolveCombatStyle(damage, store);
         NpcLevelService.NpcCombatStats combatStats = levelService.resolveCombatStats(npcLevel, style);
-        applyOutgoing(combatStats, damage);
+        applyOutgoing(combatStats, damage, resolveVictimCritSuppression(index, chunk));
     }
 
-    private static void applyOutgoing(NpcLevelService.NpcCombatStats stats, Damage damage) {
+    private static void applyOutgoing(NpcLevelService.NpcCombatStats stats,
+                                      Damage damage,
+                                      double defenderCritSuppression) {
         if (stats == null || damage == null) {
             return;
         }
 
         damage.setAmount((float) (damage.getAmount() * stats.damageMultiplier()));
-        if (ThreadLocalRandom.current().nextDouble() >= stats.critChance()) {
+        double effectiveCritChance = SkillCombatBonusSystem.suppressCritChance(stats.critChance(), defenderCritSuppression);
+        if (ThreadLocalRandom.current().nextDouble() >= effectiveCritChance) {
             return;
         }
         damage.setAmount((float) (damage.getAmount() * stats.critMultiplier()));
+    }
+
+    private static double resolveVictimCritSuppression(int index, ArchetypeChunk<EntityStore> chunk) {
+        Player victim = chunk.getComponent(index, Player.getComponentType());
+        if (victim == null) {
+            return 0.0;
+        }
+        PlayerItemizationStats victimStats = PlayerItemizationStatsService.getOrRecompute(victim);
+        return PlayerItemizationStatsService.getDefensiveStat(victim, victimStats, ItemizedStat.CRIT_REDUCTION);
     }
 
     private CombatStyle resolveCombatStyle(Damage damage, Store<EntityStore> store) {

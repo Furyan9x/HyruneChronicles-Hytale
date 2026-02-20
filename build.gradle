@@ -22,6 +22,7 @@ repositories {
 dependencies {
     // The Hytale Server API
     compileOnly files('libs/HytaleServer.jar')
+    testCompileOnly files('libs/HytaleServer.jar')
     testRuntimeOnly files('libs/HytaleServer.jar')
 
     // Dependencies needed for JSON storage (Gson is standard)
@@ -51,7 +52,6 @@ tasks.named('test') {
 def devServerRoot = providers.gradleProperty('devServerRoot')
     .orElse('C:/Users/devin/Desktop/HytaleServer/Server')
 def devModsDir = devServerRoot.map { root -> file("${root}/mods") }
-def devConfigDir = devServerRoot.map { root -> file("${root}/hyrune_data") }
 
 tasks.register('copyToDevEnv', Copy) {
     // Dev server mods directory can contain stale junctions/symlinks outside this repo.
@@ -60,17 +60,6 @@ tasks.register('copyToDevEnv', Copy) {
     onlyIf { devModsDir.get().exists() }
     from jar.archiveFile
     into devModsDir
-}
-
-tasks.register('copyGameplayConfigToDevEnv', Copy) {
-    doNotTrackState('Destination may contain external junctions/symlinks.')
-    onlyIf { devConfigDir.get().exists() }
-    from file('hyrune_data/gameplay_config.json')
-    into devConfigDir
-}
-
-tasks.named('copyToDevEnv') {
-    finalizedBy('copyGameplayConfigToDevEnv')
 }
 
 tasks.named('build') {

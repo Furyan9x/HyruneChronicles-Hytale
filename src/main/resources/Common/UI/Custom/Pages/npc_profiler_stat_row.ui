@@ -1,0 +1,20 @@
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 28, Left: 0, Right: 0);
+  Background: #0b2233(0.58);
+  Padding: (Left: 8, Right: 8);
+
+  Label #StatLabel {
+    Text: "Stat";
+    Anchor: (Width: 360, Height: 28);
+    Style: (FontSize: 12, TextColor: #cfdceb, VerticalAlignment: Center);
+  }
+
+  Group { FlexWeight: 1; }
+
+  Label #StatValue {
+    Text: "Value";
+    Anchor: (Width: 420, Height: 28);
+    Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+  }
+}

@@ -93,7 +93,7 @@ public final class GemSocketConfigHelper {
             if (Math.abs(value) <= 1e-9) {
                 continue;
             }
-            return ItemStatDisplayFormatter.formatFlat(stat, value) + " " + stat.getDisplayName();
+            return formatGemBonusValue(stat, value) + " " + stat.getDisplayName();
         }
         return ItemStatDisplayFormatter.formatFlat(ItemizedStat.MAX_HP, maxHpPerSocketedGem()) + " Max HP";
     }
@@ -205,6 +205,16 @@ public final class GemSocketConfigHelper {
             return false;
         }
         return patternMatchScore(normalizedItemId, configuredPattern) >= 0;
+    }
+
+    private static String formatGemBonusValue(ItemizedStat stat, double value) {
+        ItemizationSpecializedStatConfigHelper.RollConstraint constraint =
+            ItemizationSpecializedStatConfigHelper.rollConstraintForStat(stat);
+        if (constraint == ItemizationSpecializedStatConfigHelper.RollConstraint.PERCENT_ONLY
+            || (stat != null && stat.isPercentPrimary())) {
+            return ItemStatDisplayFormatter.formatPercent(value);
+        }
+        return ItemStatDisplayFormatter.formatFlat(stat, value);
     }
 
     private static double clamp(double value, double min, double max) {

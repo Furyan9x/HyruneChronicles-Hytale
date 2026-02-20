@@ -1,0 +1,2938 @@
+{
+    "schemaVersion": 1,
+    "defaultLevel": 1,
+    "defaultVariance": 3,
+    "defaultWeakness": "MELEE",
+    "defaultArchetype": "DPS",
+    "weaknessMultiplier": 1.2,
+    "resistanceMultiplier": 0.8,
+    "excludedNpcIds": [
+        "Tier1_Slayer_Master",
+        "Tier2_Slayer_Master",
+        "Slayer_Master",
+        "Hans",
+        "Master_Hans"
+    ],
+    "archetypeProfiles": [
+        {
+            "id": "TANK",
+            "baseDamage": 1,
+            "damageGrowthRate": 1.022,
+            "baseDefenceReduction": 0.06,
+            "defenceGrowthRate": 1.032,
+            "defenceCap": 0.82,
+            "baseCritChance": 0.02,
+            "critGrowthRate": 1.012,
+            "critChanceCap": 0.2,
+            "baseCritMultiplier": 1.3,
+            "critMultiplierPerLevel": 0.003,
+            "critMultiplierCap": 1.95,
+            "baseHealthMultiplier": 1,
+            "meleeBias": 1.08,
+            "rangedBias": 0.92,
+            "magicBias": 0.88
+        },
+        {
+            "id": "DPS",
+            "baseDamage": 1.05,
+            "damageGrowthRate": 1.035,
+            "baseDefenceReduction": 0.02,
+            "defenceGrowthRate": 1.02,
+            "defenceCap": 0.58,
+            "baseCritChance": 0.05,
+            "critGrowthRate": 1.02,
+            "critChanceCap": 0.35,
+            "baseCritMultiplier": 1.45,
+            "critMultiplierPerLevel": 0.004,
+            "critMultiplierCap": 2.25,
+            "baseHealthMultiplier": 1,
+            "meleeBias": 1,
+            "rangedBias": 1.06,
+            "magicBias": 0.98
+        },
+        {
+            "id": "MAGE",
+            "baseDamage": 1.03,
+            "damageGrowthRate": 1.03,
+            "baseDefenceReduction": 0.03,
+            "defenceGrowthRate": 1.024,
+            "defenceCap": 0.62,
+            "baseCritChance": 0.04,
+            "critGrowthRate": 1.018,
+            "critChanceCap": 0.32,
+            "baseCritMultiplier": 1.5,
+            "critMultiplierPerLevel": 0.0044,
+            "critMultiplierCap": 2.3,
+            "baseHealthMultiplier": 1,
+            "meleeBias": 0.92,
+            "rangedBias": 0.98,
+            "magicBias": 1.12
+        },
+        {
+            "id": "BOSS",
+            "baseDamage": 1.1,
+            "damageGrowthRate": 1.03,
+            "baseDefenceReduction": 0.05,
+            "defenceGrowthRate": 1.03,
+            "defenceCap": 0.85,
+            "baseCritChance": 0.03,
+            "critGrowthRate": 1.015,
+            "critChanceCap": 0.45,
+            "baseCritMultiplier": 1.55,
+            "critMultiplierPerLevel": 0.0048,
+            "critMultiplierCap": 2.6,
+            "baseHealthMultiplier": 5,
+            "meleeBias": 1.04,
+            "rangedBias": 1,
+            "magicBias": 1.02
+        }
+    ],
+    "rankProfiles": [
+        {
+            "id": "NORMAL",
+            "levelOffset": 0,
+            "statMultiplier": 1
+        },
+        {
+            "id": "STRONG",
+            "levelOffset": 4,
+            "statMultiplier": 1.35
+        },
+        {
+            "id": "ELITE",
+            "levelOffset": 7,
+            "statMultiplier": 1.8
+        },
+        {
+            "id": "HERO",
+            "levelOffset": 11,
+            "statMultiplier": 2.5
+        },
+        {
+            "id": "WORLD_BOSS",
+            "levelOffset": 16,
+            "statMultiplier": 4
+        }
+    ],
+    "families": [
+        {
+            "id": "antelope",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Antelope"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "archaeopteryx",
+            "tags": [
+                "avian",
+                "raptor"
+            ],
+            "typeIds": [
+                "Archaeopteryx"
+            ],
+            "rolePaths": [
+                "Avian/Raptor"
+            ],
+            "baseLevel": 22,
+            "variance": 5
+        },
+        {
+            "id": "armadillo",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Armadillo"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "bat",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Bat",
+                "Bat_Ice"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "bear",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Bear_Grizzly",
+                "Bear_Polar"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "bison",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Bison",
+                "Bison_Calf"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "bluebird",
+            "tags": [
+                "avian",
+                "aerial",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Bluebird",
+                "Temple_Bluebird"
+            ],
+            "rolePaths": [
+                "Avian/Aerial",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "bluegill",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Bluegill"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "boar",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Boar",
+                "Boar_Piglet"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "bramblekin",
+            "tags": [
+                "intelligent",
+                "neutral"
+            ],
+            "typeIds": [
+                "Bramblekin"
+            ],
+            "rolePaths": [
+                "Intelligent/Neutral"
+            ],
+            "baseLevel": 16,
+            "variance": 8
+        },
+        {
+            "id": "bramblekin_shaman",
+            "tags": [
+                "intelligent",
+                "neutral"
+            ],
+            "typeIds": [
+                "Bramblekin_Shaman"
+            ],
+            "rolePaths": [
+                "Intelligent/Neutral"
+            ],
+            "baseLevel": 16,
+            "variance": 8,
+            "weakness": "RANGED",
+            "archetype": "MAGE"
+        },
+        {
+            "id": "bunny",
+            "tags": [
+                "creature",
+                "livestock",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Bunny",
+                "Temple_Bunny"
+            ],
+            "rolePaths": [
+                "Creature/Livestock",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "cactee",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Cactee"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "camel",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Camel",
+                "Camel_Calf"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "catfish",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Catfish"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "chicken",
+            "tags": [
+                "creature",
+                "livestock",
+                "undead",
+                "chicken_undead.json"
+            ],
+            "typeIds": [
+                "Chicken",
+                "Chicken_Chick",
+                "Chicken_Desert",
+                "Chicken_Desert_Chick",
+                "Chicken_Undead"
+            ],
+            "rolePaths": [
+                "Creature/Livestock",
+                "Undead/Chicken_Undead.json"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "clownfish",
+            "tags": [
+                "aquatic",
+                "marine"
+            ],
+            "typeIds": [
+                "Clownfish"
+            ],
+            "rolePaths": [
+                "Aquatic/Marine"
+            ],
+            "baseLevel": 12,
+            "variance": 5
+        },
+        {
+            "id": "cow",
+            "tags": [
+                "creature",
+                "livestock",
+                "undead",
+                "cow_undead.json"
+            ],
+            "typeIds": [
+                "Cow",
+                "Cow_Calf",
+                "Cow_Undead"
+            ],
+            "rolePaths": [
+                "Creature/Livestock",
+                "Undead/Cow_Undead.json"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "crab",
+            "tags": [
+                "aquatic",
+                "marine"
+            ],
+            "typeIds": [
+                "Crab"
+            ],
+            "rolePaths": [
+                "Aquatic/Marine"
+            ],
+            "baseLevel": 12,
+            "variance": 5
+        },
+        {
+            "id": "crawler",
+            "tags": [
+                "void",
+                "crawler_void.json"
+            ],
+            "typeIds": [
+                "Crawler_Void"
+            ],
+            "rolePaths": [
+                "Void/Crawler_Void.json"
+            ],
+            "baseLevel": 56,
+            "variance": 10,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "crocodile",
+            "tags": [
+                "creature",
+                "reptile"
+            ],
+            "typeIds": [
+                "Crocodile"
+            ],
+            "rolePaths": [
+                "Creature/Reptile"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "crow",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Crow"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "deer",
+            "tags": [
+                "creature",
+                "mammal",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Deer_Doe",
+                "Deer_Stag",
+                "Temple_Deer_Doe",
+                "Temple_Deer_Stag"
+            ],
+            "rolePaths": [
+                "Creature/Mammal",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "dragon",
+            "tags": [
+                "boss",
+                "dragon_fire.json",
+                "dragon_frost.json"
+            ],
+            "typeIds": [
+                "Dragon_Fire",
+                "Dragon_Frost"
+            ],
+            "rolePaths": [
+                "Boss/Dragon_Fire.json",
+                "Boss/Dragon_Frost.json"
+            ],
+            "baseLevel": 80,
+            "variance": 6,
+            "weakness": "MAGIC",
+            "archetype": "BOSS",
+            "rank": "WORLD_BOSS",
+            "elite": true
+        },
+        {
+            "id": "duck",
+            "tags": [
+                "avian",
+                "fowl",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Duck",
+                "Temple_Duck"
+            ],
+            "rolePaths": [
+                "Avian/Fowl",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "eel",
+            "tags": [
+                "aquatic",
+                "abyssal"
+            ],
+            "typeIds": [
+                "Eel_Moray"
+            ],
+            "rolePaths": [
+                "Aquatic/Abyssal"
+            ],
+            "baseLevel": 24,
+            "variance": 5
+        },
+        {
+            "id": "emberwulf",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Emberwulf"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "eye",
+            "tags": [
+                "void",
+                "eye_void.json"
+            ],
+            "typeIds": [
+                "Eye_Void"
+            ],
+            "rolePaths": [
+                "Void/Eye_Void.json"
+            ],
+            "baseLevel": 56,
+            "variance": 10,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "fen_stalker",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Fen_Stalker"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "feran",
+            "tags": [
+                "intelligent",
+                "neutral",
+                "passive"
+            ],
+            "typeIds": [
+                "Feran_Burrower",
+                "Feran_Civilian",
+                "Feran_Cub",
+                "Feran_Longtooth",
+                "Feran_Sharptooth",
+                "Feran_Windwalker",
+                "Temple_Feran",
+                "Temple_Feran_Longtooth"
+            ],
+            "rolePaths": [
+                "Intelligent/Neutral",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 16,
+            "variance": 8
+        },
+        {
+            "id": "finch",
+            "tags": [
+                "avian",
+                "aerial",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Finch_Green",
+                "Temple_Finch_Green"
+            ],
+            "rolePaths": [
+                "Avian/Aerial",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "flamingo",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Flamingo"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "fox",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Fox"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "frog",
+            "tags": [
+                "creature",
+                "critter",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Frog_Blue",
+                "Frog_Green",
+                "Frog_Orange",
+                "Temple_Frog_Blue",
+                "Temple_Frog_Green",
+                "Temple_Frog_Orange"
+            ],
+            "rolePaths": [
+                "Creature/Critter",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "frostgill",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Frostgill"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "gecko",
+            "tags": [
+                "creature",
+                "critter"
+            ],
+            "typeIds": [
+                "Gecko"
+            ],
+            "rolePaths": [
+                "Creature/Critter"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "ghoul",
+            "tags": [
+                "undead",
+                "ghoul.json"
+            ],
+            "typeIds": [
+                "Ghoul"
+            ],
+            "rolePaths": [
+                "Undead/Ghoul.json"
+            ],
+            "baseLevel": 40,
+            "variance": 9,
+            "rank": "STRONG"
+        },
+        {
+            "id": "goat",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Goat",
+                "Goat_Kid"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "goblin",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Edible_Goblin_Scrapper",
+                "Goblin_Hermit",
+                "Goblin_Ogre",
+                "Goblin_Ogre_Tutorial",
+                "Goblin_Scavenger",
+                "Goblin_Scavenger_Battleaxe",
+                "Goblin_Scavenger_Sword",
+                "Goblin_Scrapper",
+                "Goblin_Scrapper_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "STRONG"
+        },
+        {
+            "id": "goblin_duke",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Goblin_Duke",
+                "Goblin_Duke_Phase_2",
+                "Goblin_Duke_Phase_3_Fast",
+                "Goblin_Duke_Phase_3_Slow"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 70,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "BOSS",
+            "rank": "HERO",
+            "elite": true
+        },
+        {
+            "id": "goblin_lobber",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Goblin_Lobber",
+                "Goblin_Lobber_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "goblin_miner",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Goblin_Miner",
+                "Goblin_Miner_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "goblin_thief",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Goblin_Thief",
+                "Goblin_Thief_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "golem",
+            "tags": [
+                "elemental",
+                "golem"
+            ],
+            "typeIds": [
+                "Golem_Crystal_Earth",
+                "Golem_Crystal_Flame",
+                "Golem_Crystal_Frost",
+                "Golem_Crystal_Sand",
+                "Golem_Crystal_Thunder",
+                "Golem_Firesteel",
+                "Golem_Guardian_Void"
+            ],
+            "rolePaths": [
+                "Elemental/Golem"
+            ],
+            "baseLevel": 52,
+            "variance": 9,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "hatworm",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Hatworm"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "hawk",
+            "tags": [
+                "avian",
+                "raptor"
+            ],
+            "typeIds": [
+                "Hawk"
+            ],
+            "rolePaths": [
+                "Avian/Raptor"
+            ],
+            "baseLevel": 22,
+            "variance": 5
+        },
+        {
+            "id": "hedera",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Hedera"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "horse",
+            "tags": [
+                "creature",
+                "livestock",
+                "undead",
+                "horse_skeleton.json",
+                "horse_skeleton_armored.json"
+            ],
+            "typeIds": [
+                "Horse",
+                "Horse_Foal",
+                "Horse_Skeleton",
+                "Horse_Skeleton_Armored"
+            ],
+            "rolePaths": [
+                "Creature/Livestock",
+                "Undead/Horse_Skeleton.json",
+                "Undead/Horse_Skeleton_Armored.json"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "hound",
+            "tags": [
+                "undead",
+                "hound_bleached.json"
+            ],
+            "typeIds": [
+                "Hound_Bleached"
+            ],
+            "rolePaths": [
+                "Undead/Hound_Bleached.json"
+            ],
+            "baseLevel": 40,
+            "variance": 9,
+            "rank": "STRONG"
+        },
+        {
+            "id": "hyena",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Hyena"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "jellyfish",
+            "tags": [
+                "aquatic",
+                "marine"
+            ],
+            "typeIds": [
+                "Jellyfish_Blue",
+                "Jellyfish_Cyan",
+                "Jellyfish_Green",
+                "Jellyfish_Man_Of_War",
+                "Jellyfish_Red",
+                "Jellyfish_Yellow"
+            ],
+            "rolePaths": [
+                "Aquatic/Marine"
+            ],
+            "baseLevel": 12,
+            "variance": 5
+        },
+        {
+            "id": "klops",
+            "tags": [
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Klops_Gentleman",
+                "Temple_Klops"
+            ],
+            "rolePaths": [
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 8
+        },
+        {
+            "id": "klops_merchant",
+            "tags": [
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Klops_Merchant",
+                "Klops_Merchant_Patrol",
+                "Klops_Merchant_Wandering",
+                "Temple_Klops_Merchant"
+            ],
+            "rolePaths": [
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 8
+        },
+        {
+            "id": "klops_miner",
+            "tags": [
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Klops_Miner",
+                "Klops_Miner_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 8
+        },
+        {
+            "id": "kweebec",
+            "tags": [
+                "intelligent",
+                "neutral",
+                "passive"
+            ],
+            "typeIds": [
+                "Kweebec_Elder",
+                "Kweebec_Prisoner",
+                "Kweebec_Razorleaf",
+                "Kweebec_Razorleaf_Patrol",
+                "Kweebec_Rootling",
+                "Kweebec_Sapling",
+                "Kweebec_Sapling_Orange",
+                "Kweebec_Sapling_Pink",
+                "Kweebec_Seedling",
+                "Kweebec_Sproutling",
+                "Kweebec_Sproutling_Patrol",
+                "Temple_Kweebec",
+                "Temple_Kweebec_Elder",
+                "Temple_Kweebec_Razorleaf",
+                "Temple_Kweebec_Razorleaf_Patrol",
+                "Temple_Kweebec_Razorleaf_Patrol1",
+                "Temple_Kweebec_Razorleaf_Patrol2",
+                "Temple_Kweebec_Razorleaf_Patrol3",
+                "Temple_Kweebec_Razorleaf_Patrol4",
+                "Temple_Kweebec_Razorleaf_Patrol5",
+                "Temple_Kweebec_Rootling_Static",
+                "Temple_Kweebec_Seedling",
+                "Temple_Kweebec_Seedling_Static",
+                "Temple_Kweebec_Static"
+            ],
+            "rolePaths": [
+                "Intelligent/Neutral",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 16,
+            "variance": 8
+        },
+        {
+            "id": "kweebec_merchant",
+            "tags": [
+                "intelligent",
+                "neutral",
+                "passive"
+            ],
+            "typeIds": [
+                "Kweebec_Merchant",
+                "Temple_Kweebec_Merchant"
+            ],
+            "rolePaths": [
+                "Intelligent/Neutral",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 16,
+            "variance": 8
+        },
+        {
+            "id": "larva",
+            "tags": [
+                "creature",
+                "vermin",
+                "void",
+                "larva_void.json"
+            ],
+            "typeIds": [
+                "Larva_Silk",
+                "Larva_Void"
+            ],
+            "rolePaths": [
+                "Creature/Vermin",
+                "Void/Larva_Void.json"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "leopard",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Leopard_Snow"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "lizard",
+            "tags": [
+                "creature",
+                "reptile"
+            ],
+            "typeIds": [
+                "Lizard_Sand"
+            ],
+            "rolePaths": [
+                "Creature/Reptile"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "lobster",
+            "tags": [
+                "aquatic",
+                "marine"
+            ],
+            "typeIds": [
+                "Lobster"
+            ],
+            "rolePaths": [
+                "Aquatic/Marine"
+            ],
+            "baseLevel": 12,
+            "variance": 5
+        },
+        {
+            "id": "master",
+            "tags": [
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Quest_Master"
+            ],
+            "rolePaths": [
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 8
+        },
+        {
+            "id": "meerkat",
+            "tags": [
+                "creature",
+                "critter"
+            ],
+            "typeIds": [
+                "Meerkat"
+            ],
+            "rolePaths": [
+                "Creature/Critter"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "minnow",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Minnow"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "mithril",
+            "tags": [
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Temple_Mithril_Guard"
+            ],
+            "rolePaths": [
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 8
+        },
+        {
+            "id": "molerat",
+            "tags": [
+                "creature",
+                "vermin"
+            ],
+            "typeIds": [
+                "Molerat"
+            ],
+            "rolePaths": [
+                "Creature/Vermin"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "moose",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Moose_Bull",
+                "Moose_Cow"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "mosshorn",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Mosshorn",
+                "Mosshorn_Plain"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "mouflon",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Mouflon",
+                "Mouflon_Lamb"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "mouse",
+            "tags": [
+                "creature",
+                "critter"
+            ],
+            "typeIds": [
+                "Mouse"
+            ],
+            "rolePaths": [
+                "Creature/Critter"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "outlander",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Marauder",
+                "Outlander_Peon"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_berserker",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Berserker"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_brute",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Brute"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_cultist",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Cultist"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_hunter",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Hunter"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_priest",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Priest"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_sorcerer",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Sorcerer"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "STRONG"
+        },
+        {
+            "id": "outlander_stalker",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Outlander_Stalker"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "owl",
+            "tags": [
+                "avian",
+                "aerial",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Owl_Brown",
+                "Owl_Snow",
+                "Temple_Owl_Brown"
+            ],
+            "rolePaths": [
+                "Avian/Aerial",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "parrot",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Parrot"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "penguin",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Penguin"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "pig",
+            "tags": [
+                "creature",
+                "livestock",
+                "undead",
+                "pig_undead.json"
+            ],
+            "typeIds": [
+                "Pig",
+                "Pig_Piglet",
+                "Pig_Wild",
+                "Pig_Wild_Piglet",
+                "Pig_Undead"
+            ],
+            "rolePaths": [
+                "Creature/Livestock",
+                "Undead/Pig_Undead.json"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "pigeon",
+            "tags": [
+                "avian",
+                "fowl"
+            ],
+            "typeIds": [
+                "Pigeon"
+            ],
+            "rolePaths": [
+                "Avian/Fowl"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "pike",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Pike"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "piranha",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Piranha",
+                "Piranha_Black"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "pterodactyl",
+            "tags": [
+                "avian",
+                "raptor"
+            ],
+            "typeIds": [
+                "Pterodactyl"
+            ],
+            "rolePaths": [
+                "Avian/Raptor"
+            ],
+            "baseLevel": 22,
+            "variance": 5
+        },
+        {
+            "id": "pufferfish",
+            "tags": [
+                "aquatic",
+                "marine"
+            ],
+            "typeIds": [
+                "Pufferfish"
+            ],
+            "rolePaths": [
+                "Aquatic/Marine"
+            ],
+            "baseLevel": 12,
+            "variance": 5
+        },
+        {
+            "id": "rabbit",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Rabbit"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "ram",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Ram",
+                "Ram_Lamb"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "raptor",
+            "tags": [
+                "creature",
+                "reptile"
+            ],
+            "typeIds": [
+                "Raptor_Cave"
+            ],
+            "rolePaths": [
+                "Creature/Reptile"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "rat",
+            "tags": [
+                "creature",
+                "vermin",
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Rat",
+                "Edible_Rat"
+            ],
+            "rolePaths": [
+                "Creature/Vermin",
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "raven",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Raven"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "rex",
+            "tags": [
+                "creature",
+                "reptile"
+            ],
+            "typeIds": [
+                "Rex_Cave"
+            ],
+            "rolePaths": [
+                "Creature/Reptile"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "risen_gunner",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Risen_Gunner"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "risen_knight",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Risen_Knight"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 50,
+            "variance": 9,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "salmon",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Salmon"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "scarak",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Scarak_Louse",
+                "Dungeon_Scarak_Louse"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "scarak_broodmother",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Scarak_Broodmother",
+                "Dungeon_Scarak_Broodmother",
+                "Dungeon_Scarak_Broodmother_Young"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 70,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "BOSS",
+            "rank": "HERO",
+            "elite": true
+        },
+        {
+            "id": "scarak_defender",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Scarak_Defender",
+                "Scarak_Defender_Patrol",
+                "Dungeon_Scarak_Defender",
+                "Dungeon_Scarak_Defender_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "STRONG"
+        },
+        {
+            "id": "scarak_fighter",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Scarak_Fighter",
+                "Scarak_Fighter_Patrol",
+                "Scarak_Fighter_Royal_Guard",
+                "Dungeon_Scarak_Fighter",
+                "Dungeon_Scarak_Fighter_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "scarak_seeker",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Scarak_Seeker",
+                "Scarak_Seeker_Patrol",
+                "Dungeon_Scarak_Seeker",
+                "Dungeon_Scarak_Seeker_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "scorpion",
+            "tags": [
+                "creature",
+                "vermin"
+            ],
+            "typeIds": [
+                "Scorpion"
+            ],
+            "rolePaths": [
+                "Creature/Vermin"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "shadow_knight",
+            "tags": [
+                "undead",
+                "shadow_knight.json"
+            ],
+            "typeIds": [
+                "Shadow_Knight"
+            ],
+            "rolePaths": [
+                "Undead/Shadow_Knight.json"
+            ],
+            "baseLevel": 46,
+            "variance": 9,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "shark",
+            "tags": [
+                "aquatic",
+                "abyssal"
+            ],
+            "typeIds": [
+                "Shark_Hammerhead"
+            ],
+            "rolePaths": [
+                "Aquatic/Abyssal"
+            ],
+            "baseLevel": 24,
+            "variance": 5
+        },
+        {
+            "id": "sheep",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Sheep",
+                "Sheep_Lamb"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "shellfish",
+            "tags": [
+                "aquatic",
+                "abyssal"
+            ],
+            "typeIds": [
+                "Shellfish_Lava"
+            ],
+            "rolePaths": [
+                "Aquatic/Abyssal"
+            ],
+            "baseLevel": 24,
+            "variance": 5
+        },
+        {
+            "id": "skeleton",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton",
+                "Skeleton_Burnt_Alchemist",
+                "Skeleton_Burnt_Alchemist_Patrol",
+                "Skeleton_Burnt_Alchemist_Wander",
+                "Skeleton_Burnt_Archer",
+                "Skeleton_Burnt_Archer_Patrol",
+                "Skeleton_Burnt_Archer_Wander",
+                "Skeleton_Burnt_Gunner",
+                "Skeleton_Burnt_Gunner_Patrol",
+                "Skeleton_Burnt_Gunner_Wander",
+                "Skeleton_Burnt_Knight",
+                "Skeleton_Burnt_Knight_Patrol",
+                "Skeleton_Burnt_Knight_Wander",
+                "Skeleton_Burnt_Lancer",
+                "Skeleton_Burnt_Lancer_Patrol",
+                "Skeleton_Burnt_Lancer_Wander",
+                "Skeleton_Burnt_Praetorian",
+                "Skeleton_Burnt_Praetorian_Patrol",
+                "Skeleton_Burnt_Praetorian_Wander",
+                "Skeleton_Burnt_Soldier",
+                "Skeleton_Burnt_Soldier_Patrol",
+                "Skeleton_Burnt_Soldier_Wander",
+                "Skeleton_Burnt_Wizard",
+                "Skeleton_Burnt_Wizard_Patrol",
+                "Skeleton_Burnt_Wizard_Wander",
+                "Skeleton_Frost_Archer",
+                "Skeleton_Frost_Archer_Patrol",
+                "Skeleton_Frost_Archer_Wander",
+                "Skeleton_Frost_Archmage",
+                "Skeleton_Frost_Archmage_Patrol",
+                "Skeleton_Frost_Archmage_Wander",
+                "Skeleton_Frost_Fighter",
+                "Skeleton_Frost_Fighter_Patrol",
+                "Skeleton_Frost_Fighter_Wander",
+                "Skeleton_Frost_Knight",
+                "Skeleton_Frost_Knight_Patrol",
+                "Skeleton_Frost_Knight_Wander",
+                "Skeleton_Frost_Mage",
+                "Skeleton_Frost_Mage_Patrol",
+                "Skeleton_Frost_Mage_Wander",
+                "Skeleton_Frost_Ranger",
+                "Skeleton_Frost_Ranger_Patrol",
+                "Skeleton_Frost_Ranger_Wander",
+                "Skeleton_Frost_Scout",
+                "Skeleton_Frost_Scout_Patrol",
+                "Skeleton_Frost_Scout_Wander",
+                "Skeleton_Frost_Soldier",
+                "Skeleton_Frost_Soldier_Patrol",
+                "Skeleton_Frost_Soldier_Wander",
+                "Skeleton_Incandescent_Fighter",
+                "Skeleton_Incandescent_Fighter_Patrol",
+                "Skeleton_Incandescent_Fighter_Wander",
+                "Skeleton_Incandescent_Footman",
+                "Skeleton_Incandescent_Footman_Patrol",
+                "Skeleton_Incandescent_Footman_Wander",
+                "Skeleton_Incandescent_Head",
+                "Skeleton_Incandescent_Mage",
+                "Skeleton_Incandescent_Mage_Patrol",
+                "Skeleton_Incandescent_Mage_Wander",
+                "Skeleton_Pirate_Captain",
+                "Skeleton_Pirate_Captain_Patrol",
+                "Skeleton_Pirate_Captain_Wander",
+                "Skeleton_Pirate_Gunner",
+                "Skeleton_Pirate_Gunner_Patrol",
+                "Skeleton_Pirate_Gunner_Wander",
+                "Skeleton_Pirate_Striker",
+                "Skeleton_Pirate_Striker_Patrol",
+                "Skeleton_Pirate_Striker_Wander",
+                "Skeleton_Sand_Archer",
+                "Skeleton_Sand_Archer_Patrol",
+                "Skeleton_Sand_Archer_Wander",
+                "Skeleton_Sand_Archmage",
+                "Skeleton_Sand_Archmage_Patrol",
+                "Skeleton_Sand_Archmage_Wander",
+                "Skeleton_Sand_Assassin",
+                "Skeleton_Sand_Assassin_Patrol",
+                "Skeleton_Sand_Assassin_Wander",
+                "Skeleton_Sand_Guard",
+                "Skeleton_Sand_Guard_Patrol",
+                "Skeleton_Sand_Guard_Wander",
+                "Skeleton_Sand_Mage",
+                "Skeleton_Sand_Mage_Patrol",
+                "Skeleton_Sand_Mage_Wander",
+                "Skeleton_Sand_Ranger",
+                "Skeleton_Sand_Ranger_Patrol",
+                "Skeleton_Sand_Ranger_Wander",
+                "Skeleton_Sand_Scout",
+                "Skeleton_Sand_Scout_Patrol",
+                "Skeleton_Sand_Scout_Wander",
+                "Skeleton_Sand_Soldier",
+                "Skeleton_Sand_Soldier_Patrol",
+                "Skeleton_Sand_Soldier_Wander",
+                "Dungeon_Skeleton_Sand_Archer",
+                "Dungeon_Skeleton_Sand_Assassin",
+                "Dungeon_Skeleton_Sand_Mage",
+                "Dungeon_Skeleton_Sand_Soldier"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 50,
+            "variance": 9,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_archer",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Archer",
+                "Skeleton_Archer_Patrol",
+                "Skeleton_Archer_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_archmage",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Archmage",
+                "Skeleton_Archmage_Patrol",
+                "Skeleton_Archmage_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_fighter",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Fighter",
+                "Skeleton_Fighter_Patrol",
+                "Skeleton_Fighter_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_knight",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Knight",
+                "Skeleton_Knight_Patrol",
+                "Skeleton_Knight_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 50,
+            "variance": 9,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_mage",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Mage",
+                "Skeleton_Mage_Patrol",
+                "Skeleton_Mage_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_ranger",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Ranger",
+                "Skeleton_Ranger_Patrol",
+                "Skeleton_Ranger_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_scout",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Scout",
+                "Skeleton_Scout_Patrol",
+                "Skeleton_Scout_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skeleton_soldier",
+            "tags": [
+                "undead",
+                "skeleton"
+            ],
+            "typeIds": [
+                "Skeleton_Soldier",
+                "Skeleton_Soldier_Patrol",
+                "Skeleton_Soldier_Wander"
+            ],
+            "rolePaths": [
+                "Undead/Skeleton"
+            ],
+            "baseLevel": 44,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "skrill",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Skrill",
+                "Skrill_Chick"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "slothian",
+            "tags": [
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Slothian"
+            ],
+            "rolePaths": [
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 10,
+            "variance": 8
+        },
+        {
+            "id": "slug",
+            "tags": [
+                "creature",
+                "vermin"
+            ],
+            "typeIds": [
+                "Slug_Magma"
+            ],
+            "rolePaths": [
+                "Creature/Vermin"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "snail",
+            "tags": [
+                "creature",
+                "vermin"
+            ],
+            "typeIds": [
+                "Snail_Frost",
+                "Snail_Magma"
+            ],
+            "rolePaths": [
+                "Creature/Vermin"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "snake",
+            "tags": [
+                "creature",
+                "vermin"
+            ],
+            "typeIds": [
+                "Snake_Cobra",
+                "Snake_Marsh",
+                "Snake_Rattle"
+            ],
+            "rolePaths": [
+                "Creature/Vermin"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "snapdragon",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Snapdragon"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "snapjaw",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Snapjaw"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "spark",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Spark_Living"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "sparrow",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Sparrow"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "spawn",
+            "tags": [
+                "void",
+                "spawn_void.json"
+            ],
+            "typeIds": [
+                "Spawn_Void"
+            ],
+            "rolePaths": [
+                "Void/Spawn_Void.json"
+            ],
+            "baseLevel": 56,
+            "variance": 10,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "spectre",
+            "tags": [
+                "void",
+                "spectre_void.json"
+            ],
+            "typeIds": [
+                "Spectre_Void"
+            ],
+            "rolePaths": [
+                "Void/Spectre_Void.json"
+            ],
+            "baseLevel": 56,
+            "variance": 10,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "spider",
+            "tags": [
+                "creature",
+                "vermin"
+            ],
+            "typeIds": [
+                "Spider",
+                "Spider_Cave"
+            ],
+            "rolePaths": [
+                "Creature/Vermin"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "spirit",
+            "tags": [
+                "elemental",
+                "spirit"
+            ],
+            "typeIds": [
+                "Spirit_Ember",
+                "Spirit_Frost",
+                "Spirit_Root",
+                "Spirit_Thunder"
+            ],
+            "rolePaths": [
+                "Elemental/Spirit"
+            ],
+            "baseLevel": 42,
+            "variance": 9,
+            "rank": "ELITE",
+            "elite": true
+        },
+        {
+            "id": "squirrel",
+            "tags": [
+                "creature",
+                "critter",
+                "intelligent",
+                "passive"
+            ],
+            "typeIds": [
+                "Squirrel",
+                "Temple_Squirrel"
+            ],
+            "rolePaths": [
+                "Creature/Critter",
+                "Intelligent/Passive"
+            ],
+            "baseLevel": 3,
+            "variance": 3
+        },
+        {
+            "id": "tamed",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Tamed_Bison",
+                "Tamed_Bison_Calf",
+                "Tamed_Boar",
+                "Tamed_Boar_Piglet",
+                "Tamed_Bunny",
+                "Tamed_Camel",
+                "Tamed_Camel_Calf",
+                "Tamed_Chicken",
+                "Tamed_Chicken_Chick",
+                "Tamed_Chicken_Desert",
+                "Tamed_Chicken_Desert_Chick",
+                "Tamed_Cow",
+                "Tamed_Cow_Calf",
+                "Tamed_Goat",
+                "Tamed_Goat_Kid",
+                "Tamed_Horse",
+                "Tamed_Horse_Foal",
+                "Tamed_Mosshorn",
+                "Tamed_Mosshorn_Plain",
+                "Tamed_Mouflon",
+                "Tamed_Mouflon_Lamb",
+                "Tamed_Pig",
+                "Tamed_Pig_Piglet",
+                "Tamed_Pig_Wild",
+                "Tamed_Pig_Wild_Piglet",
+                "Tamed_Rabbit",
+                "Tamed_Ram",
+                "Tamed_Ram_Lamb",
+                "Tamed_Sheep",
+                "Tamed_Sheep_Lamb",
+                "Tamed_Skrill",
+                "Tamed_Skrill_Chick",
+                "Tamed_Turkey",
+                "Tamed_Turkey_Chick",
+                "Tamed_Warthog",
+                "Tamed_Warthog_Piglet"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "tang",
+            "tags": [
+                "aquatic",
+                "marine"
+            ],
+            "typeIds": [
+                "Tang_Blue",
+                "Tang_Chevron",
+                "Tang_Lemon_Peel",
+                "Tang_Sailfin"
+            ],
+            "rolePaths": [
+                "Aquatic/Marine"
+            ],
+            "baseLevel": 12,
+            "variance": 5
+        },
+        {
+            "id": "tetrabird",
+            "tags": [
+                "avian",
+                "raptor"
+            ],
+            "typeIds": [
+                "Tetrabird"
+            ],
+            "rolePaths": [
+                "Avian/Raptor"
+            ],
+            "baseLevel": 22,
+            "variance": 5
+        },
+        {
+            "id": "tiger",
+            "tags": [
+                "creature",
+                "mammal"
+            ],
+            "typeIds": [
+                "Tiger_Sabertooth"
+            ],
+            "rolePaths": [
+                "Creature/Mammal"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "toad",
+            "tags": [
+                "creature",
+                "reptile"
+            ],
+            "typeIds": [
+                "Toad_Rhino",
+                "Toad_Rhino_Magma"
+            ],
+            "rolePaths": [
+                "Creature/Reptile"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "tortoise",
+            "tags": [
+                "creature",
+                "reptile"
+            ],
+            "typeIds": [
+                "Tortoise"
+            ],
+            "rolePaths": [
+                "Creature/Reptile"
+            ],
+            "baseLevel": 18,
+            "variance": 5
+        },
+        {
+            "id": "trillodon",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Trillodon"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "trilobite",
+            "tags": [
+                "aquatic",
+                "abyssal"
+            ],
+            "typeIds": [
+                "Trilobite",
+                "Trilobite_Black"
+            ],
+            "rolePaths": [
+                "Aquatic/Abyssal"
+            ],
+            "baseLevel": 24,
+            "variance": 5
+        },
+        {
+            "id": "trork",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Brawler",
+                "Trork_Guard",
+                "Trork_Unarmed"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "trork_chieftain",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Chieftain"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 70,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "BOSS",
+            "rank": "HERO",
+            "elite": true
+        },
+        {
+            "id": "trork_doctor",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Doctor_Witch"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "STRONG"
+        },
+        {
+            "id": "trork_hunter",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Hunter"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "trork_mauler",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Mauler"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "STRONG"
+        },
+        {
+            "id": "trork_sentry",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Sentry",
+                "Trork_Sentry_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "trork_shaman",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Shaman"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "RANGED",
+            "archetype": "MAGE",
+            "rank": "STRONG"
+        },
+        {
+            "id": "trork_warrior",
+            "tags": [
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Trork_Warrior",
+                "Trork_Warrior_Patrol"
+            ],
+            "rolePaths": [
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 34,
+            "variance": 8,
+            "weakness": "MAGIC",
+            "archetype": "TANK",
+            "rank": "STRONG"
+        },
+        {
+            "id": "trout",
+            "tags": [
+                "aquatic",
+                "freshwater"
+            ],
+            "typeIds": [
+                "Trout_Rainbow"
+            ],
+            "rolePaths": [
+                "Aquatic/Freshwater"
+            ],
+            "baseLevel": 8,
+            "variance": 5
+        },
+        {
+            "id": "tuluk",
+            "tags": [
+                "intelligent",
+                "neutral"
+            ],
+            "typeIds": [
+                "Tuluk_Fisherman"
+            ],
+            "rolePaths": [
+                "Intelligent/Neutral"
+            ],
+            "baseLevel": 16,
+            "variance": 8
+        },
+        {
+            "id": "turkey",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Turkey",
+                "Turkey_Chick"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "vulture",
+            "tags": [
+                "avian",
+                "raptor"
+            ],
+            "typeIds": [
+                "Vulture"
+            ],
+            "rolePaths": [
+                "Avian/Raptor"
+            ],
+            "baseLevel": 22,
+            "variance": 5
+        },
+        {
+            "id": "warthog",
+            "tags": [
+                "creature",
+                "livestock"
+            ],
+            "typeIds": [
+                "Warthog",
+                "Warthog_Piglet"
+            ],
+            "rolePaths": [
+                "Creature/Livestock"
+            ],
+            "baseLevel": 8,
+            "variance": 4
+        },
+        {
+            "id": "werewolf",
+            "tags": [
+                "undead",
+                "werewolf.json"
+            ],
+            "typeIds": [
+                "Werewolf"
+            ],
+            "rolePaths": [
+                "Undead/Werewolf.json"
+            ],
+            "baseLevel": 40,
+            "variance": 9,
+            "rank": "STRONG"
+        },
+        {
+            "id": "whale",
+            "tags": [
+                "aquatic",
+                "abyssal"
+            ],
+            "typeIds": [
+                "Whale_Humpback"
+            ],
+            "rolePaths": [
+                "Aquatic/Abyssal"
+            ],
+            "baseLevel": 24,
+            "variance": 5
+        },
+        {
+            "id": "wolf",
+            "tags": [
+                "creature",
+                "mammal",
+                "intelligent",
+                "aggressive"
+            ],
+            "typeIds": [
+                "Wolf_Black",
+                "Wolf_White",
+                "Wolf_Outlander_Priest",
+                "Wolf_Outlander_Sorcerer",
+                "Wolf_Trork_Hunter",
+                "Wolf_Trork_Shaman"
+            ],
+            "rolePaths": [
+                "Creature/Mammal",
+                "Intelligent/Aggressive"
+            ],
+            "baseLevel": 18,
+            "variance": 5,
+            "weakness": "RANGED",
+            "archetype": "MAGE"
+        },
+        {
+            "id": "woodpecker",
+            "tags": [
+                "avian",
+                "aerial"
+            ],
+            "typeIds": [
+                "Woodpecker"
+            ],
+            "rolePaths": [
+                "Avian/Aerial"
+            ],
+            "baseLevel": 10,
+            "variance": 5
+        },
+        {
+            "id": "wraith",
+            "tags": [
+                "undead",
+                "wraith.json",
+                "wraith_lantern.json"
+            ],
+            "typeIds": [
+                "Wraith",
+                "Wraith_Lantern"
+            ],
+            "rolePaths": [
+                "Undead/Wraith.json",
+                "Undead/Wraith_Lantern.json"
+            ],
+            "baseLevel": 40,
+            "variance": 9,
+            "rank": "STRONG"
+        },
+        {
+            "id": "yeti",
+            "tags": [
+                "creature",
+                "mythic"
+            ],
+            "typeIds": [
+                "Yeti"
+            ],
+            "rolePaths": [
+                "Creature/Mythic"
+            ],
+            "baseLevel": 40,
+            "variance": 8,
+            "rank": "STRONG"
+        },
+        {
+            "id": "zombie",
+            "tags": [
+                "undead",
+                "zombie"
+            ],
+            "typeIds": [
+                "Zombie",
+                "Zombie_Aberrant",
+                "Zombie_Aberrant_Big",
+                "Zombie_Aberrant_Small",
+                "Zombie_Burnt",
+                "Zombie_Frost",
+                "Zombie_Sand"
+            ],
+            "rolePaths": [
+                "Undead/Zombie"
+            ],
+            "baseLevel": 36,
+            "variance": 9,
+            "rank": "STRONG"
+        }
+    ]
+}

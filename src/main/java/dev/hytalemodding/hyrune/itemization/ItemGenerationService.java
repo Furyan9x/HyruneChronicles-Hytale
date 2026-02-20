@@ -40,6 +40,13 @@ public final class ItemGenerationService {
         );
     }
 
+    public static ItemStack createGeneratedItem(String itemId,
+                                                int quantity,
+                                                ItemRollSource source,
+                                                ItemRarityRollModel.GenerationContext context) {
+        return rollIfEligible(new ItemStack(itemId, quantity), source, context);
+    }
+
     public static ItemStack rollIfEligible(ItemStack stack,
                                            ItemRollSource source,
                                            ItemRarityRollModel.GenerationContext context) {
@@ -93,10 +100,19 @@ public final class ItemGenerationService {
     }
 
     public static void dropGeneratedLoot(Ref<EntityStore> sourceRef, Store<EntityStore> store, String itemId, int quantity) {
+        dropGeneratedLoot(sourceRef, store, itemId, quantity, ItemRollSource.DROPPED, ItemRarityRollModel.GenerationContext.of("drop_generated_loot"));
+    }
+
+    public static void dropGeneratedLoot(Ref<EntityStore> sourceRef,
+                                         Store<EntityStore> store,
+                                         String itemId,
+                                         int quantity,
+                                         ItemRollSource source,
+                                         ItemRarityRollModel.GenerationContext context) {
         if (sourceRef == null || store == null || itemId == null || itemId.isBlank() || quantity <= 0) {
             return;
         }
-        ItemStack rolled = createDroppedLootItem(itemId, quantity);
+        ItemStack rolled = createGeneratedItem(itemId, quantity, source, context);
         ItemUtils.dropItem(sourceRef, rolled, store);
     }
 

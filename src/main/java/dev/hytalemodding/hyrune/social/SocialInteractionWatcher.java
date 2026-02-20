@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import dev.hytalemodding.hyrune.itemization.GemSocketConfigHelper;
+import dev.hytalemodding.hyrune.npc.NpcProfilerService;
 import dev.hytalemodding.hyrune.ui.SocialMenuPage;
 import dev.hytalemodding.hyrune.ui.GemSocketPage;
 
@@ -61,6 +62,10 @@ public class SocialInteractionWatcher implements PlayerPacketWatcher {
         Store<EntityStore> senderStore = senderRef.getStore();
         Player senderPlayer = senderStore.getComponent(senderRef, Player.getComponentType());
         if (senderPlayer == null) {
+            return;
+        }
+
+        if (NpcProfilerService.tryOpenNpcProfiler(sender, senderRef, senderStore, senderPlayer, false)) {
             return;
         }
 

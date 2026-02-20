@@ -4,6 +4,7 @@ package dev.hytalemodding.hyrune.slayer;
  * 
  */
 public class SlayerTaskAssignment {
+    private String masterId;
     private String taskId;
     private String targetNpcTypeId;
     private int totalKills;
@@ -13,12 +14,21 @@ public class SlayerTaskAssignment {
     public SlayerTaskAssignment() {
     }
 
-    public SlayerTaskAssignment(String taskId, String targetNpcTypeId, int totalKills) {
+    public SlayerTaskAssignment(String masterId, String taskId, String targetNpcTypeId, int totalKills) {
+        this.masterId = masterId;
         this.taskId = taskId;
         this.targetNpcTypeId = targetNpcTypeId;
         this.totalKills = totalKills;
         this.remainingKills = totalKills;
         this.state = SlayerTaskState.ACCEPTED;
+    }
+
+    public String getMasterId() {
+        return masterId;
+    }
+
+    public void setMasterId(String masterId) {
+        this.masterId = masterId;
     }
 
     public String getTaskId() {

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "masters": [
+    {
+      "id": "slayer_master",
+      "displayName": "Slayer Master",
+      "minSlayerLevel": 1,
+      "minCombatLevel": 1,
+      "basePoints": 5,
+      "streakMilestoneInterval": 10,
+      "streakMilestoneBonusPoints": 20,
+      "taskEntries": [
+        { "taskId": "rats", "weight": 12, "minCount": 24, "maxCount": 50 },
+        { "taskId": "spiders", "weight": 11, "minCount": 24, "maxCount": 48 },
+        { "taskId": "wolves", "weight": 10, "minCount": 18, "maxCount": 36 },
+        { "taskId": "goblins", "weight": 10, "minCount": 20, "maxCount": 42 },
+        { "taskId": "hounds", "weight": 8, "minCount": 16, "maxCount": 34 },
+        { "taskId": "zombies", "weight": 9, "minCount": 16, "maxCount": 34 },
+        { "taskId": "skeletons", "weight": 8, "minCount": 16, "maxCount": 32 },
+        { "taskId": "trorks", "weight": 7, "minCount": 15, "maxCount": 30 },
+        { "taskId": "outlanders", "weight": 6, "minCount": 14, "maxCount": 28 },
+        { "taskId": "scaraks", "weight": 6, "minCount": 14, "maxCount": 28 }
+      ]
+    },
+    {
+      "id": "tier2_slayer_master",
+      "displayName": "Tier 2 Slayer Master",
+      "minSlayerLevel": 20,
+      "minCombatLevel": 45,
+      "basePoints": 8,
+      "streakMilestoneInterval": 10,
+      "streakMilestoneBonusPoints": 35,
+      "taskEntries": [
+        { "taskId": "skeleton_knights", "weight": 10, "minCount": 14, "maxCount": 26 },
+        { "taskId": "skeleton_archmages", "weight": 7, "minCount": 10, "maxCount": 20 },
+        { "taskId": "outlander_brutes", "weight": 9, "minCount": 14, "maxCount": 24 },
+        { "taskId": "outlander_sorcerers", "weight": 8, "minCount": 10, "maxCount": 20 },
+        { "taskId": "trork_maulers", "weight": 8, "minCount": 12, "maxCount": 24 },
+        { "taskId": "trork_shamans", "weight": 8, "minCount": 10, "maxCount": 20 },
+        { "taskId": "risen_knights", "weight": 7, "minCount": 10, "maxCount": 20 },
+        { "taskId": "shadow_knights", "weight": 6, "minCount": 9, "maxCount": 18 },
+        { "taskId": "spectres", "weight": 5, "minCount": 8, "maxCount": 16 },
+        { "taskId": "spawns", "weight": 5, "minCount": 8, "maxCount": 16 },
+        { "taskId": "scarak_defenders", "weight": 7, "minCount": 10, "maxCount": 20 },
+        { "taskId": "scarak_fighters", "weight": 8, "minCount": 12, "maxCount": 24 },
+        { "taskId": "trork_chieftains", "weight": 3, "minCount": 4, "maxCount": 8 },
+        { "taskId": "scarak_broodmothers", "weight": 2, "minCount": 3, "maxCount": 6 },
+        { "taskId": "goblin_dukes", "weight": 2, "minCount": 3, "maxCount": 6 },
+        { "taskId": "dragons", "weight": 1, "minCount": 2, "maxCount": 4 }
+      ]
+    }
+  ]
+}

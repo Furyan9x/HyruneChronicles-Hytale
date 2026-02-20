@@ -70,7 +70,13 @@ public class WoodcuttingSpeedSystem extends EntityEventSystem<EntityStore, Damag
         }
 
         double itemBonus = PlayerItemizationStatsService.getCached(uuidComponent.getUuid()).getItemBlockBreakSpeedBonus();
-        float multiplier = (1.0f + (level * WOODCUTTING_DAMAGE_PER_LEVEL)) * (float) (1.0 + itemBonus);
+        float multiplier = computeWoodcuttingDamageMultiplier(level, itemBonus);
         event.setDamage(event.getDamage() * multiplier);
+    }
+
+    public static float computeWoodcuttingDamageMultiplier(int woodcuttingLevel, double itemBlockBreakBonus) {
+        int clampedLevel = Math.max(0, woodcuttingLevel);
+        double clampedItemBonus = Math.max(0.0, itemBlockBreakBonus);
+        return (1.0f + (clampedLevel * WOODCUTTING_DAMAGE_PER_LEVEL)) * (float) (1.0 + clampedItemBonus);
     }
 }

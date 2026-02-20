@@ -10,6 +10,9 @@ import com.hypixel.hytale.server.core.inventory.container.CombinedItemContainer;
 import com.hypixel.hytale.server.core.inventory.transaction.ItemStackTransaction;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.hyrune.database.SlayerRepository;
+import dev.hytalemodding.hyrune.itemization.ItemGenerationService;
+import dev.hytalemodding.hyrune.itemization.ItemRarityRollModel;
+import dev.hytalemodding.hyrune.itemization.ItemRollSource;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.npc.NpcLevelService;
 import dev.hytalemodding.hyrune.playerdata.SlayerPlayerData;
@@ -31,10 +34,12 @@ import java.util.logging.Level;
  */
 public class SlayerService {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private static final int BASE_POINTS_AWARDED = 5;
     private static final int POINTS_KILL_DIVISOR = 5;
     private static final long XP_PER_KILL = 25L;
     private static final double ITEM_REWARD_CHANCE = 0.1;
+    private static final String DEFAULT_MASTER_ID = "slayer_master";
+    private static final double STREAK_MULTIPLIER_PER_10 = 0.05;
+    private static final double STREAK_MULTIPLIER_MAX_BONUS = 1.0;
 
     private final SlayerRepository repository;
     private final SlayerTaskRegistry taskRegistry;
@@ -93,7 +98,11 @@ public class SlayerService {
         }
 
         CombinedItemContainer container = inventory.getCombinedHotbarFirst();
-        ItemStack stackToAdd = new ItemStack(shopItem.id(), 1);
+        ItemStack stackToAdd = ItemGenerationService.rollIfEligible(
+            new ItemStack(shopItem.id(), 1),
+            ItemRollSource.SLAYER_SHOP,
+            ItemRarityRollModel.GenerationContext.of("slayer_shop_purchase")
+        );
 
         ItemStackTransaction transaction = container.addItemStack(stackToAdd);
         ItemStack remainder = transaction.getRemainder();
@@ -118,7 +127,7 @@ public class SlayerService {
         return normalizeAssignment(data);
     }
 
-    public SlayerTaskAssignment assignTask(UUID uuid, int slayerLevel) {
+    public SlayerTaskAssignment assignTask(UUID uuid, String masterId, int slayerLevel, int combatLevel) {
         if (uuid == null) {
             return null;
         }
@@ -128,16 +137,66 @@ public class SlayerService {
             return current;
         }
 
-        SlayerTaskDefinition task = taskRegistry.getRandomTaskForLevel(slayerLevel);
-        if (task == null) {
+        String resolvedMasterId = normalizeMasterIdOrDefault(masterId);
+        SlayerTaskRegistry.AssignmentRoll roll = taskRegistry.getRandomTaskForMaster(
+            resolvedMasterId,
+            Math.max(1, slayerLevel),
+            Math.max(1, combatLevel)
+        );
+        if (roll == null || roll.task() == null) {
             return null;
         }
+
+        SlayerTaskDefinition task = roll.task();
         String specificTarget = npcService.getRandomIdFromGroup(task.getTargetGroupId());
-        int count = taskRegistry.rollKillCount(task);
-        SlayerTaskAssignment assignment = new SlayerTaskAssignment(task.getId(), specificTarget, count);
+        if (specificTarget == null || specificTarget.isBlank()) {
+            specificTarget = task.getTargetGroupId();
+        }
+        int count = taskRegistry.rollKillCount(roll.taskEntry());
+        SlayerTaskAssignment assignment = new SlayerTaskAssignment(resolvedMasterId, task.getId(), specificTarget, count);
         data.setAssignment(assignment);
         persist(data);
         return assignment;
+    }
+
+    public String getMasterRequirementMessage(String masterId, int slayerLevel, int combatLevel) {
+        SlayerMasterDefinition master = taskRegistry.getMasterById(masterId);
+        if (master == null) {
+            return "I cannot assign tasks right now.";
+        }
+        if (slayerLevel < master.getMinSlayerLevel()) {
+            return "You need Slayer level " + master.getMinSlayerLevel() + " for " + master.getDisplayName() + ".";
+        }
+        if (combatLevel < master.getMinCombatLevel()) {
+            return "You need combat level " + master.getMinCombatLevel() + " for " + master.getDisplayName() + ".";
+        }
+        return null;
+    }
+
+    public String getMasterDisplayName(String masterId) {
+        SlayerMasterDefinition master = taskRegistry.getMasterById(masterId);
+        if (master != null && master.getDisplayName() != null && !master.getDisplayName().isBlank()) {
+            return master.getDisplayName();
+        }
+        String normalized = normalizeMasterIdOrDefault(masterId);
+        return normalized.replace('_', ' ');
+    }
+
+    public String getTurnInRequirementMessage(UUID uuid, String interactingMasterId) {
+        if (uuid == null) {
+            return "I can't find your records right now.";
+        }
+        SlayerTaskAssignment assignment = getAssignment(uuid);
+        if (assignment == null || assignment.getState() != SlayerTaskState.COMPLETED) {
+            return "You have not completed your task yet.";
+        }
+
+        String assignedMasterId = normalizeMasterIdOrDefault(assignment.getMasterId());
+        String expectedMasterId = normalizeMasterIdOrDefault(interactingMasterId);
+        if (!assignedMasterId.equalsIgnoreCase(expectedMasterId)) {
+            return "I did not assign that task. Return to " + getMasterDisplayName(assignedMasterId) + ".";
+        }
+        return null;
     }
 
     public boolean onKill(UUID killerUuid, String npcTypeId, long xpAmount) {
@@ -151,6 +210,14 @@ public class SlayerService {
         }
         if (assignment.getState() == SlayerTaskState.COMPLETED) {
             return false;
+        }
+        SlayerTaskDefinition task = taskRegistry.getTaskById(assignment.getTaskId());
+        if (task != null) {
+            LevelingService leveling = LevelingService.get();
+            int slayerLevel = leveling == null ? 1 : Math.max(1, leveling.getSkillLevel(killerUuid, SkillType.SLAYER));
+            if (slayerLevel < task.getRequiredSlayerLevel()) {
+                return false;
+            }
         }
         if (!matchesAssignmentTarget(assignment, npcTypeId)) {
             return false;
@@ -180,12 +247,23 @@ public class SlayerService {
             return null;
         }
 
-        int pointsAwarded = BASE_POINTS_AWARDED + Math.max(1, assignment.getTotalKills() / POINTS_KILL_DIVISOR);
+        SlayerMasterDefinition master = taskRegistry.getMasterById(assignment.getMasterId());
+        int basePoints = master == null ? 5 : master.getBasePoints();
+        int pointsFromKills = Math.max(1, assignment.getTotalKills() / POINTS_KILL_DIVISOR);
+        int nextStreak = data.getCurrentStreak() + 1;
+        int streakBlocks = nextStreak / 10;
+        double streakMultiplier = 1.0 + Math.min(STREAK_MULTIPLIER_MAX_BONUS, streakBlocks * STREAK_MULTIPLIER_PER_10);
+        int pointsAwarded = (int) Math.round((basePoints + pointsFromKills) * streakMultiplier);
+        int milestoneInterval = master == null ? 10 : Math.max(1, master.getStreakMilestoneInterval());
+        int milestoneBonus = master == null ? 0 : Math.max(0, master.getStreakMilestoneBonusPoints());
+        int awardedMilestoneBonus = (nextStreak % milestoneInterval == 0) ? milestoneBonus : 0;
+        pointsAwarded += awardedMilestoneBonus;
         long slayerXpAwarded = XP_PER_KILL * assignment.getTotalKills();
         boolean itemRewarded = Math.random() < ITEM_REWARD_CHANCE;
 
         data.addSlayerPoints(pointsAwarded);
         data.incrementCompletedTasks();
+        data.incrementStreak();
         data.setAssignment(null);
         persist(data);
 
@@ -194,7 +272,7 @@ public class SlayerService {
             levelingService.addSkillXp(uuid, SkillType.SLAYER, slayerXpAwarded);
         }
 
-        return new SlayerTurnInResult(pointsAwarded, slayerXpAwarded, itemRewarded);
+        return new SlayerTurnInResult(pointsAwarded, slayerXpAwarded, itemRewarded, data.getCurrentStreak(), awardedMilestoneBonus);
     }
 
     public void unload(UUID uuid) {
@@ -228,6 +306,10 @@ public class SlayerService {
             return null;
         }
         boolean changed = false;
+        if (assignment.getMasterId() == null || assignment.getMasterId().isBlank()) {
+            assignment.setMasterId(DEFAULT_MASTER_ID);
+            changed = true;
+        }
         if (assignment.getState() == null) {
             assignment.setState(SlayerTaskState.ACCEPTED);
             changed = true;
@@ -278,7 +360,14 @@ public class SlayerService {
             repository.save(data);
         } catch (RuntimeException e) {
             LOGGER.at(Level.WARNING)
-                .log("Failed to save Slayer data for " + (data != null ? data.getUuid() : "unknown") + ": " + e.getMessage());
+                .log("Failed to save Slayer data for " + data.getUuid() + ": " + e.getMessage());
         }
+    }
+
+    private String normalizeMasterIdOrDefault(String masterId) {
+        if (masterId == null || masterId.isBlank()) {
+            return DEFAULT_MASTER_ID;
+        }
+        return masterId;
     }
 }
