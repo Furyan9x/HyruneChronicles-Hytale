@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCu
 import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.ui.ItemGridSlot;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -34,9 +35,7 @@ import java.util.Map;
  */
 public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSocketData> {
     private static final String UI_PATH = "Pages/GemSocket.ui";
-    private static final String INVENTORY_CARD_ROW_UI = "Pages/gem_inventory_card_row.ui";
     private static final String SOCKETED_ROW_UI = "Pages/gem_socketed_row.ui";
-    private static final int CARDS_PER_ROW = 5;
 
     private static final String ACTION_CLOSE = "Close";
     private static final String ACTION_SELECT_RECEIVER = "SelectReceiver";
@@ -49,6 +48,7 @@ public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSock
     private static final String TAB_REMOVE = "Remove";
     private static final String GEM_REMOVER_ITEM_ID = "Ingredient_Bar_Copper";
     private static final String VIRTUAL_ITEM_SEPARATOR = "__hyrunedtt_";
+    private static final int MAX_TOOLTIP_GEMS = 6;
 
     private String selectedGemItemId;
     private String selectedTab = TAB_ADD;
@@ -83,15 +83,11 @@ public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSock
                 this.close();
                 return;
             case ACTION_SELECT_RECEIVER:
-                this.selectedReceiverSlot = parseSlot(data.slot);
+                selectReceiverFromEvent(ref, store, data);
                 rebuild(ref, store);
                 return;
             case ACTION_SELECT_MATERIAL:
-                if (TAB_ADD.equals(this.selectedTab)) {
-                    this.selectedGemItemId = data.itemId;
-                } else {
-                    this.selectedRemoveItemId = data.itemId;
-                }
+                selectMaterialFromEvent(ref, store, data);
                 rebuild(ref, store);
                 return;
             case ACTION_TAB_ADD:
@@ -111,6 +107,64 @@ public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSock
             default:
                 return;
         }
+    }
+
+    private void selectReceiverFromEvent(Ref<EntityStore> ref, Store<EntityStore> store, GemSocketData data) {
+        Inventory inventory = resolveInventory(ref, store);
+        List<GemSocketApplicationService.ReceiverEntry> entries = inventory == null
+            ? List.of()
+            : GemSocketApplicationService.findEligibleReceiverEntries(inventory);
+        int selectedIndex = resolveSelectedIndex(data);
+        if (selectedIndex >= 0 && selectedIndex < entries.size()) {
+            this.selectedReceiverSlot = entries.get(selectedIndex).slot();
+            return;
+        }
+        if (data.itemStackId != null && !data.itemStackId.isBlank()) {
+            for (GemSocketApplicationService.ReceiverEntry entry : entries) {
+                if (data.itemStackId.equalsIgnoreCase(entry.stack().getItemId())) {
+                    this.selectedReceiverSlot = entry.slot();
+                    return;
+                }
+            }
+        }
+        this.selectedReceiverSlot = parseSlot(data.slot);
+    }
+
+    private void selectMaterialFromEvent(Ref<EntityStore> ref, Store<EntityStore> store, GemSocketData data) {
+        Inventory inventory = resolveInventory(ref, store);
+        ItemContainer container = inventory == null ? null : inventory.getCombinedEverything();
+        List<MaterialEntry> materials = TAB_ADD.equals(this.selectedTab)
+            ? buildGemEntries(container)
+            : buildRemoveEntries(container);
+
+        int selectedIndex = resolveSelectedIndex(data);
+        if (selectedIndex >= 0 && selectedIndex < materials.size()) {
+            String clickedId = materials.get(selectedIndex).itemId();
+            if (TAB_ADD.equals(this.selectedTab)) {
+                this.selectedGemItemId = clickedId;
+            } else {
+                this.selectedRemoveItemId = clickedId;
+            }
+            return;
+        }
+        if (data.itemStackId != null && !data.itemStackId.isBlank()) {
+            if (TAB_ADD.equals(this.selectedTab)) {
+                this.selectedGemItemId = data.itemStackId;
+            } else {
+                this.selectedRemoveItemId = data.itemStackId;
+            }
+            return;
+        }
+        if (TAB_ADD.equals(this.selectedTab)) {
+            this.selectedGemItemId = data.itemId;
+        } else {
+            this.selectedRemoveItemId = data.itemId;
+        }
+    }
+
+    private Inventory resolveInventory(Ref<EntityStore> ref, Store<EntityStore> store) {
+        Player player = store.getComponent(ref, Player.getComponentType());
+        return player != null ? player.getInventory() : null;
     }
 
     private void handleSocket(Ref<EntityStore> ref, Store<EntityStore> store) {
@@ -273,71 +327,78 @@ public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSock
     private void renderLeftEquipmentInventory(UICommandBuilder cmd,
                                               UIEventBuilder evt,
                                               List<GemSocketApplicationService.ReceiverEntry> equipmentEntries) {
-        cmd.clear("#EquipInventoryGrid");
         cmd.set("#EquipInventoryEmpty.Visible", equipmentEntries.isEmpty());
-        for (int start = 0, row = 0; start < equipmentEntries.size(); start += CARDS_PER_ROW, row++) {
-            cmd.append("#EquipInventoryGrid", INVENTORY_CARD_ROW_UI);
-            String root = "#EquipInventoryGrid[" + row + "]";
-            for (int col = 0; col < CARDS_PER_ROW; col++) {
-                int index = start + col;
-                String slotRoot = root + " #Slot" + col;
-                if (index >= equipmentEntries.size()) {
-                    cmd.set(slotRoot + ".Visible", false);
-                    continue;
-                }
-
-                GemSocketApplicationService.ReceiverEntry entry = equipmentEntries.get(index);
-                ItemInstanceMetadata meta = entry.metadata();
-                cmd.set(slotRoot + ".Visible", true);
-                cmd.set(slotRoot + " #CardIcon" + col + ".ItemId", entry.stack().getItemId());
-                cmd.set(slotRoot + " #CardMeta" + col + ".Text",
-                    meta.getSocketedGemCount() + "/" + meta.getSocketCapacity());
-                cmd.set(slotRoot + " #CardSel" + col + ".Visible", entry.slot() == selectedReceiverSlot);
-
-                evt.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    slotRoot + " #CardBtn" + col,
-                    EventData.of("Button", ACTION_SELECT_RECEIVER).append("Slot", String.valueOf(entry.slot())),
-                    false
-                );
-            }
+        ItemGridSlot[] slots = new ItemGridSlot[equipmentEntries.size()];
+        for (int index = 0; index < equipmentEntries.size(); index++) {
+            GemSocketApplicationService.ReceiverEntry entry = equipmentEntries.get(index);
+            ItemInstanceMetadata meta = entry.metadata();
+            ItemGridSlot slot = new ItemGridSlot(new ItemStack(entry.stack().getItemId(), 1));
+            slot.setName(safeDisplayName(entry.stack().getItemId()));
+            slot.setDescription(buildEquipmentTooltip(entry));
+            slot.setActivatable(true);
+            slots[index] = slot;
         }
+        cmd.set("#EquipInventoryGrid.Slots", slots);
+        evt.addEventBinding(
+            CustomUIEventBindingType.SlotClicking,
+            "#EquipInventoryGrid",
+            EventData.of("Button", ACTION_SELECT_RECEIVER),
+            false
+        );
     }
 
     private void renderRightMaterialInventory(UICommandBuilder cmd,
                                               UIEventBuilder evt,
-        List<MaterialEntry> materials,
+                                              List<MaterialEntry> materials,
                                               boolean isAdd) {
-        cmd.set("#RightInventoryTitle.Text", isAdd ? "Gem Inventory" : "Removal Inventory");
-        cmd.clear("#MaterialInventoryGrid");
+        cmd.set("#RightInventoryTitle.Text", isAdd ? "Gems" : "Unsocketing Materials");
         cmd.set("#MaterialInventoryEmpty.Visible", materials.isEmpty());
-
-        String selectedId = isAdd ? selectedGemItemId : selectedRemoveItemId;
-        for (int start = 0, row = 0; start < materials.size(); start += CARDS_PER_ROW, row++) {
-            cmd.append("#MaterialInventoryGrid", INVENTORY_CARD_ROW_UI);
-            String root = "#MaterialInventoryGrid[" + row + "]";
-            for (int col = 0; col < CARDS_PER_ROW; col++) {
-                int index = start + col;
-                String slotRoot = root + " #Slot" + col;
-                if (index >= materials.size()) {
-                    cmd.set(slotRoot + ".Visible", false);
-                    continue;
-                }
-
-                MaterialEntry entry = materials.get(index);
-                cmd.set(slotRoot + ".Visible", true);
-                cmd.set(slotRoot + " #CardIcon" + col + ".ItemId", entry.itemId());
-                cmd.set(slotRoot + " #CardMeta" + col + ".Text", String.valueOf(entry.quantity()));
-                cmd.set(slotRoot + " #CardSel" + col + ".Visible", entry.itemId().equalsIgnoreCase(selectedId));
-
-                evt.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    slotRoot + " #CardBtn" + col,
-                    EventData.of("Button", ACTION_SELECT_MATERIAL).append("ItemId", entry.itemId()),
-                    false
-                );
-            }
+        ItemGridSlot[] slots = new ItemGridSlot[materials.size()];
+        for (int index = 0; index < materials.size(); index++) {
+            MaterialEntry entry = materials.get(index);
+            ItemGridSlot slot = new ItemGridSlot(new ItemStack(entry.itemId(), 1));
+            slot.setName(safeDisplayName(entry.itemId()));
+            slot.setDescription("Owned: " + entry.quantity());
+            slot.setActivatable(true);
+            slots[index] = slot;
         }
+        cmd.set("#MaterialInventoryGrid.Slots", slots);
+        evt.addEventBinding(
+            CustomUIEventBindingType.SlotClicking,
+            "#MaterialInventoryGrid",
+            EventData.of("Button", ACTION_SELECT_MATERIAL),
+            false
+        );
+    }
+
+    private static String buildEquipmentTooltip(GemSocketApplicationService.ReceiverEntry entry) {
+        ItemInstanceMetadata meta = entry.metadata();
+        StringBuilder tooltip = new StringBuilder();
+        tooltip.append("Sockets: ")
+            .append(meta.getSocketedGemCount())
+            .append("/")
+            .append(meta.getSocketCapacity());
+
+        List<String> socketed = meta.getSocketedGems();
+        if (socketed.isEmpty()) {
+            tooltip.append("\nSocketed Gems: none");
+            return tooltip.toString();
+        }
+
+        tooltip.append("\nSocketed Gems:");
+        int max = Math.min(socketed.size(), MAX_TOOLTIP_GEMS);
+        for (int i = 0; i < max; i++) {
+            String gemId = socketed.get(i);
+            tooltip.append("\n- ")
+                .append(GemSocketConfigHelper.displayGemName(gemId))
+                .append(" (")
+                .append(GemSocketConfigHelper.describeGemBonusForItem(gemId, entry.stack().getItemId()))
+                .append(")");
+        }
+        if (socketed.size() > max) {
+            tooltip.append("\n... +").append(socketed.size() - max).append(" more");
+        }
+        return tooltip.toString();
     }
 
     private void ensureSelections(List<GemSocketApplicationService.ReceiverEntry> equipmentEntries,
@@ -428,6 +489,17 @@ public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSock
         }
     }
 
+    private static int resolveSelectedIndex(GemSocketData data) {
+        if (data.slotIndex != null) {
+            return data.slotIndex;
+        }
+        if (data.selectedSlotIndex != null) {
+            return data.selectedSlotIndex;
+        }
+        short parsed = parseSlot(data.slot);
+        return parsed < 0 ? -1 : parsed;
+    }
+
     private static String safeDisplayName(String itemId) {
         if (itemId == null || itemId.isBlank()) {
             return "Unknown";
@@ -462,16 +534,25 @@ public class GemSocketPage extends InteractiveCustomUIPage<GemSocketPage.GemSock
     public static class GemSocketData {
         static final String KEY_BUTTON = "Button";
         static final String KEY_SLOT = "Slot";
+        static final String KEY_SLOT_INDEX = "SlotIndex";
+        static final String KEY_SELECTED_SLOT_INDEX = "SelectedSlotIndex";
         static final String KEY_ITEM_ID = "ItemId";
+        static final String KEY_ITEM_STACK_ID = "ItemStackId";
 
         public static final BuilderCodec<GemSocketData> CODEC = BuilderCodec.builder(GemSocketData.class, GemSocketData::new)
             .addField(new KeyedCodec<>(KEY_BUTTON, Codec.STRING), (d, s) -> d.button = s, d -> d.button)
             .addField(new KeyedCodec<>(KEY_SLOT, Codec.STRING), (d, s) -> d.slot = s, d -> d.slot)
+            .addField(new KeyedCodec<>(KEY_SLOT_INDEX, Codec.INTEGER), (d, i) -> d.slotIndex = i, d -> d.slotIndex)
+            .addField(new KeyedCodec<>(KEY_SELECTED_SLOT_INDEX, Codec.INTEGER), (d, i) -> d.selectedSlotIndex = i, d -> d.selectedSlotIndex)
             .addField(new KeyedCodec<>(KEY_ITEM_ID, Codec.STRING), (d, s) -> d.itemId = s, d -> d.itemId)
+            .addField(new KeyedCodec<>(KEY_ITEM_STACK_ID, Codec.STRING), (d, s) -> d.itemStackId = s, d -> d.itemStackId)
             .build();
 
         private String button;
         private String slot;
+        private Integer slotIndex;
+        private Integer selectedSlotIndex;
         private String itemId;
+        private String itemStackId;
     }
 }

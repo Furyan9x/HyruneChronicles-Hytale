@@ -28,23 +28,10 @@ public class HyruneSystems {
         registry.registerSystem(new ContainerOpenItemGenerationSystem());
         registry.registerSystem(new SkillRegenSystem());
 
-        // Profession XP & Logic
-        registry.registerSystem(new GatheringXpSystem());
+        // Progression
         registry.registerSystem(new CraftingRestrictionSystem());
         registry.registerSystem(new CraftingXpSystem());
         registry.registerSystem(new TimedCraftingXpSystem());
-        registry.registerSystem(new FarmingPlantingRestrictionSystem());
-        registry.registerSystem(new FarmingHarvestPickupSystem());
-        registry.registerSystem(new ToolTypeEnforcementSystem());
-        registry.registerSystem(new MiningSpeedSystem());
-        registry.registerSystem(new MiningDurabilitySystem());
-        registry.registerSystem(new WoodcuttingSpeedSystem());
-        registry.registerSystem(new WoodcuttingDurabilitySystem());
-
-        // Fishing
-        registry.registerSystem(new FishingBobberSystem());
-        registry.registerSystem(new FishingCastSystem());
-        registry.registerSystem(new FishingRodIdleSystem());
 
         // Syncing
         registry.registerSystem(new SyncTaskSystem());

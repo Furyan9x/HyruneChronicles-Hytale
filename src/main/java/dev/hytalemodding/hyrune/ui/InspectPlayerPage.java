@@ -28,11 +28,17 @@ import java.util.concurrent.CompletableFuture;
  */
 public class InspectPlayerPage extends InteractiveCustomUIPage<InspectPlayerPage.InspectData> {
     private static final String UI_PATH = "Pages/InspectPlayerPage.ui";
+    private static final String SKILL_CELL_UI = "Pages/inspect_skill_cell.ui";
 
     private static final String ACTION_CLOSE = "Close";
     private static final String ACTION_BACK = "Back";
+    private static final String ACTION_TAB_OVERVIEW = "TabOverview";
+    private static final String ACTION_TAB_SKILLS = "TabSkills";
+    private static final String TAB_OVERVIEW = "Overview";
+    private static final String TAB_SKILLS = "Skills";
 
     private final PlayerRef targetPlayerRef;
+    private String selectedTab = TAB_OVERVIEW;
 
     public InspectPlayerPage(@Nonnull PlayerRef viewerRef, @Nonnull PlayerRef targetPlayerRef) {
         super(viewerRef, CustomPageLifetime.CanDismiss, InspectData.CODEC);
@@ -51,6 +57,7 @@ public class InspectPlayerPage extends InteractiveCustomUIPage<InspectPlayerPage
         QuestManager quests = QuestManager.get();
 
         int totalLevel = 0;
+        long totalXp = 0L;
         int attack = 1;
         int strength = 1;
         int defence = 1;
@@ -62,6 +69,7 @@ public class InspectPlayerPage extends InteractiveCustomUIPage<InspectPlayerPage
         if (levels != null) {
             for (SkillType skill : SkillType.values()) {
                 totalLevel += levels.getSkillLevel(targetUuid, skill);
+                totalXp += Math.max(0L, levels.getSkillXp(targetUuid, skill));
             }
             attack = levels.getSkillLevel(targetUuid, SkillType.ATTACK);
             strength = levels.getSkillLevel(targetUuid, SkillType.STRENGTH);
@@ -78,16 +86,22 @@ public class InspectPlayerPage extends InteractiveCustomUIPage<InspectPlayerPage
         commandBuilder.set("#InspectPlayerName.Text", resolveTargetName());
         commandBuilder.set("#InspectCombatLevel.Text", String.valueOf(combatLevel));
         commandBuilder.set("#InspectTotalLevel.Text", String.valueOf(totalLevel));
+        commandBuilder.set("#InspectTotalXp.Text", String.valueOf(totalXp));
         commandBuilder.set("#InspectQuestPoints.Text", String.valueOf(questPoints));
         commandBuilder.set("#InspectClan.Text", "N/A");
-        commandBuilder.set("#InspectStatus.Text", "None");
         commandBuilder.set("#InspectAchievementPoints.Text", "Coming Soon");
         commandBuilder.set("#InspectGearPlaceholder.Text", "Gear view placeholder");
+        buildSkillMiniGrid(commandBuilder, levels, targetUuid);
+        applyTabState(commandBuilder);
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnClose",
             EventData.of("Button", ACTION_CLOSE), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BtnBack",
             EventData.of("Button", ACTION_BACK), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#InspectTabOverview",
+            EventData.of("Button", ACTION_TAB_OVERVIEW), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#InspectTabSkills",
+            EventData.of("Button", ACTION_TAB_SKILLS), false);
     }
 
     @Override
@@ -104,6 +118,14 @@ public class InspectPlayerPage extends InteractiveCustomUIPage<InspectPlayerPage
                 break;
             case ACTION_BACK:
                 openSocialMenu(ref, store);
+                break;
+            case ACTION_TAB_OVERVIEW:
+                this.selectedTab = TAB_OVERVIEW;
+                updateTabState();
+                break;
+            case ACTION_TAB_SKILLS:
+                this.selectedTab = TAB_SKILLS;
+                updateTabState();
                 break;
             default:
                 break;
@@ -139,6 +161,45 @@ public class InspectPlayerPage extends InteractiveCustomUIPage<InspectPlayerPage
         double rangedStyle = 0.325 * (ranged * 1.5);
         double magicStyle = 0.325 * (magic * 1.5);
         return (int) (base + Math.max(melee, Math.max(rangedStyle, magicStyle)));
+    }
+
+    private void buildSkillMiniGrid(UICommandBuilder commandBuilder, LevelingService levels, UUID targetUuid) {
+        commandBuilder.clear("#InspectSkillCol1");
+        commandBuilder.clear("#InspectSkillCol2");
+        commandBuilder.clear("#InspectSkillCol3");
+
+        SkillType[] values = SkillType.values();
+        for (int i = 0; i < values.length; i++) {
+            SkillType skill = values[i];
+            int level = levels != null ? levels.getSkillLevel(targetUuid, skill) : 1;
+            int col = i % 3;
+            int row = i / 3;
+            String root = "#InspectSkillCol" + (col + 1);
+
+            commandBuilder.append(root, SKILL_CELL_UI);
+            String cell = root + "[" + row + "]";
+            String iconPath = SkillUiAssets.getSkillIconPath(skill);
+            if (iconPath != null) {
+                commandBuilder.set(cell + " #InspectCellIcon.Background", iconPath);
+            }
+            commandBuilder.set(cell + " #InspectCellValue.Text", String.valueOf(level));
+        }
+    }
+
+    private void updateTabState() {
+        UICommandBuilder commandBuilder = new UICommandBuilder();
+        applyTabState(commandBuilder);
+        sendUpdate(commandBuilder, null, false);
+    }
+
+    private void applyTabState(UICommandBuilder commandBuilder) {
+        boolean overview = TAB_OVERVIEW.equals(this.selectedTab);
+        commandBuilder.set("#InspectOverviewContent.Visible", overview);
+        commandBuilder.set("#InspectSkillsContent.Visible", !overview);
+        commandBuilder.set("#InspectTabOverviewSelected.Visible", overview);
+        commandBuilder.set("#InspectTabSkillsSelected.Visible", !overview);
+        commandBuilder.set("#InspectTabOverview.Disabled", overview);
+        commandBuilder.set("#InspectTabSkills.Disabled", !overview);
     }
 
     public static class InspectData {

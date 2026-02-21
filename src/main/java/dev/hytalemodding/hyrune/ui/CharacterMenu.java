@@ -24,6 +24,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Hyrune;
+import dev.hytalemodding.hyrune.clans.ClanPanelBridge;
 import dev.hytalemodding.hyrune.level.CombatXpStyle;
 import dev.hytalemodding.hyrune.level.LevelingService;
 import dev.hytalemodding.hyrune.quests.Quest;
@@ -35,6 +36,7 @@ import dev.hytalemodding.hyrune.quests.QuestRequirement;
 import dev.hytalemodding.hyrune.quests.QuestReward;
 import dev.hytalemodding.hyrune.playerdata.QuestStatus;
 import dev.hytalemodding.hyrune.social.SocialActionResult;
+import dev.hytalemodding.hyrune.social.SocialInteractionRules;
 import dev.hytalemodding.hyrune.social.SocialService;
 import dev.hytalemodding.hyrune.skills.SkillType;
 import dev.hytalemodding.hyrune.ui.attributes.CharacterAttributeComputationService;
@@ -84,6 +86,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
     private static final String TAB_ATTRIBUTES = "Attributes";
     private static final String TAB_SKILLS = "Skills";
     private static final String TAB_FRIENDS = "Friends";
+    private static final String TAB_CLAN = "Clan";
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd-yyyy");
     private static final DateTimeFormatter RESTART_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm");
@@ -144,6 +147,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabAttributesBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_ATTRIBUTES), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabSkillsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_SKILLS), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabFriendsBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_FRIENDS), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabClanBtn", EventData.of("Button", "SelectTab").append("TabID", TAB_CLAN), false);
 
         bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailOffenseBtn", DetailCategory.OFFENSE);
         bindAttributeDetailCategoryButton(eventBuilder, "#AttrDetailDefenseBtn", DetailCategory.DEFENSE);
@@ -420,6 +424,10 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
             this.playerRef.sendMessage(Message.raw("That player is offline."));
             return;
         }
+        if (!SocialInteractionRules.isWithinInteractionRange(this.playerRef, targetPlayerRef)) {
+            this.playerRef.sendMessage(Message.raw("You must be within 5 blocks to use social actions."));
+            return;
+        }
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
@@ -489,6 +497,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         boolean showAttributes = TAB_ATTRIBUTES.equals(this.selectedTab);
         boolean showSkills = TAB_SKILLS.equals(this.selectedTab);
         boolean showFriends = TAB_FRIENDS.equals(this.selectedTab);
+        boolean showClan = TAB_CLAN.equals(this.selectedTab);
 
         cmd.set("#PageTitle.Text", getTabTitle());
         cmd.set("#TabCombatSettings.Visible", showCombatSettings);
@@ -497,6 +506,7 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         cmd.set("#TabAttributes.Visible", showAttributes);
         cmd.set("#TabSkills.Visible", showSkills);
         cmd.set("#TabFriends.Visible", showFriends);
+        cmd.set("#TabClan.Visible", showClan);
         cmd.set("#Footer.Visible", showSkills);
         cmd.set("#TabBar.SelectedTab", this.selectedTab);
         if (showCombatSettings) {
@@ -508,6 +518,17 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
         if (showFriends) {
             this.buildFriendsTab(cmd, evt, this.playerRef.getUuid());
         }
+        if (showClan) {
+            this.buildClanTab(cmd, this.playerRef.getUuid());
+        }
+    }
+
+    private void buildClanTab(UICommandBuilder cmd, UUID uuid) {
+        ClanPanelBridge.ClanPanelSnapshot snapshot = ClanPanelBridge.snapshot(uuid);
+        cmd.set("#ClanNameValue.Text", snapshot.clanName());
+        cmd.set("#ClanRankValue.Text", snapshot.rankName());
+        cmd.set("#ClanMembersValue.Text", String.format(Locale.US, "%d total / %d online", snapshot.memberCount(), snapshot.onlineCount()));
+        cmd.set("#ClanMotdValue.Text", snapshot.motd());
     }
 
     private void buildFriendsTab(UICommandBuilder cmd, UIEventBuilder evt, UUID uuid) {
@@ -1095,6 +1116,8 @@ public class CharacterMenu extends InteractiveCustomUIPage<CharacterMenu.SkillMe
                 return "Attributes";
             case TAB_FRIENDS:
                 return "Friends List";
+            case TAB_CLAN:
+                return "Clan";
             case TAB_SKILLS:
             default:
                 return "Skills";

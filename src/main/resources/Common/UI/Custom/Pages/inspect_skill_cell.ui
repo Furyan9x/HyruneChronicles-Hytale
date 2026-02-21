@@ -1,0 +1,23 @@
+Group {
+  LayoutMode: Top;
+  Anchor: (Width: 56, Height: 62);
+
+  Group {
+    Anchor: (Width: 48, Height: 48, Horizontal: 1);
+    Background: "Images/skill_cell_bg.png";
+    Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
+
+    Group #InspectCellIcon {
+      Anchor: (Horizontal: 1, Vertical: 1);
+      Background: "attack.png";
+    }
+  }
+
+  Group { Anchor: (Height: 3); }
+
+  Label #InspectCellValue {
+    Text: "1";
+    Anchor: (Height: 11, Left: 0, Right: 0);
+    Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+  }
+}

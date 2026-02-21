@@ -1,0 +1,58 @@
+$C = "../Common.ui";
+
+@PromptTitle = LabelStyle(FontSize: 20, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@PromptText = LabelStyle(FontSize: 14, TextColor: #e7eef6, HorizontalAlignment: Center, VerticalAlignment: Center, Wrap: true);
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 520, Height: 260);
+
+  Group #Title {
+    Anchor: (Top: 0, Left: 0, Right: 0, Height: 52);
+
+    Label {
+      Text: "Trade Request";
+      Style: @PromptTitle;
+      Anchor: (Left: 40, Right: 40, Height: 32, Top: 6);
+    }
+
+    TextButton #TradePromptClose {
+      Anchor: (Right: 6, Top: 8, Width: 24, Height: 24);
+      Text: "X";
+      Style: $C.@HeaderTextButtonStyle;
+    }
+  }
+
+  Group #Content {
+    LayoutMode: Top;
+    Anchor: (Top: 56, Left: 16, Right: 16, Bottom: 16);
+    Background: #081d2a(0.72);
+    Padding: (Top: 14, Left: 14, Right: 14, Bottom: 14);
+
+    Label #TradePromptText {
+      Text: "A player wishes to trade with you.";
+      Style: @PromptText;
+      Anchor: (Left: 0, Right: 0, Height: 66);
+    }
+
+    Group { FlexWeight: 1; }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Height: 36, Left: 0, Right: 0);
+
+      TextButton #TradePromptAccept {
+        Anchor: (Width: 220, Height: 34);
+        Text: "Accept";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #TradePromptDecline {
+        Anchor: (Width: 220, Height: 34);
+        Text: "Decline";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+    }
+  }
+}

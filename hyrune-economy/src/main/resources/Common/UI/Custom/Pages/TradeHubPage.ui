@@ -1,0 +1,73 @@
+$C = "../Common.ui";
+
+@TradeTitle = LabelStyle(FontSize: 20, TextColor: #f2d38a, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@TradeSection = LabelStyle(FontSize: 12, TextColor: #f2d38a, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 840, Height: 620);
+
+  Group #Title {
+    Anchor: (Top: 0, Left: 0, Right: 0, Height: 52);
+    Label { Text: "Trade Hub"; Style: @TradeTitle; Anchor: (Left: 40, Right: 40, Height: 32, Top: 6); }
+    TextButton #TradeClose {
+      Anchor: (Right: 6, Top: 8, Width: 24, Height: 24);
+      Text: "X";
+      Style: $C.@HeaderTextButtonStyle;
+    }
+  }
+
+    Group #Content {
+      LayoutMode: Top;
+      Anchor: (Top: 54, Left: 14, Right: 14, Bottom: 14);
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Height: 36, Left: 8, Right: 8);
+      TextButton #TradeTabLocal {
+        Anchor: (Width: 180, Height: 32);
+        Text: "Local Trade";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+      Group { Anchor: (Width: 8); }
+      TextButton #TradeTabMarket {
+        Anchor: (Width: 180, Height: 32);
+        Text: "Market Board";
+        Style: $C.@DefaultTextButtonStyle;
+      }
+    }
+
+    Group { Anchor: (Height: 10); }
+
+    Group #LocalTradePanel {
+      LayoutMode: Top;
+      FlexWeight: 1;
+      Background: #071927(0.55);
+      Padding: (Top: 12, Left: 12, Right: 12, Bottom: 12);
+      Visible: true;
+
+      Label { Text: "Local Trade"; Style: @TradeSection; Anchor: (Height: 18, Left: 0, Right: 0); }
+      Group { Anchor: (Height: 8); }
+      Label {
+        Text: "First pass: this panel will host direct player-to-player trade offers and lock-in confirmation.";
+        Anchor: (Left: 0, Right: 0);
+        Style: (FontSize: 12, TextColor: #d7e3ef, Wrap: true);
+      }
+    }
+
+    Group #MarketBoardPanel {
+      LayoutMode: Top;
+      FlexWeight: 1;
+      Background: #071927(0.55);
+      Padding: (Top: 12, Left: 12, Right: 12, Bottom: 12);
+      Visible: false;
+
+      Label { Text: "Market Board"; Style: @TradeSection; Anchor: (Height: 18, Left: 0, Right: 0); }
+      Group { Anchor: (Height: 8); }
+      Label {
+        Text: "First pass: this panel will host regional listings, buy orders, and history.";
+        Anchor: (Left: 0, Right: 0);
+        Style: (FontSize: 12, TextColor: #d7e3ef, Wrap: true);
+      }
+    }
+  }
+}

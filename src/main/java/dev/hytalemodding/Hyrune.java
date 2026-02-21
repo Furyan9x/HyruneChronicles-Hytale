@@ -37,8 +37,6 @@ import dev.hytalemodding.hyrune.database.QuestRepository;
 import dev.hytalemodding.hyrune.bonus.SkillStatBonusListener;
 import dev.hytalemodding.hyrune.config.HyruneConfigManager;
 import dev.hytalemodding.hyrune.events.LevelingVisualsListener;
-import dev.hytalemodding.hyrune.events.FarmingHarvestListener;
-import dev.hytalemodding.hyrune.events.FarmingRequirementListener;
 import dev.hytalemodding.hyrune.events.ItemizationInventoryListener;
 import dev.hytalemodding.hyrune.events.ContainerLootItemizationListener;
 import dev.hytalemodding.hyrune.events.WorldItemGenerationListener;
@@ -47,7 +45,6 @@ import dev.hytalemodding.hyrune.registry.HyruneComponents;
 import dev.hytalemodding.hyrune.registry.HyruneDialogue;
 import dev.hytalemodding.hyrune.registry.HyruneSystems;
 import dev.hytalemodding.hyrune.component.FishingBobberComponent;
-import dev.hytalemodding.hyrune.interaction.FishingInteraction;
 import dev.hytalemodding.hyrune.interaction.GemSocketInteraction;
 import dev.hytalemodding.hyrune.interaction.NpcProfilerInteraction;
 import dev.hytalemodding.hyrune.interaction.RepairBenchInteraction;
@@ -169,8 +166,6 @@ public class Hyrune extends JavaPlugin {
         this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, joinListener::onPlayerDisconnect);
         // Keep DrainPlayerFromWorldEvent too - it might be useful for world teleports.
         this.getEventRegistry().registerGlobal(DrainPlayerFromWorldEvent.class, joinListener::onPlayerLeave);
-        this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingHarvestListener()::onPlayerInteract);
-        this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new FarmingRequirementListener()::onPlayerInteract);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ArmorRequirementListener()::onInventoryChange);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new TradePackInventoryListener()::onInventoryChange);
         this.getEventRegistry().registerGlobal(LivingEntityInventoryChangeEvent.class, new ContainerLootItemizationListener()::onInventoryChange);
@@ -193,11 +188,6 @@ public class Hyrune extends JavaPlugin {
     }
 
     private void registerInteractions() {
-        this.getCodecRegistry(Interaction.CODEC).register(
-            "HyruneFishing",
-            FishingInteraction.class,
-            FishingInteraction.CODEC
-        );
         this.getCodecRegistry(Interaction.CODEC).register(
             "HyruneRepairBench",
             RepairBenchInteraction.class,

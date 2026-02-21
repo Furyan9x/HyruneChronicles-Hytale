@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -92,6 +93,14 @@ public class SocialInteractionWatcher implements PlayerPacketWatcher {
         }
         PlayerRef targetPlayerRef = targetStore.getComponent(targetEntityRef, universe.getPlayerRefComponentType());
         if (targetPlayerRef == null || targetPlayerRef.getUuid().equals(sender.getUuid())) {
+            return;
+        }
+        if (!SocialInteractionRules.isOnline(targetPlayerRef.getUuid())) {
+            sender.sendMessage(Message.raw("That player is offline."));
+            return;
+        }
+        if (!SocialInteractionRules.isWithinInteractionRange(sender, targetPlayerRef)) {
+            sender.sendMessage(Message.raw("You must be within 5 blocks to use social actions."));
             return;
         }
 

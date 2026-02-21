@@ -2,7 +2,7 @@ $C = "../Common.ui";
 
 $C.@PageOverlay {
   $C.@DecoratedContainer {
-    Anchor: (Width: 760, Height: 560);
+    Anchor: (Width: 790, Height: 600);
 
     #Title {
       Group {
@@ -30,7 +30,7 @@ $C.@PageOverlay {
 
       Group #InspectLeftPanel {
         LayoutMode: Top;
-        Anchor: (Width: 320, Left: 0, Top: 0, Bottom: 0);
+        Anchor: (Width: 340, Left: 0, Top: 0, Bottom: 0);
         Background: #071826(0.9);
         Padding: (Top: 12, Left: 12, Right: 12, Bottom: 12);
 
@@ -42,7 +42,7 @@ $C.@PageOverlay {
         Group { Anchor: (Height: 8); }
 
         Group {
-          Anchor: (Height: 280, Left: 0, Right: 0);
+          Anchor: (Height: 320, Left: 0, Right: 0);
           Background: #0d2a3f(0.8);
           Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
 
@@ -56,15 +56,33 @@ $C.@PageOverlay {
         Group { Anchor: (Height: 10); }
 
         Label {
-          Text: "TABS";
+          Text: "BEST ACHIEVEMENTS";
           Anchor: (Height: 14);
           Style: (FontSize: 10, TextColor: #d9c6a5, RenderUppercase: true, RenderBold: true, LetterSpacing: 1);
         }
-        Group { Anchor: (Height: 4); }
-        Label {
-          Text: "Overview | Stats | Achievements";
-          Anchor: (Height: 16);
-          Style: (FontSize: 11, TextColor: #9fb0c5, HorizontalAlignment: Center);
+        Group { Anchor: (Height: 6); }
+
+        Group {
+          LayoutMode: Top;
+          Anchor: (Height: 88, Left: 0, Right: 0);
+          Background: #0d2a3f(0.62);
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+          Label {
+            Text: "1. Placeholder Achievement";
+            Anchor: (Height: 16, Left: 0, Right: 0);
+            Style: (FontSize: 11, TextColor: #c7d4e2, VerticalAlignment: Center);
+          }
+          Label {
+            Text: "2. Placeholder Achievement";
+            Anchor: (Height: 16, Left: 0, Right: 0);
+            Style: (FontSize: 11, TextColor: #c7d4e2, VerticalAlignment: Center);
+          }
+          Label {
+            Text: "3. Placeholder Achievement";
+            Anchor: (Height: 16, Left: 0, Right: 0);
+            Style: (FontSize: 11, TextColor: #c7d4e2, VerticalAlignment: Center);
+          }
         }
       }
 
@@ -76,60 +94,121 @@ $C.@PageOverlay {
         Background: #000000(0.28);
         Padding: (Top: 12, Left: 14, Right: 14, Bottom: 12);
 
-        Group {
-          LayoutMode: Top;
-          Anchor: (Height: 78, Left: 0, Right: 0);
-          Background: #0f2537(0.8);
-          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+        Group #InspectRightTabs {
+          LayoutMode: Left;
+          Anchor: (Height: 30, Left: 0, Right: 0);
+          Background: #0f2537(0.7);
+          Padding: (Top: 4, Left: 6, Right: 6, Bottom: 4);
 
-          Label { Text: "COMBAT LEVEL"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center); }
-          Group { Anchor: (Height: 4); }
-          Label #InspectCombatLevel { Text: "0"; Style: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); }
+          TextButton #InspectTabOverview {
+            Anchor: (Width: 110, Height: 22);
+            Text: "Overview";
+            Style: $C.@DefaultTextButtonStyle;
+          }
+          Group { Anchor: (Width: 6); }
+          TextButton #InspectTabSkills {
+            Anchor: (Width: 110, Height: 22);
+            Text: "Skills";
+            Style: $C.@DefaultTextButtonStyle;
+          }
+          Group { FlexWeight: 1; }
         }
+        Group #InspectTabOverviewSelected { Anchor: (Height: 2, Left: 10, Width: 98); Background: #f2d38a; Visible: true; }
+        Group #InspectTabSkillsSelected { Anchor: (Height: 2, Left: 126, Width: 98); Background: #f2d38a; Visible: false; }
 
         Group { Anchor: (Height: 8); }
 
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 34);
-          Label { Text: "Total Level"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
-          Group { FlexWeight: 1; }
-          Label #InspectTotalLevel { Text: "0"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: End); }
+        Group #InspectOverviewContent {
+          LayoutMode: Top;
+          Anchor: (Left: 0, Right: 0);
+          Visible: true;
+
+          Group {
+            LayoutMode: Top;
+            Anchor: (Height: 78, Left: 0, Right: 0);
+            Background: #0f2537(0.8);
+            Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+
+            Label { Text: "COMBAT LEVEL"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center); }
+            Group { Anchor: (Height: 4); }
+            Label #InspectCombatLevel { Text: "0"; Style: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); }
+          }
+
+          Group { Anchor: (Height: 8); }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 34);
+            Label { Text: "Total Level"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #InspectTotalLevel { Text: "0"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: End); }
+          }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 34);
+            Label { Text: "Quest Points"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #InspectQuestPoints { Text: "0"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: End); }
+          }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 34);
+            Label { Text: "Clan"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #InspectClan { Text: "N/A"; Style: (FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End); }
+          }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 34);
+            Label { Text: "Total XP"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #InspectTotalXp { Text: "0"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: End); }
+          }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 34);
+            Label { Text: "Achievement Points"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #InspectAchievementPoints { Text: "Coming Soon"; Style: (FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End); }
+          }
         }
 
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 34);
-          Label { Text: "Quest Points"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
-          Group { FlexWeight: 1; }
-          Label #InspectQuestPoints { Text: "0"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: End); }
-        }
+        Group #InspectSkillsContent {
+          LayoutMode: Top;
+          FlexWeight: 1;
+          Anchor: (Left: 0, Right: 0);
+          Visible: false;
 
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 34);
-          Label { Text: "Clan"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
-          Group { FlexWeight: 1; }
-          Label #InspectClan { Text: "N/A"; Style: (FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End); }
-        }
+          Group {
+            LayoutMode: Top;
+            FlexWeight: 1;
+            Anchor: (Left: 0, Right: 0);
+            Background: #0f2537(0.6);
+            Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
 
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 34);
-          Label { Text: "Status"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
-          Group { FlexWeight: 1; }
-          Label #InspectStatus { Text: "None"; Style: (FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End); }
-        }
+            Label { Text: "SKILLS"; Style: (FontSize: 10, TextColor: #d9c6a5, RenderUppercase: true, RenderBold: true); }
+            Group { Anchor: (Height: 8); }
 
-        Group {
-          LayoutMode: Left;
-          Anchor: (Height: 34);
-          Label { Text: "Achievement Points"; Style: (FontSize: 12, TextColor: #d9c6a5, VerticalAlignment: Center); }
-          Group { FlexWeight: 1; }
-          Label #InspectAchievementPoints { Text: "Coming Soon"; Style: (FontSize: 12, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: End); }
+            Group {
+              LayoutMode: Left;
+              FlexWeight: 1;
+              Anchor: (Left: 0, Right: 0);
+
+              Group { FlexWeight: 1; }
+              Group #InspectSkillCol1 { LayoutMode: Top; Anchor: (Width: 56); }
+              Group { Anchor: (Width: 8); }
+              Group #InspectSkillCol2 { LayoutMode: Top; Anchor: (Width: 56); }
+              Group { Anchor: (Width: 8); }
+              Group #InspectSkillCol3 { LayoutMode: Top; Anchor: (Width: 56); }
+              Group { FlexWeight: 1; }
+            }
+          }
         }
       }
     }
   }
 }
-

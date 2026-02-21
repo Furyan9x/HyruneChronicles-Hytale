@@ -5,25 +5,32 @@ plugins {
 group = 'dev.hytalemodding'
 version = '0.0.8'
 
+def serverJar = files('libs/HytaleServer.jar')
+
+allprojects {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            name = "hytale-release"
+            url = uri("https://maven.hytale.com/release")
+        }
+        maven {
+            name = "hytale-pre-release"
+            url = uri("https://maven.hytale.com/pre-release")
+        }
+    }
+}
 
 repositories {
-    mavenCentral()
-    mavenLocal()// Crucial: Looks for the HytaleServer.jar you manually installed
-    maven {
-        name = "hytale-release"
-        url = uri("https://maven.hytale.com/release")
-    }
-    maven {
-        name = "hytale-pre-release"
-        url = uri("https://maven.hytale.com/pre-release")
-    }
+    // inherited via allprojects
 }
 
 dependencies {
     // The Hytale Server API
-    compileOnly files('libs/HytaleServer.jar')
-    testCompileOnly files('libs/HytaleServer.jar')
-    testRuntimeOnly files('libs/HytaleServer.jar')
+    compileOnly serverJar
+    testCompileOnly serverJar
+    testRuntimeOnly serverJar
 
     // Dependencies needed for JSON storage (Gson is standard)
     implementation 'com.google.code.gson:gson:2.10.1'
@@ -38,6 +45,37 @@ dependencies {
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    group = rootProject.group
+    version = rootProject.version
+
+    dependencies {
+        compileOnly rootProject.files('libs/HytaleServer.jar')
+        testCompileOnly rootProject.files('libs/HytaleServer.jar')
+        testRuntimeOnly rootProject.files('libs/HytaleServer.jar')
+        compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
     }
 }
 
@@ -59,6 +97,10 @@ tasks.register('copyToDevEnv', Copy) {
     doNotTrackState('Destination may contain external junctions/symlinks.')
     onlyIf { devModsDir.get().exists() }
     from jar.archiveFile
+    subprojects.each { module ->
+        dependsOn(module.tasks.named('jar'))
+        from(module.tasks.named('jar').flatMap { it.archiveFile })
+    }
     into devModsDir
 }
 

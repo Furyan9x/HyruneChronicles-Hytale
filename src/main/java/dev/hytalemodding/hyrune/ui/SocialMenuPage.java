@@ -18,8 +18,10 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import dev.hytalemodding.Hyrune;
 import dev.hytalemodding.hyrune.component.GameModeDataComponent;
+import dev.hytalemodding.hyrune.economy.TradeRequestBridge;
 import dev.hytalemodding.hyrune.gamemode.StarterKitProvider;
 import dev.hytalemodding.hyrune.social.SocialActionResult;
+import dev.hytalemodding.hyrune.social.SocialInteractionRules;
 import dev.hytalemodding.hyrune.social.SocialService;
 
 import javax.annotation.Nonnull;
@@ -55,6 +57,9 @@ public class SocialMenuPage extends InteractiveCustomUIPage<SocialMenuPage.Socia
                       @Nonnull UICommandBuilder commandBuilder,
                       @Nonnull UIEventBuilder eventBuilder,
                       @Nonnull Store<EntityStore> store) {
+        if (!ensureTargetAvailable(true)) {
+            return;
+        }
         commandBuilder.append(UI_PATH);
         populateState(commandBuilder, eventBuilder);
     }
@@ -75,6 +80,10 @@ public class SocialMenuPage extends InteractiveCustomUIPage<SocialMenuPage.Socia
         if (socialService == null) {
             this.playerRef.sendMessage(Message.raw("Social service is not available."));
             this.close();
+            return;
+        }
+
+        if (!ACTION_CLOSE.equals(data.button) && !ensureTargetAvailable(true)) {
             return;
         }
 
@@ -101,8 +110,8 @@ public class SocialMenuPage extends InteractiveCustomUIPage<SocialMenuPage.Socia
                 sendResult(socialService.unignore(viewer, target));
                 break;
             case ACTION_TRADE:
-                handleTradePlaceholder();
-                break;
+                handleTradeRequest();
+                return;
             case ACTION_INVITE:
                 this.playerRef.sendMessage(Message.raw("Party/Group invites are not implemented yet."));
                 break;
@@ -173,12 +182,18 @@ public class SocialMenuPage extends InteractiveCustomUIPage<SocialMenuPage.Socia
         evt.addEventBinding(CustomUIEventBindingType.Activating, selector, EventData.of("Button", action), false);
     }
 
-    private void handleTradePlaceholder() {
+    private void handleTradeRequest() {
         if (isTradeBlocked(this.playerRef) || isTradeBlocked(this.targetPlayerRef)) {
             this.playerRef.sendMessage(Message.raw("Trade is blocked for Ironman/Hardcore Ironman accounts."));
+            this.close();
             return;
         }
-        this.playerRef.sendMessage(Message.raw("Trade system is not implemented yet."));
+        TradeRequestBridge.TradeRequestResult result =
+            TradeRequestBridge.requestTrade(this.playerRef, this.targetPlayerRef);
+        if (result.message() != null && !result.message().isBlank()) {
+            this.playerRef.sendMessage(Message.raw(result.message()));
+        }
+        this.close();
     }
 
     private boolean isTradeBlocked(PlayerRef playerRef) {
@@ -216,6 +231,31 @@ public class SocialMenuPage extends InteractiveCustomUIPage<SocialMenuPage.Socia
             return;
         }
         this.playerRef.sendMessage(Message.raw(result.message()));
+    }
+
+    private boolean ensureTargetAvailable(boolean sendFeedback) {
+        if (this.targetPlayerRef == null || this.targetPlayerRef.getUuid() == null) {
+            if (sendFeedback) {
+                this.playerRef.sendMessage(Message.raw("Invalid social target."));
+            }
+            this.close();
+            return false;
+        }
+        if (!SocialInteractionRules.isOnline(this.targetPlayerRef.getUuid())) {
+            if (sendFeedback) {
+                this.playerRef.sendMessage(Message.raw("That player is offline."));
+            }
+            this.close();
+            return false;
+        }
+        if (!SocialInteractionRules.isWithinInteractionRange(this.playerRef, this.targetPlayerRef)) {
+            if (sendFeedback) {
+                this.playerRef.sendMessage(Message.raw("You must be within 5 blocks to use social actions."));
+            }
+            this.close();
+            return false;
+        }
+        return true;
     }
 
     public static class SocialData {

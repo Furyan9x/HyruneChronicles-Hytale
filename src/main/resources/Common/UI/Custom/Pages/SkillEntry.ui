@@ -89,6 +89,11 @@ $C.@PageOverlay {
           Icon: "friends_list.png";
           IconSelected: "friends_list.png";
         }
+        TabButton #TabClanBtn {
+          Id: "Clan";
+          Icon: "slayer.png";
+          IconSelected: "slayer.png";
+        }
       }
 
       Group { Anchor: (Height: 16); }
@@ -855,6 +860,68 @@ $C.@PageOverlay {
                 }
               }
             }
+          }
+        }
+      }
+
+      Group #TabClan {
+        LayoutMode: Top;
+        Visible: false;
+
+        Group {
+          LayoutMode: Top;
+          Anchor: (Height: 132, Left: 0, Right: 0);
+          Background: #0d1623(0.75);
+          Padding: (Top: 10, Left: 12, Right: 12, Bottom: 10);
+
+          Label {
+            Text: "CLAN OVERVIEW";
+            Anchor: (Height: 16);
+            Style: (FontSize: 11, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+          }
+          Group { Anchor: (Height: 8); }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 22);
+            Label { Text: "Clan"; Style: (FontSize: 12, TextColor: #f2d38a, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #ClanNameValue { Text: "Unaligned"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 22);
+            Label { Text: "Rank"; Style: (FontSize: 12, TextColor: #f2d38a, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #ClanRankValue { Text: "Wanderer"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 22);
+            Label { Text: "Members"; Style: (FontSize: 12, TextColor: #f2d38a, VerticalAlignment: Center); }
+            Group { FlexWeight: 1; }
+            Label #ClanMembersValue { Text: "1 total / 1 online"; Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center); }
+          }
+        }
+
+        Group { Anchor: (Height: 10); }
+
+        Group {
+          LayoutMode: Top;
+          Anchor: (Height: 128, Left: 0, Right: 0);
+          Background: #000000(0.25);
+          Padding: (Top: 10, Left: 12, Right: 12, Bottom: 10);
+
+          Label {
+            Text: "CLAN MOTD";
+            Anchor: (Height: 16);
+            Style: (FontSize: 11, TextColor: #d9c6a5, RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+          }
+          Group { Anchor: (Height: 8); }
+          Label #ClanMotdValue {
+            Text: "No clan message set.";
+            Anchor: (Left: 0, Right: 0);
+            Style: (FontSize: 12, TextColor: #f7e9cd, Wrap: true);
           }
         }
       }
